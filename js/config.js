@@ -147,7 +147,7 @@ window.PORTFOLIO = {
       shots: [
         ["media/hplc-detectors/1.webp", "What the detector actually sees: a mixed sample as a 3D particle cloud"],
         ["media/hplc-detectors/2.webp", "Separation becomes signal: one peak per compound"],
-        ["media/hplc-detectors/3.webp", "UV / PDA / DAD: zooming into the photodiode array"],
+        ["media/hplc-detectors/3.webp", "Five ways to turn a molecule into a peak"],
         ["media/hplc-detectors/4.webp", "Triple quadrupole: precursor → product, recorded as an MRM chromatogram"],
       ],
     },
