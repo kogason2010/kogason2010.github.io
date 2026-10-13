@@ -137,7 +137,7 @@ window.PORTFOLIO = {
     {
       type: "github",
       repo: "kogason2010/hplc-detectors",
-      title: "Inside the HPLC Detector",
+      title: "HPLC Detectors",
       icon: "icons/hplc-detectors.svg",
       description:
         "How five HPLC detectors turn chemistry into a peak: UV / PDA / DAD, fluorescence, refractive index, ELSD, and single and triple quadrupole mass spectrometry, each as a live animated schematic.",
