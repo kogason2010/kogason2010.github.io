@@ -12,6 +12,7 @@ It's plain HTML, CSS and JavaScript, with no framework and no build step. GitHub
 - **[Nexera IC Applications](https://github.com/kogason2010/nexera-ic-applications)**: published IC methods told through 3D ions, with an ion atlas and a methods table.
 - **[Exposed: EPSA by SFC](https://github.com/kogason2010/nexera-uc-epsa)**: a scroll-driven journey through measuring polar surface area with supercritical fluid chromatography.
 - **[Solvane](https://github.com/kogason2010/solvane)**: a design study for a fictional analytical-science company.
+- **[Inside the HPLC Detector](https://github.com/kogason2010/hplc-detectors)**: how five HPLC detectors (UV / PDA / DAD, fluorescence, RI, ELSD and single / triple quad MS) turn chemistry into a peak, as live animated schematics.
 
 The first three live together in a *Nexera App Notes* folder on the desktop. They're independent, unofficial projects and aren't affiliated with Shimadzu.
 

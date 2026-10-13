@@ -134,6 +134,24 @@ window.PORTFOLIO = {
       ],
     },
 
+    {
+      type: "github",
+      repo: "kogason2010/hplc-detectors",
+      title: "Inside the HPLC Detector",
+      icon: "icons/hplc-detectors.svg",
+      description:
+        "How five HPLC detectors turn chemistry into a peak: UV / PDA / DAD, fluorescence, refractive index, ELSD, and single and triple quadrupole mass spectrometry, each as a live animated schematic.",
+      tip: "Hover the photodiode array in the UV / PDA / DAD tab to zoom into individual diodes.",
+      stack: ["React", "TypeScript", "three.js", "GSAP", "Lenis", "Vite"],
+      updated: "2026-10-12",
+      shots: [
+        ["media/hplc-detectors/1.webp", "What the detector actually sees: a mixed sample as a 3D particle cloud"],
+        ["media/hplc-detectors/2.webp", "Separation becomes signal: one peak per compound"],
+        ["media/hplc-detectors/3.webp", "UV / PDA / DAD: zooming into the photodiode array"],
+        ["media/hplc-detectors/4.webp", "Triple quadrupole: precursor → product, recorded as an MRM chromatogram"],
+      ],
+    },
+
     /* ---------- Built-in apps ---------- */
     { type: "builtin", id: "showcase", title: "Showcase", app: "showcase", icon: "showcase" },
     { type: "builtin", id: "explorer", title: "File Explorer", app: "explorer", location: "home", icon: "explorer" },
@@ -161,6 +179,8 @@ What's on this desktop
                      systems and their application notes
   Solvane            a design study for a fictional
                      analytical-science company
+  Inside the HPLC    how five HPLC detectors turn chemistry
+  Detector           into a peak, as live schematics
 
 Every project runs as an app right here. Open one from the
 desktop, the Start menu or Showcase.
@@ -205,8 +225,8 @@ Shortcuts
   ],
 
   /* Where things appear (ids, or "group:<id>" for a folder) */
-  desktop: ["recycle", "showcase", "explorer", "group:nexera", "solvane", "photos", "about", "terminal"],
-  pinned: ["showcase", "explorer", "group:nexera", "solvane", "photos", "terminal", "settings", "notepad", "about", "readme"],
-  taskbar: ["explorer", "showcase", "group:nexera", "solvane", "terminal"],
+  desktop: ["recycle", "showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "photos", "about", "terminal"],
+  pinned: ["showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "photos", "terminal", "settings", "notepad", "about", "readme"],
+  taskbar: ["explorer", "showcase", "group:nexera", "solvane", "hplc-detectors", "terminal"],
   startup: ["showcase"],
 };
