@@ -8,18 +8,37 @@ It's plain HTML, CSS and JavaScript, with no framework and no build step. GitHub
 
 ## The projects
 
-- **[Nexera IC](https://github.com/kogason2010/nexera-ic)**: a cinematic, interactive explainer of ion chromatography.
-- **[Nexera IC Applications](https://github.com/kogason2010/nexera-ic-applications)**: published IC methods told through 3D ions, with an ion atlas and a methods table.
-- **[Exposed: EPSA by SFC](https://github.com/kogason2010/nexera-uc-epsa)**: a scroll-driven journey through measuring polar surface area with supercritical fluid chromatography.
-- **[Solvane](https://github.com/kogason2010/solvane)**: a design study for a fictional analytical-science company.
-- **[Inside the HPLC Detector](https://github.com/kogason2010/hplc-detectors)**: how five HPLC detectors (UV / PDA / DAD, fluorescence, RI, ELSD and single / triple quad MS) turn chemistry into a peak, as live animated schematics.
-- **[Strand by Strand](https://github.com/kogason2010/lcms-2050-oligos)**: a scroll-driven walk through four application notes on confirming synthetic oligonucleotides with the LCMS-2050 single quadrupole mass spectrometer.
+The desktop sorts them into two folders, plus a couple of standalone apps.
 
-The first three live together in a *Nexera App Notes* folder on the desktop. They're independent, unofficial projects and aren't affiliated with Shimadzu.
+**Application Notes**: published Shimadzu application notes, retold as interactive 3D.
+
+- **[Strand by Strand](https://github.com/kogason2010/lcms-2050-oligos)**: four notes on confirming synthetic oligonucleotides with the LCMS-2050 single quadrupole mass spectrometer.
+- **[Exposed: EPSA by SFC](https://github.com/kogason2010/nexera-uc-epsa)**: measuring experimental polar surface area with supercritical fluid chromatography.
+- **[Nexera IC Applications](https://github.com/kogason2010/nexera-ic-applications)**: published IC methods told through 3D ions, with an ion atlas and a methods table.
+
+**Instrument Explainers**: how the instruments themselves work.
+
+- **[Inside the HPLC Detector](https://github.com/kogason2010/hplc-detectors)**: five HPLC detectors (UV / PDA / DAD, fluorescence, RI, ELSD and single / triple quad MS) as live animated schematics.
+- **[Nexera IC](https://github.com/kogason2010/nexera-ic)**: a cinematic, interactive explainer of ion chromatography.
+
+**On their own**
+
+- **[HPLC Tools](https://github.com/kogason2010/HPLC-tools)**: calculators for everyday HPLC work: method transfer with USP <621> checks, gradients, buffers, system suitability, back-pressure.
+- **[Solvane](https://github.com/kogason2010/solvane)**: a design study for a fictional analytical-science company.
+
+The Shimadzu-related projects are independent and unofficial, and aren't affiliated with Shimadzu.
 
 ## What's on the desktop
 
-Besides the projects there's a File Explorer, Photos, Notepad, Settings and a Terminal (try `help`, `neofetch` or `git log`). I also wanted the small Windows details to work: windows snap to the sides and corners, hovering the maximize button gives you snap layouts, and there's Task view, Start menu search, a notification center, quick settings, light and dark mode, and desktop icons you can drag around.
+Besides the projects there's a File Explorer, Photos, Notepad, Settings and a Terminal (try `help`, `neofetch` or `git log`). I wanted the small Windows details to work too:
+
+- Right-click menus work like Windows 11's, with View and Sort by submenus, Pin to Start or taskbar, and Properties.
+- Deleted desktop icons go to a working Recycle Bin, and Settings can put everything back.
+- Windows snap to sides and corners, and hovering the maximize button shows snap layouts.
+- Hovering a taskbar button previews its window, and minimizing shrinks the window into its button.
+- There's Task view, a taskbar search box, a notification center, quick settings, and light and dark mode.
+- File Explorer has Pictures (every screenshot), This PC and a Details view with real file sizes.
+- Desktop icons can be dragged, box-selected and resized.
 
 ## How it works
 
@@ -35,7 +54,7 @@ The live URL, source link and icon are worked out from the repo name. You can al
 
 Rather than embedding each project from its own URL, I keep a copy of each one's built site in `apps/`, so every project runs straight from this site as its own app. Links between projects are caught and open the other project in a new window instead of navigating away.
 
-To keep those copies current, `tools/sync-apps.mjs` pulls the latest build of each bundled project from its repo. A GitHub Action (`.github/workflows/sync-apps.yml`) runs it every Monday, whenever `config.js` changes, and on demand from the Actions tab. It commits any changes it finds.
+To keep those copies current, `tools/sync-apps.mjs` pulls the latest build of each bundled project from its repo. Projects that only keep source code in their repo (like the HPLC detectors site) get a `build` entry in the config, and the script builds them before copying. It also writes `apps/manifest.json` with each bundle's size, which File Explorer and Properties show. A GitHub Action (`.github/workflows/sync-apps.yml`) runs it every Monday, whenever `config.js` changes, and on demand from the Actions tab. It commits any changes it finds.
 
 ### Screenshots
 

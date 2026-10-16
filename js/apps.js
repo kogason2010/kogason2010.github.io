@@ -66,18 +66,33 @@
     home: { title: 'Home', icon: 'home' },
     desktop: { title: 'Desktop', icon: 'desktop' },
     documents: { title: 'Documents', icon: 'documents' },
+    pictures: { title: 'Pictures', icon: 'pictures' },
     projects: { title: 'Projects', icon: 'folder' },
+    thispc: { title: 'This PC', icon: 'pc' },
     recycle: { title: 'Recycle Bin', icon: 'recycle' },
   };
+  const USER = owner.handle || 'user';
+  /* Where things "live", for the address bar tooltip and Properties. */
+  function pathOf(loc) {
+    if (loc && loc.startsWith('group:')) { const g = GROUPS.get(loc.slice(6)); return `C:\\Users\\${USER}\\Projects\\${g ? g.title : ''}`; }
+    return {
+      home: 'Home', thispc: 'This PC', recycle: 'Recycle Bin',
+      desktop: `C:\\Users\\${USER}\\Desktop`, documents: `C:\\Users\\${USER}\\Documents`,
+      pictures: `C:\\Users\\${USER}\\Pictures`, projects: `C:\\Users\\${USER}\\Projects`,
+    }[loc] || '';
+  }
+  OS.pathOf = pathOf;
   function locInfo(loc) {
     if (loc.startsWith('group:')) {
       const g = GROUPS.get(loc.slice(6));
       return g ? { title: g.title, group: g, path: ['home', 'projects', loc] } : null;
     }
     const L = LOCS[loc];
-    return L ? { ...L, path: loc === 'home' ? ['home'] : ['home', loc] } : null;
+    if (!L) return null;
+    const path = loc === 'home' || loc === 'thispc' || loc === 'recycle' ? [loc] : loc === 'projects' || loc === 'pictures' || loc === 'documents' || loc === 'desktop' ? ['thispc', loc] : ['home', loc];
+    return { ...L, path };
   }
-  const parentOf = (loc) => (loc.startsWith('group:') ? 'projects' : 'home');
+  const parentOf = (loc) => (loc.startsWith('group:') ? 'projects' : loc === 'home' || loc === 'thispc' ? 'home' : 'thispc');
   const ungroupedSites = () => OS.sites().filter((a) => !a.group || !GROUPS.has(a.group));
   function locItems(loc) {
     if (loc === 'home') {
@@ -93,8 +108,19 @@
       ];
     }
     if (loc.startsWith('group:')) return [{ h: null, items: OS.groupMembers(loc.slice(6)).map((a) => a.id) }];
-    if (loc === 'desktop') return [{ h: null, items: (CFG.desktop || []).slice() }];
+    if (loc === 'desktop') return [{ h: null, items: OS.desktopList() }];
     if (loc === 'documents') return [{ h: null, items: OS.docs().map((a) => a.id) }];
+    if (loc === 'pictures') {
+      return OS.sites().filter((a) => a.shots && a.shots.length)
+        .map((a) => ({ h: 'Screenshots · ' + a.title, items: a.shots.map((_, i) => `pic:${a.id}:${i}`) }));
+    }
+    if (loc === 'thispc') {
+      return [
+        { h: 'Folders', items: ['loc:desktop', 'loc:documents', 'loc:pictures', 'loc:projects'] },
+        { h: 'Devices and drives', items: ['drive:c'] },
+      ];
+    }
+    if (loc === 'recycle') return [{ h: null, items: OS.recycledList() }];
     return [];
   }
   const countIn = (loc) => locItems(loc).reduce((n, s) => n + s.items.length, 0);
@@ -102,6 +128,17 @@
     return list.map((a) => a.updated || '').sort().pop() || '';
   }
   function describe(t) {
+    if (t.startsWith('pic:')) {
+      const [, id, i] = t.split(':');
+      const a = APPS.get(id);
+      const shot = a && a.shots[+i];
+      if (!shot) return null;
+      const name = `${id}-${+i + 1}.${(shot.src.split('.').pop() || 'png')}`;
+      return { t, title: name, pic: shot, app: null, picApp: a, picIndex: +i, icon: () => icon('photos'), type: (name.split('.').pop() || '').toUpperCase() + ' File', sub: shot.caption, date: a.updated || '', open: () => OS.openPhotos(id, +i) };
+    }
+    if (t === 'drive:c') {
+      return { t, title: 'Local Disk (C:)', drive: true, loc: 'projects', folder: true, icon: () => icon('driveIc'), type: 'Local Disk', sub: '' };
+    }
     if (t.startsWith('loc:')) {
       const loc = t.slice(4);
       const info = locInfo(loc);
@@ -127,8 +164,14 @@
       ...[...APPS.values()].filter(hit).map((a) => a.id),
     ];
   }
-  const VIEWS = [['tiles', 'viewTiles', 'Tiles'], ['large', 'viewLarge', 'Large icons'], ['details', 'viewDetails', 'Details']];
-  const defaultView = (loc) => (loc === 'projects' || loc.startsWith('group:') ? 'large' : 'tiles');
+  const VIEWS = [['large', 'viewLarge', 'Large icons'], ['tiles', 'viewTiles', 'Tiles'], ['details', 'viewDetails', 'Details']];
+  const defaultView = (loc) => (loc === 'projects' || loc === 'pictures' || loc.startsWith('group:') ? 'large' : loc === 'recycle' ? 'details' : 'tiles');
+  /* A pretend disk: 476 GB, mostly free, with the portfolio's real size counted in. */
+  function driveUsage() {
+    const real = Object.values(OS.manifest || {}).reduce((n, m) => n + (m.bytes || 0), 0);
+    const total = 476 * 1024 ** 3, used = 131.4 * 1024 ** 3 + real;
+    return { total, used, free: total - used };
+  }
 
   OS.APPDEFS.explorer = {
     size: [1000, 620],
@@ -149,7 +192,16 @@
         render();
       };
       w.onRelaunch = (s) => { if (s.location && s.location !== st.loc) go(s.location); };
-      const openItem = (d) => (d.folder ? go(d.loc) : OS.launch(d.t));
+      const openItem = (d) => (d.open ? d.open() : st.loc === 'recycle' ? OS.properties(d.t) : d.folder ? go(d.loc) : OS.launch(d.t));
+      const menuFor = (d) => {
+        if (st.loc === 'recycle') {
+          return [{ label: 'Restore', icon: 'restore', bold: true, action: () => OS.restoreItem(d.t) }, { sep: true }, { label: 'Properties', icon: 'props', action: () => OS.properties(d.t) }];
+        }
+        if (d.pic) return [{ label: 'Open', icon: 'chevR', bold: true, action: d.open }, { label: 'Open app', icon: 'play', action: () => OS.launch(d.picApp.id) }];
+        if (d.drive) return [{ label: 'Open', icon: 'chevR', bold: true, action: () => go('projects') }, { sep: true }, { label: 'Properties', icon: 'props', action: () => OS.properties('drive:c') }];
+        if (d.t.startsWith('loc:')) return [{ label: 'Open', icon: 'chevR', bold: true, action: () => openItem(d) }, { label: 'Open in new window', icon: 'external', action: () => OS.openWindow({ key: 'loc:' + d.loc + ':' + Date.now(), app: 'explorer', location: d.loc }) }];
+        return OS.itemMenu(d.t, () => openItem(d));
+      };
       const select = (t) => {
         st.sel = t;
         filesEl.querySelectorAll('[data-t]').forEach((n) => n.classList.toggle('sel', n.dataset.t === t));
@@ -171,17 +223,42 @@
         const search = el('label', { class: 'ex-search' }, glyph('search'),
           el('input', { id: 'ex-q-' + w.id, type: 'search', placeholder: 'Search', 'aria-label': 'Search', value: st.q, autocomplete: 'off',
             oninput: (e) => { st.q = e.target.value.trim(); st.sel = null; renderFiles(); renderDetails(); renderStatus(); } }));
-        viewBtns = el('div', { class: 'ex-views', role: 'group', 'aria-label': 'View' }, VIEWS.map(([id, g, label]) => {
-          const b = ibtn(g, label, () => { store.set('exview:' + st.loc, id); syncViewBtns(); renderFiles(); });
-          b.dataset.view = id;
+        viewBtns = el('div', { class: 'ex-views', role: 'group', 'aria-label': 'View' });
+        const cmd = (g, label, fn, extra = {}) => {
+          const b = el('button', { class: 'cmd' + (extra.cls ? ' ' + extra.cls : ''), disabled: !!extra.disabled, title: extra.title || null }, glyph(g), label ? el('span', {}, label) : null, extra.drop ? glyph('chevD', 'sm') : null);
+          b.addEventListener('click', (e) => fn(b, e));
           return b;
-        }));
+        };
+        const dropAt = (b, items) => { const r = b.getBoundingClientRect(); OS.contextMenu(r.left, r.bottom + 4, items); };
+        const sortMenu = (b) => dropAt(b, [['name', 'Name'], ['date', 'Date modified'], ['type', 'Type'], ['size', 'Size']].map(([k, l]) => ({
+          label: l, check: !!(st.sort && st.sort.key === k), action: () => { st.sort = { key: k, dir: st.sort && st.sort.key === k ? -st.sort.dir : k === 'date' || k === 'size' ? -1 : 1 }; renderFiles(); },
+        })));
+        const viewMenu = (b) => dropAt(b, VIEWS.map(([id, g, l]) => ({ label: l, icon: g, check: viewOf() === id, action: () => { store.set('exview:' + st.loc, id); syncViewBtns(); renderFiles(); } })));
+        const isBin = st.loc === 'recycle';
+        const sel = () => (st.sel ? describe(st.sel) : null);
+        const cmdbar = el('div', { class: 'ex-cmd', role: 'toolbar', 'aria-label': 'Commands' },
+          isBin
+            ? [cmd('trash', 'Empty Recycle Bin', () => OS.emptyBin(), { disabled: !OS.recycledList().length }),
+               cmd('restore', 'Restore all items', () => OS.recycledList().forEach(OS.restoreItem), { disabled: !OS.recycledList().length }),
+               el('span', { class: 'cmd-sep' })]
+            : [cmd('newfile', 'New', (b) => dropAt(b, [{ label: 'Text Document', icon: 'newfile', action: () => OS.openWindow({ key: 'notepad:' + Date.now(), app: 'notepad' }) }]), { drop: true }),
+               el('span', { class: 'cmd-sep' }),
+               cmd('copy', '', () => { const d = sel(); if (d && d.app && d.app.url) OS.copyText(d.app.url, 'Link'); }, { title: 'Copy link', disabled: false }),
+               cmd('share', '', () => { const d = sel(); if (d && d.app && d.app.url) OS.copyText(d.app.url, 'Link'); }, { title: 'Share' }),
+               cmd('trash', '', () => { const d = sel(); if (d) OS.recycle(d.t); }, { title: 'Delete' }),
+               el('span', { class: 'cmd-sep' })],
+          cmd('sort', 'Sort', sortMenu, { drop: true }),
+          cmd('viewLarge', 'View', viewMenu, { drop: true }),
+          el('span', { class: 'cmd-fill' }),
+          cmd('props', 'Details', () => { const on = !root.classList.contains('no-details'); root.classList.toggle('no-details', on); store.set('exdetails', !on); }, { cls: 'details-toggle' }));
+        if (store.get('exdetails', true) === false) root.classList.add('no-details');
         const toolbar = el('div', { class: 'ex-toolbar' },
           ibtn('arrowL', 'Back', () => { if (st.back.length) { st.fwd.push(st.loc); go(st.back.pop(), false); } }, !st.back.length),
           ibtn('arrowR', 'Forward', () => { if (st.fwd.length) { st.back.push(st.loc); go(st.fwd.pop(), false); } }, !st.fwd.length),
           ibtn('arrowU', 'Up', () => go(parentOf(st.loc)), st.loc === 'home'),
           ibtn('refresh', 'Refresh', () => render()),
-          crumbs, search, viewBtns);
+          crumbs, search);
+        crumbs.title = pathOf(st.loc);
 
         const nav = el('nav', { class: 'ex-nav', 'aria-label': 'Folders' });
         const navItem = (loc, sub) => {
@@ -189,27 +266,20 @@
           return el('button', { class: 'nav-i' + (sub ? ' sub' : '') + (st.loc === loc ? ' on' : ''), onclick: () => go(loc) },
             i.group ? groupIcon(i.group) : icon(i.icon), el('span', {}, i.title));
         };
-        nav.append(navItem('home'), el('hr'), navItem('desktop'), navItem('documents'), navItem('projects'));
+        nav.append(navItem('home'), el('hr'), navItem('desktop'), navItem('documents'), navItem('pictures'), navItem('projects'));
         GROUPS.forEach((g) => nav.append(navItem('group:' + g.id, true)));
-        nav.append(el('hr'), navItem('recycle'));
+        nav.append(el('hr'), navItem('thispc'), navItem('recycle'));
 
         filesEl = el('div', { class: 'ex-files', onclick: (e) => { if (e.target === filesEl || e.target.classList.contains('tiles') || e.target.classList.contains('thumbs')) select(null); } });
         detailsEl = el('aside', { class: 'ex-details', 'aria-label': 'Details' });
         statusEl = el('div', { class: 'ex-status' });
-        root.replaceChildren(toolbar, el('div', { class: 'ex-main' }, nav, filesEl, detailsEl), statusEl);
+        root.replaceChildren(toolbar, cmdbar, el('div', { class: 'ex-main' }, nav, filesEl, detailsEl), statusEl);
         syncViewBtns();
         renderFiles();
         renderDetails();
         renderStatus();
       }
-      function syncViewBtns() {
-        const v = viewOf();
-        viewBtns.querySelectorAll('[data-view]').forEach((b) => {
-          const on = b.dataset.view === v;
-          b.classList.toggle('on', on);
-          b.setAttribute('aria-pressed', String(on));
-        });
-      }
+      function syncViewBtns() { /* views are chosen from the View menu */ }
 
       function sections() {
         return st.q ? [{ h: `Search results for “${st.q}”`, items: searchAll(st.q) }] : locItems(st.loc);
@@ -218,15 +288,29 @@
         b.addEventListener('click', () => { select(d.t); if (OS.coarse()) openItem(d); });
         b.addEventListener('dblclick', () => openItem(d));
         b.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); openItem(d); } });
-        b.addEventListener('contextmenu', (e) => { e.preventDefault(); select(d.t); OS.contextMenu(e.clientX, e.clientY, OS.itemMenu(d.t, () => openItem(d))); });
+        b.addEventListener('contextmenu', (e) => { e.preventDefault(); select(d.t); OS.contextMenu(e.clientX, e.clientY, menuFor(d)); });
+        b.addEventListener('keydown', (e) => { if (e.key === 'Delete' && st.loc !== 'recycle') { e.preventDefault(); OS.recycle(d.t); } });
         return b;
       }
       function tile(d) {
+        if (d.drive) {
+          const u = driveUsage();
+          return wire(el('button', { class: 'tile drive' + (st.sel === d.t ? ' sel' : ''), dataset: { t: d.t }, 'aria-label': d.title },
+            d.icon(), el('span', { class: 'meta' }, el('b', {}, d.title),
+              el('span', { class: 'bar', role: 'meter', 'aria-valuenow': Math.round((u.used / u.total) * 100), 'aria-valuemin': '0', 'aria-valuemax': '100' }, el('i', { style: { width: (u.used / u.total) * 100 + '%' } })),
+              el('small', {}, `${OS.fmtBytes(u.free)} free of ${OS.fmtBytes(u.total)}`))), d);
+        }
         return wire(el('button', { class: 'tile' + (st.sel === d.t ? ' sel' : ''), dataset: { t: d.t }, 'aria-label': d.title },
           d.icon(), el('span', { class: 'meta' }, el('b', {}, d.title), el('small', {}, d.type), d.sub ? el('small', {}, d.sub) : null)), d);
       }
       function thumb(d) {
+        if (d.drive) return tile(d);
         const a = d.app;
+        if (d.pic) {
+          return wire(el('button', { class: 'thumb' + (st.sel === d.t ? ' sel' : ''), dataset: { t: d.t }, 'aria-label': d.title },
+            el('span', { class: 'th-pic' }, el('img', { src: d.pic.src, alt: '', loading: 'lazy', draggable: 'false' })),
+            el('span', { class: 'th-label' }, el('b', {}, d.title))), d);
+        }
         const pic = a && a.cover
           ? el('span', { class: 'th-pic' }, el('img', { src: a.cover, alt: '', loading: 'lazy', draggable: 'false' }))
           : el('span', { class: 'th-pic th-ic' }, d.icon());
@@ -241,7 +325,7 @@
         let rows = items.slice();
         if (st.sort) {
           const { key, dir } = st.sort;
-          const val = (d) => (key === 'name' ? d.title.toLowerCase() : key === 'date' ? d.date || '' : d.type.toLowerCase());
+          const val = (d) => (key === 'name' ? d.title.toLowerCase() : key === 'date' ? d.date || '' : key === 'size' ? sizeBytes(d) : d.type.toLowerCase());
           rows.sort((x, y) => (val(x) < val(y) ? -1 : val(x) > val(y) ? 1 : 0) * dir);
         }
         const hcell = (key, label) => {
@@ -250,14 +334,25 @@
             el('span', {}, label), on ? glyph(st.sort.dir > 0 ? 'chevU' : 'chevD') : null);
         };
         return el('div', { class: 'dlist', role: 'table' },
-          el('div', { class: 'drow head', role: 'row' }, hcell('name', 'Name'), hcell('date', 'Date modified'), hcell('type', 'Type')),
+          el('div', { class: 'drow head', role: 'row' }, hcell('name', 'Name'), hcell('date', 'Date modified'), hcell('type', 'Type'), hcell('size', 'Size')),
           rows.map((d) => wire(el('button', { class: 'drow' + (st.sel === d.t ? ' sel' : ''), role: 'row', dataset: { t: d.t }, 'aria-label': d.title },
             el('span', { class: 'dn' }, d.icon(), el('span', {}, d.title)),
             el('span', { class: 'dd' }, d.date ? fmtDate(d.date) : ''),
-            el('span', { class: 'dd' }, d.type)), d)));
+            el('span', { class: 'dd' }, d.type),
+            el('span', { class: 'dd num' }, sizeBytes(d) >= 0 ? sizeLabel(d) : '')), d)));
       }
+      function sizeBytes(d) {
+        const m = d.app ? OS.sizeOf(d.app) : null;
+        return m ? m.bytes : -1;
+      }
+      /* Explorer shows sizes in whole KB. */
+      const sizeLabel = (d) => Math.max(1, Math.ceil(sizeBytes(d) / 1024)).toLocaleString() + ' KB';
       function renderFiles() {
         filesEl.replaceChildren();
+        if (st.sel && !sections().some((x) => x.items.includes(st.sel))) st.sel = null;
+        if (st.sort && viewOf() !== 'details') {
+          /* Sorting also applies to icon views. */
+        }
         const secs = sections().map((s) => ({ ...s, items: s.items.map(describe).filter(Boolean) })).filter((s) => s.items.length);
         if (!secs.length) {
           const msg = st.q ? 'No items match your search.' : st.loc === 'recycle' ? 'Recycle Bin is empty. Every project shipped.' : 'This folder is empty.';
@@ -269,6 +364,11 @@
           filesEl.append(detailsTable(secs.flatMap((s) => s.items)));
           return;
         }
+        if (st.sort) {
+          const { key, dir } = st.sort;
+          const val = (d) => (key === 'name' ? d.title.toLowerCase() : key === 'date' ? d.date || '' : key === 'size' ? sizeBytes(d) : d.type.toLowerCase());
+          secs.forEach((x) => x.items.sort((a, b) => (val(a) < val(b) ? -1 : val(a) > val(b) ? 1 : 0) * dir));
+        }
         for (const s of secs) {
           if (s.h) filesEl.append(el('h4', { class: 'ex-h' }, s.h));
           filesEl.append(view === 'large'
@@ -279,6 +379,22 @@
       function renderDetails() {
         detailsEl.replaceChildren();
         const d = st.sel && describe(st.sel);
+        if (d && d.pic) {
+          detailsEl.append(el('div', { class: 'dt' },
+            el('button', { class: 'dt-cover', 'aria-label': 'Open in Photos', onclick: d.open }, el('img', { src: d.pic.src, alt: '', draggable: 'false' })),
+            el('h3', { class: 'dt-title' }, d.title), el('div', { class: 'dt-type' }, d.type),
+            el('p', { class: 'dt-desc' }, d.pic.caption),
+            el('dl', { class: 'kv' }, el('div', {}, el('dt', {}, 'Dimensions'), el('dd', {}, '1280 × 800')), el('div', {}, el('dt', {}, 'From'), el('dd', {}, d.picApp.title))),
+            el('div', { class: 'btns' }, el('button', { class: 'btn primary', onclick: d.open }, 'Open in Photos'), el('button', { class: 'btn', onclick: () => OS.launch(d.picApp.id) }, 'Open app'))));
+          return;
+        }
+        if (d && d.drive) {
+          const u = driveUsage();
+          detailsEl.append(el('div', { class: 'dt' }, el('div', { class: 'dt-ic' }, d.icon()), el('h3', { class: 'dt-title' }, d.title), el('div', { class: 'dt-type' }, 'Local Disk · NTFS'),
+            el('span', { class: 'bar wide' }, el('i', { style: { width: (u.used / u.total) * 100 + '%' } })),
+            el('dl', { class: 'kv' }, el('div', {}, el('dt', {}, 'Used'), el('dd', {}, OS.fmtBytes(u.used))), el('div', {}, el('dt', {}, 'Free'), el('dd', {}, OS.fmtBytes(u.free))), el('div', {}, el('dt', {}, 'Capacity'), el('dd', {}, OS.fmtBytes(u.total))))));
+          return;
+        }
         if (d) {
           if (d.group) detailsEl.append(groupDetails(d.group, () => openItem(d)));
           else if (d.app && d.app.kind !== 'builtin') detailsEl.append(appDetails(d.app, { onOpen: () => openItem(d) }));
@@ -302,7 +418,8 @@
       }
 
       w.navigate = go;
-      w.onClose = OS.on('registry', render);
+      const offs = [OS.on('registry', render), OS.on('desktop', render), OS.on('manifest', () => { if (viewOf() === 'details' || st.loc === 'thispc') renderFiles(); })];
+      w.onClose = () => offs.forEach((f) => f());
       render();
     },
   };
@@ -421,6 +538,91 @@
       }
       w.addAction('external', 'Open live site in new tab', null, { href: a.url });
       w.body.append(view);
+    },
+  };
+
+  /* =====================================================================
+     Properties dialog (right-click → Properties)
+     ===================================================================== */
+  OS.APPDEFS.properties = {
+    size: [380, 520],
+    fixed: true,
+    mount(w, spec) {
+      const t = spec.target;
+      const r = OS.resolve(t);
+      const isDrive = t === 'drive:c';
+      const name = isDrive ? 'Local Disk (C:)' : r ? r.title : t;
+      w.setTitle(name + ' Properties');
+      w.setIcon(() => icon('props'));
+      const a = r && r.type === 'app' ? r.app : null;
+      const g = r && r.type === 'group' ? r.group : null;
+      const desk = OS.desktopList().includes(t);
+      const binned = OS.recycledList().includes(t);
+      const shortcut = a && a.kind !== 'doc' && a.id !== 'recycle' && desk;
+      let type, loc;
+      if (isDrive) type = 'Local Disk';
+      else if (g) type = 'File folder';
+      else if (!a) type = '';
+      else if (a.kind === 'doc') type = 'Text Document (.txt)';
+      else if (a.id === 'recycle') type = 'System folder';
+      else if (shortcut || binned) type = 'Shortcut (.lnk)';
+      else type = a.kind === 'site' ? 'Application' : 'App';
+      if (binned) loc = 'Recycle Bin';
+      else if (desk) loc = pathOf('desktop');
+      else if (a && a.group && GROUPS.has(a.group)) loc = pathOf('group:' + a.group);
+      else if (a && a.kind === 'site') loc = pathOf('projects');
+      else if (a && a.kind === 'doc') loc = pathOf('documents');
+      else loc = 'C:\\Windows\\System32';
+      const m = a ? OS.sizeOf(a) : null;
+      let size = m ? `${OS.fmtBytes(m.bytes)} (${m.bytes.toLocaleString()} bytes)` : '';
+      let contains = m && m.files > 1 ? `${m.files} files` : '';
+      if (g) {
+        const members = OS.groupMembers(g.id);
+        const total = members.reduce((n, x) => n + ((OS.sizeOf(x) || {}).bytes || 0), 0);
+        size = total ? `${OS.fmtBytes(total)} (${total.toLocaleString()} bytes)` : '';
+        contains = OS.plural(members.length, 'app');
+      }
+      const date = a && a.updated ? OS.toDate(a.updated).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' }) : '';
+      const field = (label, value) => (value ? el('div', { class: 'pr-row' }, el('span', {}, label), el('span', { class: 'pr-v' }, value)) : null);
+      const tabs = el('div', { class: 'pr-tabs', role: 'tablist' }, el('button', { class: 'on', role: 'tab', 'aria-selected': 'true' }, 'General'),
+        shortcut ? el('button', { role: 'tab', 'aria-selected': 'false', disabled: true }, 'Shortcut') : null,
+        el('button', { role: 'tab', 'aria-selected': 'false', disabled: true }, 'Details'));
+      let top;
+      if (isDrive) {
+        const used = 131.4 * 1024 ** 3 + Object.values(OS.manifest || {}).reduce((n, x) => n + (x.bytes || 0), 0), total = 476 * 1024 ** 3;
+        const pct = used / total;
+        top = [el('div', { class: 'pr-head' }, icon('driveIc'), el('input', { class: 'pr-name', id: 'pr-n-' + w.id, value: 'Local Disk', readonly: true, 'aria-label': 'Name' })),
+          el('hr'), field('Type:', 'Local Disk'), field('File system:', 'NTFS'), el('hr'),
+          field('Used space:', OS.fmtBytes(used)), field('Free space:', OS.fmtBytes(total - used)), el('hr'), field('Capacity:', OS.fmtBytes(total)),
+          el('div', { class: 'pr-pie', style: { '--p': pct * 360 + 'deg' }, 'aria-hidden': 'true' }), el('div', { class: 'pr-c' }, 'Drive C:')];
+      } else {
+        const ic = r ? (r.type === 'group' ? OS.groupIcon(r.group) : t === 'recycle' ? icon(OS.recycledList().length ? 'recycleFull' : 'recycle') : appIcon(a)) : icon('textfile');
+        top = [el('div', { class: 'pr-head' }, ic, el('input', { class: 'pr-name', id: 'pr-n-' + w.id, value: name, readonly: true, 'aria-label': 'Name' })),
+          el('hr'),
+          field('Type:', type),
+          a && a.kind === 'site' ? field('Description:', a.typeLabel === 'Application' ? a.title : a.typeLabel) : null,
+          field('Location:', loc),
+          a && a.url ? field(a.run ? 'Source:' : 'Target:', el('a', { href: a.source || a.url, target: '_blank', rel: 'noopener' }, OS.prettyUrl(a.source || a.url))) : null,
+          a && a.url && a.run ? field('Live site:', el('a', { href: a.url, target: '_blank', rel: 'noopener' }, OS.prettyUrl(a.url))) : null,
+          (size || contains) ? el('hr') : null,
+          field('Size:', size),
+          field('Contains:', contains),
+          date ? el('hr') : null,
+          field('Modified:', date),
+          a && a.stack && a.stack.length ? field('Built with:', a.stack.join(', ')) : null,
+          el('hr'),
+          el('div', { class: 'pr-row' }, el('span', {}, 'Attributes:'), el('span', { class: 'pr-v pr-attr' },
+            el('label', {}, el('input', { type: 'checkbox', id: 'pr-ro-' + w.id, checked: true, disabled: true }), ' Read-only'),
+            el('label', {}, el('input', { type: 'checkbox', id: 'pr-h-' + w.id, disabled: true }), ' Hidden')))];
+      }
+      const btns = el('div', { class: 'pr-btns' },
+        el('button', { class: 'btn primary', onclick: () => OS.close(w) }, 'OK'),
+        el('button', { class: 'btn', onclick: () => OS.close(w) }, 'Cancel'),
+        el('button', { class: 'btn', disabled: true }, 'Apply'));
+      w.body.append(el('div', { class: 'pr' }, tabs, el('div', { class: 'pr-body' }, top.filter(Boolean)), btns));
+      w.node.addEventListener('keydown', (e) => { if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); OS.close(w); } });
+      const off = OS.on('manifest', () => { OS.close(w); OS.properties(t); });
+      w.onClose = off;
     },
   };
 
@@ -704,8 +906,8 @@
               row('Choose your mode', 'Light or dark windows, taskbar and menus', modes),
               row('Accent color', 'Used for highlights, buttons and the taskbar', sw)),
             el('div', { class: 'set-card' }, row('Background', 'Desktop wallpaper', null), walls),
-            el('div', { class: 'set-card' }, row('Desktop icons', 'Drag icons to rearrange them. This puts them back in their original order.',
-              el('button', { class: 'btn', onclick: () => OS.resetIcons && OS.resetIcons() }, 'Reset layout'))));
+            el('div', { class: 'set-card' }, row('Desktop', 'Puts icons, pins and anything you deleted back the way they were.',
+              el('button', { class: 'btn', onclick: () => OS.resetDesktop() }, 'Reset desktop'))));
         } else if (section === 'apps') {
           const all = [...APPS.values()].sort((a, b) => a.title.localeCompare(b.title));
           const label = (a) => [a.run ? 'Runs from this site' : a.typeLabel, a.group && GROUPS.get(a.group) ? GROUPS.get(a.group).title : null, a.discovered ? 'Found on GitHub' : null].filter(Boolean).join(' · ');

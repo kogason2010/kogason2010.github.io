@@ -1,0 +1,30 @@
+{
+  "hplc-detectors": {
+    "bytes": 1602291,
+    "files": 16
+  },
+  "hplc-tools": {
+    "bytes": 92897,
+    "files": 4
+  },
+  "lcms-2050-oligos": {
+    "bytes": 69197,
+    "files": 2
+  },
+  "nexera-ic": {
+    "bytes": 1801093,
+    "files": 17
+  },
+  "nexera-ic-applications": {
+    "bytes": 1667017,
+    "files": 10
+  },
+  "nexera-uc-epsa": {
+    "bytes": 60450,
+    "files": 2
+  },
+  "solvane": {
+    "bytes": 2534610,
+    "files": 22
+  }
+}

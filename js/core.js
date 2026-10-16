@@ -144,6 +144,74 @@
   }
   Object.assign(OS, { APPS, GROUPS, addApp, groupMembers, sites, docs, byUpdated, resolve, keyFor, findAppByUrl });
 
+  /* ---------- what the visitor changed: pins and the Recycle Bin (kept in this browser) ---------- */
+  const UNDELETABLE = new Set(['recycle']);
+  let recycled = store.get('recycled', []);
+  let purged = store.get('purged', []);
+  let taskPins = store.get('taskPins', null);
+  let startPins = store.get('startPins', null);
+  const valid = (list) => list.filter((t) => resolve(t));
+  const desktopList = () => valid(CFG.desktop || []).filter((t) => !recycled.includes(t) && !purged.includes(t));
+  const taskbarList = () => valid(taskPins || CFG.taskbar || []);
+  const startList = () => valid(startPins || CFG.pinned || []);
+  const recycledList = () => valid(recycled);
+  const isPinned = (where, t) => (where === 'taskbar' ? taskbarList() : startList()).includes(t);
+  function togglePin(where, t) {
+    const list = (where === 'taskbar' ? taskbarList() : startList()).slice();
+    const i = list.indexOf(t);
+    if (i >= 0) list.splice(i, 1); else list.push(t);
+    if (where === 'taskbar') { taskPins = list; store.set('taskPins', list); }
+    else { startPins = list; store.set('startPins', list); }
+    OS.emit('desktop');
+  }
+  const canDelete = (t) => desktopList().includes(t) && !UNDELETABLE.has(t);
+  function recycle(t) {
+    if (!canDelete(t)) return;
+    recycled = [...recycled.filter((x) => x !== t), t];
+    store.set('recycled', recycled);
+    OS.emit('desktop');
+  }
+  function restoreItem(t) {
+    recycled = recycled.filter((x) => x !== t);
+    store.set('recycled', recycled);
+    OS.emit('desktop');
+  }
+  function emptyBin() {
+    purged = [...new Set([...purged, ...recycled])];
+    recycled = [];
+    store.set('purged', purged);
+    store.set('recycled', recycled);
+    OS.emit('desktop');
+  }
+  function resetDesktop() {
+    recycled = []; purged = []; taskPins = null; startPins = null;
+    ['recycled', 'purged', 'taskPins', 'startPins', 'icons', 'iconOrder', 'iconSize'].forEach(store.del);
+    OS.emit('desktop');
+  }
+  Object.assign(OS, { desktopList, taskbarList, startList, recycledList, isPinned, togglePin, canDelete, recycle, restoreItem, emptyBin, resetDesktop });
+
+  /* Bundle sizes for Properties and File Explorer (written by tools/sync-apps.mjs). */
+  OS.manifest = {};
+  fetch('apps/manifest.json').then((r) => (r.ok ? r.json() : {})).then((m) => { OS.manifest = m || {}; OS.emit('manifest'); }).catch(() => {});
+  function sizeOf(a) {
+    if (!a) return null;
+    if (a.run) {
+      const dir = (a.run.match(/^apps\/([^/]+)\//) || [])[1];
+      return dir ? OS.manifest[dir] || null : null;
+    }
+    if (a.kind === 'doc') return { bytes: new Blob([a.text || '']).size, files: 1 };
+    return null;
+  }
+  function fmtBytes(n) {
+    if (n == null) return '';
+    if (n < 1024) return n + ' bytes';
+    const u = ['KB', 'MB', 'GB'];
+    let v = n / 1024, i = 0;
+    while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+    return (v >= 100 ? Math.round(v) : v.toFixed(v >= 10 ? 1 : 2)) + ' ' + u[i];
+  }
+  Object.assign(OS, { sizeOf, fmtBytes });
+
   /* ---------- icons ---------- */
   function monogram(title) {
     const words = String(title || '?').replace(/[^\p{L}\p{N} ]/gu, ' ').trim().split(/\s+/);
@@ -328,7 +396,7 @@
     const bar = el('div', { class: 'titlebar' }, iconSlot, titleEl, actions, el('div', { class: 'wctl' }, bMin, bMax, bX));
     const body = el('div', { class: 'wbody' });
     const handles = ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map((d) => el('div', { class: 'rz rz-' + d, dataset: { dir: d } }));
-    const node = el('section', { class: 'win opening', role: 'dialog', 'aria-label': '', tabindex: '-1', dataset: { app: spec.app } }, bar, body, handles);
+    const node = el('section', { class: 'win opening' + (def.fixed ? ' fixed' : ''), role: 'dialog', 'aria-label': '', tabindex: '-1', dataset: { app: spec.app } }, bar, body, handles);
     Object.assign(w, { node, bar, body, bMax, actions });
 
     w.setTitle = (t) => { w.title = t; titleEl.textContent = t; node.setAttribute('aria-label', t); if (w.live) changed(); };
@@ -369,12 +437,12 @@
     w.ro.observe(node);
 
     node.addEventListener('pointerdown', () => { if (WM.active !== w) focus(w); }, true);
-    bar.addEventListener('dblclick', (e) => { if (!e.target.closest('.wctl, .tact')) toggleMax(w); });
+    bar.addEventListener('dblclick', (e) => { if (!e.target.closest('.wctl, .tact') && !def.fixed) toggleMax(w); });
     wireDrag(w);
     wireResize(w, handles);
     wireLayouts(w);
 
-    if (compact() || spec.max) setMax(w, true, false);
+    if ((compact() && !def.fixed) || spec.max) setMax(w, true, false);
     requestAnimationFrame(() => requestAnimationFrame(() => node.classList.remove('opening')));
     focus(w);
     return w;
@@ -394,7 +462,17 @@
     WM.active = null;
     WM.wins.forEach((x) => x.node.classList.remove('active'));
   }
+  /* Point the minimize animation at the window's taskbar button, like Windows does. */
+  function aimAtTaskbar(w) {
+    const btn = document.querySelector(`.tbb[data-w="${w.id}"]`);
+    if (!btn) return;
+    const b = btn.getBoundingClientRect(), n = w.node.getBoundingClientRect();
+    w.node.style.setProperty('--min-x', Math.round(b.left + b.width / 2 - (n.left + n.width / 2)) + 'px');
+    w.node.style.setProperty('--min-y', Math.round(b.top + b.height / 2 - (n.top + n.height / 2)) + 'px');
+  }
+  OS.aimAtTaskbar = aimAtTaskbar;
   function minimize(w) {
+    aimAtTaskbar(w);
     w.min = true;
     w.node.classList.add('min');
     if (WM.active === w) {
@@ -429,7 +507,7 @@
     }
     setMaxButton(w, on);
   }
-  const toggleMax = (w) => { if (!compact()) setMax(w, !w.max); };
+  const toggleMax = (w) => { if (!compact() && !w.def.fixed) setMax(w, !w.max); };
   /* Place a window in a fraction of the desktop, remembering where it was. */
   function snapTo(w, f) {
     const A = area();
@@ -459,7 +537,7 @@
   function minimizeAll() {
     const anyOpen = WM.wins.some((w) => !w.min);
     if (anyOpen) {
-      WM.wins.forEach((w) => { w.min = true; w.node.classList.add('min'); });
+      WM.wins.forEach((w) => { aimAtTaskbar(w); w.min = true; w.node.classList.add('min'); });
       blurAll();
       changed();
     } else if (WM.wins.length) {
@@ -602,7 +680,7 @@
   }
   function wireLayouts(w) {
     w.bMax.addEventListener('pointerenter', (e) => {
-      if (e.pointerType !== 'mouse' || compact()) return;
+      if (e.pointerType !== 'mouse' || compact() || w.def.fixed) return;
       clearTimeout(hideTimer);
       clearTimeout(layoutsTimer);
       layoutsTimer = setTimeout(() => showLayouts(w), 420);
@@ -620,7 +698,7 @@
     const A = area();
     hideLayouts();
     WM.wins.forEach((w) => {
-      if (compact()) { if (!w.max) setMax(w, true, false); return; }
+      if (compact() && !w.def.fixed) { if (!w.max) setMax(w, true, false); return; }
       if (w.max) return;
       const r = { ...w.rect };
       r.w = Math.min(r.w, A.width);
@@ -632,7 +710,7 @@
   });
 
   /* ---------- launching ---------- */
-  const LOCATIONS = ['home', 'desktop', 'documents', 'projects', 'recycle'];
+  const LOCATIONS = ['home', 'desktop', 'documents', 'pictures', 'projects', 'thispc', 'recycle'];
   function launch(t, extra = {}) {
     if (LOCATIONS.includes(t)) return openWindow({ key: 'loc:' + t, app: 'explorer', location: t });
     const r = resolve(t);
@@ -650,18 +728,42 @@
     }
     return openWindow({ key: a.id, app: a.app, ref: a, ...extra });
   }
+  OS.properties = (t) => openWindow({ key: 'props:' + t, app: 'properties', target: t });
   /* Open the Photos viewer on one project's screenshots. */
   OS.openPhotos = (appId, index = 0) => launch('photos', { album: appId, index });
 
-  /* Right-click menu entries shared by the desktop, Explorer, Start and Showcase. */
+  /* Right-click menu for an item, laid out like Windows 11: an icon row on top
+     (Copy, Share, Delete), then the commands, then Properties. */
+  async function copyText(text, what) {
+    try { await navigator.clipboard.writeText(text); OS.toast && OS.toast({ title: what + ' copied', body: text, iconName: 'start', timeout: 3500 }); }
+    catch { OS.toast && OS.toast({ title: "Couldn't copy", body: text, timeout: 6000 }); }
+  }
+  OS.copyText = copyText;
   function itemMenu(t, openFn) {
     const r = resolve(t);
-    const a = r && r.type === 'app' ? r.app : null;
+    if (!r) return [];
+    const a = r.type === 'app' ? r.app : null;
+    const link = a && a.url ? a.url : null;
+    const row = [
+      { icon: 'copy', label: 'Copy link', disabled: !link, action: () => copyText(link, 'Link') },
+      { icon: 'share', label: 'Share', disabled: !link, action: () => {
+        if (navigator.share) navigator.share({ title: a.title, url: link }).catch(() => {});
+        else copyText(link, 'Link');
+      } },
+      { icon: 'trash', label: 'Delete', disabled: !canDelete(t), action: () => recycle(t) },
+    ];
+    const pinnable = r.type === 'group' || (a && a.app !== 'explorer') || (a && a.app === 'explorer');
     return [
-      { label: 'Open', icon: 'chevR', action: openFn || (() => launch(t)) },
-      a && a.shots && a.shots.length ? { label: 'View screenshots', icon: 'image', action: () => OS.openPhotos(a.id, 0) } : null,
+      { row },
+      { label: 'Open', icon: 'chevR', action: openFn || (() => launch(t)), bold: true },
       a && a.kind === 'site' ? { label: 'Open live site in new tab', icon: 'external', href: a.url } : null,
+      a && a.shots && a.shots.length ? { label: 'View screenshots', icon: 'image', action: () => OS.openPhotos(a.id, 0) } : null,
+      { sep: true },
+      pinnable ? { label: isPinned('start', t) ? 'Unpin from Start' : 'Pin to Start', icon: 'pin', action: () => togglePin('start', t) } : null,
+      pinnable && r.type !== 'group' ? { label: isPinned('taskbar', t) ? 'Unpin from taskbar' : 'Pin to taskbar', icon: 'pin', action: () => togglePin('taskbar', t) } : null,
       a && a.source ? { label: 'View source on GitHub', icon: 'code', href: a.source } : null,
+      { sep: true },
+      { label: 'Properties', icon: 'props', action: () => OS.properties(t) },
     ].filter(Boolean);
   }
 
