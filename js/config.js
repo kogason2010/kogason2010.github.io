@@ -151,6 +151,24 @@ window.PORTFOLIO = {
         ["media/hplc-detectors/4.webp", "Triple quadrupole: precursor → product, recorded as an MRM chromatogram"],
       ],
     },
+    {
+      type: "github",
+      repo: "kogason2010/lcms-2050-oligos",
+      title: "Strand by Strand",
+      bundle: true,
+      icon: "icons/lcms-2050-oligos.svg",
+      description:
+        "A scroll-driven 3D walk through four application notes on confirming synthetic oligonucleotides with the LCMS-2050 single quadrupole mass spectrometer: by charge state, by mass, and by where they elute.",
+      tip: "Press D inside the app for a guided demo, or explore the charge ladder and screening grid yourself.",
+      stack: ["three.js", "Single HTML file"],
+      updated: "2026-10-15",
+      shots: [
+        ["media/lcms-2050-oligos/1.webp", "Strand by strand: a 20-mer oligonucleotide in 3D"],
+        ["media/lcms-2050-oligos/2.webp", "The charge ladder: one molecule, many m/z values, one deconvoluted mass"],
+        ["media/lcms-2050-oligos/3.webp", "The 24-run screening grid from LabSolutions MD method development"],
+        ["media/lcms-2050-oligos/4.webp", "Ion-pair-free LC/MS of an siRNA: both strands confirmed separately"],
+      ],
+    },
 
     /* ---------- Built-in apps ---------- */
     { type: "builtin", id: "showcase", title: "Showcase", app: "showcase", icon: "showcase" },
@@ -181,6 +199,8 @@ What's on this desktop
                      analytical-science company
   Inside the HPLC    how five HPLC detectors turn chemistry
   Detector           into a peak, as live schematics
+  Strand by Strand   confirming synthetic oligonucleotides
+                     on a single quadrupole LC/MS
 
 Every project runs as an app right here. Open one from the
 desktop, the Start menu or Showcase.
@@ -225,8 +245,8 @@ Shortcuts
   ],
 
   /* Where things appear (ids, or "group:<id>" for a folder) */
-  desktop: ["recycle", "showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "photos", "about", "terminal"],
-  pinned: ["showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "photos", "terminal", "settings", "notepad", "about", "readme"],
-  taskbar: ["explorer", "showcase", "group:nexera", "solvane", "hplc-detectors", "terminal"],
+  desktop: ["recycle", "showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "lcms-2050-oligos", "photos", "about", "terminal"],
+  pinned: ["showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "lcms-2050-oligos", "photos", "terminal", "settings", "notepad", "about", "readme"],
+  taskbar: ["explorer", "showcase", "group:nexera", "solvane", "hplc-detectors", "lcms-2050-oligos", "terminal"],
   startup: ["showcase"],
 };

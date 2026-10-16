@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Strand by Strand</title>
+<meta name="description" content="A scroll-driven 3D walk through four Shimadzu application notes on analysing synthetic oligonucleotides with the LCMS-2050 single quadrupole mass spectrometer. Unofficial companion.">
+<meta name="theme-color" content="#06070c">
+<meta property="og:title" content="Strand by Strand">
+<meta property="og:description" content="Four Shimadzu application notes on confirming synthetic oligonucleotides with the LCMS-2050 single quadrupole, as a scroll-driven 3D walk-through. Unofficial.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://kogason2010.github.io/lcms-2050-oligos/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one fixed WebGL world (a 20-mer strand → its charges → HFIP adducts → a column of six lookalikes → an siRNA duplex coming apart → a HILIC column) under sticky, scroll-scrubbed chapters, then a normal-flow comparison. Single dark theme on purpose: it is an instrument space. */
+:root{
+  --void:#06070c;
+  --ink:#e6e8ee;
+  --dim:#8d92a6;
+  --strand:#4cb8a4;   /* nucleic acid backbone */
+  --charge:#cfa24a;   /* negative charge / phosphate */
+  --hfip:#9a86d8;     /* ion pair & adducts */
+  --pos:#d27a8d;      /* positive mode / fail */
+  --hilic:#6f9fd4;    /* water layer */
+  --hair:rgba(236,237,243,.14);
+  --panel:rgba(10,12,20,.72);
+  --display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --body:"Hanken Grotesk","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--void)}
+body{margin:0;background:var(--void);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body.locked{overflow:hidden}
+[hidden]{display:none!important}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+.nogl #gl{display:none}
+.nogl{background:radial-gradient(ellipse at 65% 40%,#10202a 0%,var(--void) 70%) fixed}
+.vignette{position:fixed;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.6) 100%)}
+
+/* HUD */
+.hud{position:fixed;z-index:20;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);pointer-events:none}
+.hud-tl{top:calc(env(safe-area-inset-top,0px) + 22px);left:max(16px,3vw);display:flex;gap:14px;align-items:baseline}
+.hud-tl b{color:var(--ink);font-weight:500;letter-spacing:.22em}
+.hud-tr{top:calc(env(safe-area-inset-top,0px) + 22px);right:max(16px,3vw);display:flex;gap:10px;align-items:baseline}
+.hud-tr .idx{color:var(--ink)}
+.hud-bl{bottom:calc(env(safe-area-inset-bottom,0px) + 22px);left:max(16px,3vw);font-variant-numeric:tabular-nums;max-width:60vw}
+.hud-bl i{font-style:normal;color:var(--ink)}
+.hud-br{bottom:calc(env(safe-area-inset-bottom,0px) + 16px);right:max(16px,3vw)}
+.ctl{display:flex;gap:8px;align-items:center;pointer-events:auto}
+.ctl button{background:rgba(6,7,12,.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(236,237,243,.28);color:var(--ink);font:inherit;letter-spacing:inherit;text-transform:inherit;padding:9px 14px;border-radius:999px;cursor:pointer;display:inline-flex;gap:8px;align-items:center;white-space:nowrap}
+.ctl button:hover{border-color:var(--ink)}
+.ctl button svg{width:12px;height:12px;fill:currentColor;flex:none}
+.ctl .demo{background:var(--strand);color:var(--void);border-color:var(--strand);font-weight:500;padding-inline:18px}
+.ctl .demo:hover{background:var(--ink);border-color:var(--ink)}
+.ctl .demo.on{background:transparent;color:var(--strand)}
+.ctl .gmin{opacity:.7;font-weight:400}
+#bSpeed{min-width:3.2em;justify-content:center;font-variant-numeric:tabular-nums}
+.demo-bar{position:fixed;left:0;top:0;height:2px;background:var(--strand);z-index:30;width:0;opacity:0;transition:opacity .3s}
+.demo-bar.on{opacity:1}
+.rail{position:fixed;right:max(10px,1.4vw);top:50%;transform:translateY(-50%);height:28vh;width:1px;background:var(--hair);z-index:20}
+.rail i{position:absolute;left:0;top:0;width:1px;background:var(--ink);height:0}
+:focus-visible{outline:2px solid var(--strand);outline-offset:2px}
+
+/* gate */
+.gate{position:fixed;inset:0;z-index:50;background:var(--void);display:grid;place-items:center;padding:24px;transition:opacity .7s,visibility .7s}
+.gate.gone{opacity:0;visibility:hidden}
+.gate-in{display:grid;gap:22px;justify-items:center;text-align:center;max-width:34rem}
+.gate .ladder{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.08em;min-height:1.5em}
+.gate .ladder b{color:var(--charge);font-weight:500}
+.gate-bar{width:220px;height:1px;background:var(--hair);overflow:hidden}
+.gate-bar i{display:block;height:100%;background:var(--strand);transform-origin:left;transform:scaleX(0)}
+.gate-btns{display:flex;gap:10px;opacity:0;transition:opacity .5s;pointer-events:none}
+.gate-btns.show{opacity:1;pointer-events:auto}
+.gate h1{font-size:clamp(3rem,10vw,6rem)}
+
+/* chapters */
+.ch{position:relative;z-index:5}
+.stick{position:sticky;top:0;height:100vh;height:100svh;display:grid;grid-template:1fr/1fr;padding-inline:max(20px,6vw);padding-block:max(80px,11vh) max(86px,12vh);pointer-events:none}
+.stick.scrim::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,7,12,.78) 0%,rgba(6,7,12,.4) 40%,transparent 62%);pointer-events:none}
+.beat{grid-area:1/1;position:relative;max-width:35rem;min-width:0;align-self:center;justify-self:start;display:grid;gap:16px;transition:opacity .15s linear;pointer-events:auto}
+.beat.top{align-self:start}
+.beat.bottom{align-self:end}
+.beat.right{justify-self:end}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);display:flex;gap:12px;align-items:center}
+.eyebrow::before{content:"";width:28px;height:1px;background:currentColor}
+h1,h2{font-family:var(--display);font-weight:400;margin:0;line-height:.95;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:clamp(3.4rem,9.5vw,8.6rem)}
+h2{font-size:clamp(2.6rem,6vw,5.4rem)}
+h1 em,h2 em{font-style:italic;color:var(--strand)}
+h2 .c{color:var(--charge);font-style:italic}
+h2 .h{color:var(--hfip);font-style:italic}
+h2 .w{color:var(--hilic);font-style:italic}
+p{margin:0;max-width:46ch;color:#c9ccd8;font-size:1.02rem}
+p b{color:var(--ink);font-weight:500}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.small{font-size:.9rem;color:#a3a8ba}
+.sub{font-family:var(--display);font-size:clamp(1.4rem,2.6vw,2.1rem);line-height:1.2;max-width:30ch;color:var(--ink)}
+.cue{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:12px}
+.cue i{display:block;width:1px;height:46px;background:linear-gradient(var(--ink),transparent);animation:cue 2.2s ease-in-out infinite;transform-origin:top}
+@keyframes cue{0%{transform:scaleY(0)}50%{transform:scaleY(1)}100%{transform:scaleY(1);opacity:0}}
+
+/* panels & widgets */
+.panel{align-content:start;grid-auto-rows:max-content;background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--hair);border-radius:14px;padding:16px;display:grid;gap:12px}
+.notes{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.notes li{display:grid;grid-template-columns:2.2rem 1fr;gap:4px 12px;padding:12px 0;border-top:1px solid var(--hair)}
+.notes li:first-child{border-top:0}
+.notes .n{font-family:var(--display);font-size:1.8rem;line-height:1;color:var(--dim);grid-row:span 2}
+.notes .t{font-weight:500;color:var(--ink)}
+.notes .q{color:#c9ccd8;font-size:.95rem}
+.notes .id{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.06em}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.chip{background:transparent;border:1px solid var(--hair);color:var(--ink);font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:6px 11px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--void);border-color:var(--ink)}
+.chip:hover{border-color:var(--ink)}
+.rungs{display:flex;gap:6px;flex-wrap:wrap}
+.rung{font-family:var(--mono);font-size:11px;padding:6px 9px;border-radius:8px;border:1px solid var(--hair);background:transparent;color:var(--charge);cursor:pointer;font-variant-numeric:tabular-nums;text-align:left;line-height:1.25}
+.rung span{display:block;color:var(--dim);font-size:10.5px}
+.rung[aria-pressed=true]{border-color:var(--charge);background:rgba(207,162,74,.12)}
+.rung.pos{color:var(--pos)}
+.rung.pos[aria-pressed=true]{border-color:var(--pos);background:rgba(210,122,141,.12)}
+.calcline{font-family:var(--mono);font-size:12.5px;color:#c9ccd8;font-variant-numeric:tabular-nums;line-height:1.7}
+.calcline b{color:var(--ink);font-weight:500}
+.big{font-family:var(--display);font-size:clamp(2.6rem,5vw,3.6rem);line-height:1;color:var(--ink)}
+.big small{font-family:var(--mono);font-size:12px;color:var(--dim);margin-left:6px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+th,td{padding:6px 8px;text-align:left;border-bottom:1px solid var(--hair);vertical-align:top}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:400}
+td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:5.5rem 1fr 4.6rem;gap:10px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.bar .tr{height:10px;border-radius:5px;background:rgba(236,237,243,.07);overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:5px;transition:width .2s}
+.bar .v{text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.qv{display:flex;align-items:baseline;gap:10px}
+.qv .big{color:var(--hfip)}
+.grid24{display:grid;grid-template-columns:auto repeat(3,1fr);gap:3px;font-family:var(--mono);font-size:11.5px}
+.grid24 .hd{color:var(--dim);padding:4px 6px;letter-spacing:.04em}
+.grid24 button{border:1px solid var(--hair);background:rgba(236,237,243,.03);color:var(--dim);border-radius:6px;padding:5px 6px;font:inherit;cursor:pointer;text-align:right;font-variant-numeric:tabular-nums;min-height:28px}
+.grid24 button.top{color:var(--ink);border-color:transparent}
+.grid24 button[aria-pressed=true]{outline:2px solid var(--ink);outline-offset:1px}
+.grid24 button.flag{border-style:dashed;border-color:var(--pos)}
+.detail{font-size:.95rem;color:#c9ccd8;min-height:2.8em}
+.detail b{color:var(--ink);font-weight:500}
+.eqn{font-family:var(--mono);font-size:12.5px;color:var(--ink);border-left:2px solid var(--strand);padding:4px 0 4px 12px}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.05em;text-transform:uppercase}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:0}
+.tag-ok{color:var(--strand)}
+.nw{white-space:nowrap}
+.tag-bad{color:var(--pos)}
+
+/* chromatogram */
+#chrom{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 56px);height:150px;width:100%;z-index:6;pointer-events:none;opacity:0}
+
+/* 3D labels */
+#tags{position:fixed;inset:0;z-index:4;pointer-events:none}
+.tag{position:absolute;left:0;top:0;font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:var(--ink);white-space:nowrap;transform:translate(-50%,-140%);opacity:0;text-shadow:0 0 6px #000}
+.tag i{font-style:normal;color:var(--dim)}
+.tag.side{font-size:11px}
+
+/* normal flow end section */
+.end{position:relative;z-index:8;background:linear-gradient(180deg,transparent,var(--void) 18vh);padding:18vh max(20px,6vw) 130px}
+.end-in{max-width:72rem;margin:0 auto;display:grid;gap:40px}
+.end h2{font-size:clamp(2.4rem,5vw,4.2rem)}
+.compare th{white-space:nowrap}
+.compare td{min-width:9rem;color:#c9ccd8}
+.compare td:first-child{color:var(--ink);font-weight:500;min-width:11rem}
+.refs{display:grid;gap:10px;padding-left:20px;margin:0;color:#c9ccd8;font-size:.92rem}
+.refs i{color:var(--ink)}
+footer{font-size:.85rem;color:var(--dim);border-top:1px solid var(--hair);padding-top:24px;display:grid;gap:8px}
+footer a,.end a{color:var(--strand)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));gap:28px}
+.cols h3{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);font-weight:400;margin:0 0 8px}
+
+@media (max-width:720px){
+  .rail{display:none}
+  .hud-tl .s2{display:none}
+  .hud-bl{bottom:calc(env(safe-area-inset-bottom,0px) + 68px);font-size:10px;max-width:none;right:16px}
+  .hud-br{left:16px;right:16px}
+  .ctl{justify-content:space-between}
+  .ctl .lbl{display:none}
+  .stick{padding-block:max(70px,10vh) 104px}
+  .stick.scrim::before{background:linear-gradient(180deg,rgba(6,7,12,.55) 0%,rgba(6,7,12,.1) 30%,rgba(6,7,12,.55) 55%,rgba(6,7,12,.9) 100%)}
+  .beat{align-self:end!important;justify-self:stretch!important;max-width:none}
+  .beat.top{align-self:start!important}
+  .beat .panel{max-height:calc(100svh - 300px);overflow:auto;padding:12px;gap:10px}
+  .notes li{padding:8px 0}
+  th,td{padding:5px 6px}
+  .beat .eyebrow{background:rgba(6,7,12,.75);padding:4px 8px;border-radius:6px;justify-self:start;max-width:100%}
+  .gate-in{max-width:100%}
+  .gate-btns{flex-wrap:wrap;justify-content:center}
+  .gate .ladder{font-size:11px;line-height:1.7}
+  .gate .eyebrow{font-size:10.5px;letter-spacing:.14em}
+  #chrom{height:104px;bottom:calc(env(safe-area-inset-bottom,0px) + 112px)}
+  .hide-m{display:none!important}
+  .beat.top:not(:has(.panel)){background:rgba(6,7,12,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:14px;border-radius:14px;margin-inline:-6px}
+  .panel table{font-size:.8rem}
+  .panel td.num,.panel th.num{white-space:nowrap}
+  p{font-size:.97rem}
+}
+@media (max-height:820px) and (min-width:721px){.notes li{padding:7px 0}.beat{gap:12px}h2{font-size:clamp(2.4rem,5vw,4.4rem)}}
+@media (max-height:520px) and (min-width:560px){
+  .stick{padding-block:54px 64px}
+  .beat,.beat.top{align-self:start!important;max-width:min(30rem,58vw)}
+  .beat .panel{max-height:calc(100svh - 160px);overflow:auto}
+  .hud-bl,.rail,.ctl .lbl{display:none}
+  h1{font-size:clamp(2.8rem,8vw,4.2rem)}h2{font-size:clamp(2rem,5vw,2.8rem)}
+  .sub{font-size:1.15rem}p{font-size:.9rem}.beat{gap:10px}
+  #chrom{height:76px;bottom:calc(env(safe-area-inset-bottom,0px) + 50px)}
+  .gate h1{font-size:3rem}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="locked">
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+<canvas id="chrom" aria-hidden="true"></canvas>
+<div id="tags" aria-hidden="true"></div>
+<div class="demo-bar" id="demoBar"></div>
+
+<div class="gate" id="gate" role="dialog" aria-label="Start">
+  <div class="gate-in">
+    <span class="eyebrow">LCMS-2050 · four application notes</span>
+    <h1>Strand by <em>strand</em></h1>
+    <div class="ladder" id="gateL" aria-live="polite">&nbsp;</div>
+    <div class="gate-bar"><i id="gateBar"></i></div>
+    <div class="gate-btns ctl" id="gateBtns">
+      <button class="demo" id="enterD"><svg viewBox="0 0 12 12"><path d="M2 1v10l9-5z"/></svg>Play demo <span class="gmin" id="gateMin"></span></button>
+      <button id="enterQ">Explore at my pace</button>
+    </div>
+  </div>
+</div>
+
+<div class="hud hud-tl"><b>Strand by Strand</b><span class="s2">Unofficial companion · Shimadzu LCMS-2050</span></div>
+<div class="hud hud-tr"><span class="idx" id="hIdx">00</span><span id="hName">Strand</span></div>
+<div class="hud hud-bl" id="hRead"><i>LCMS-2050</i> · single quadrupole · DUIS ion source</div>
+<div class="hud hud-br">
+  <div class="ctl">
+    <button id="bTop" aria-label="Back to start"><svg viewBox="0 0 12 12"><path d="M6 1 1 7h3v4h4V7h3z"/></svg><span class="lbl">Start</span></button>
+    <button id="bSpeed" aria-label="Demo speed" title="Demo speed" hidden>1×</button>
+    <button class="demo" id="bDemo" aria-pressed="false"><svg id="bDemoIco" viewBox="0 0 12 12"><path d="M2 1v10l9-5z"/></svg><span id="bDemoL">Play demo</span></button>
+    <button id="bEnd" aria-label="Jump to comparison"><svg viewBox="0 0 12 12"><path d="M6 11 1 5h3V1h4v4h3z"/></svg><span class="lbl">Compare</span></button>
+  </div>
+</div>
+<div class="rail" aria-hidden="true"><i id="rail"></i></div>
+
+<main>
+<!-- 00 -->
+<section class="ch" id="c0" style="height:170vh" data-name="Strand" data-read="<i>LCMS-2050</i> · single quadrupole · DUIS ion source">
+  <div class="stick scrim">
+    <div class="beat" data-a="0" data-b="1">
+      <span class="eyebrow">Four Shimadzu application notes</span>
+      <h1>Strand by <em>strand</em></h1>
+      <p class="sub">How a single quadrupole mass spectrometer confirms what a synthetic oligonucleotide is: by its charges, its mass, and where it elutes.</p>
+      <span class="cue"><i></i>Scroll, or press D for a guided demo</span>
+    </div>
+  </div>
+</section>
+
+<!-- 01 -->
+<section class="ch" id="c1" style="height:190vh" data-name="Four notes" data-read="Antisense 20-mer · sequence from note 01-00766">
+  <div class="stick scrim">
+    <div class="beat top" data-a=".04" data-b=".95">
+      <span class="eyebrow">01 · The questions</span>
+      <h2>One instrument,<br><em>four</em> questions.</h2>
+      <div class="panel">
+        <ol class="notes">
+          <li><span class="n">i</span><span class="t">Clean spectra under ion pairing</span><span class="q">Can source settings strip HFIP adducts from the charge states? <span class="id">SSI 02-SSI-LCMS-173 · Nov 2024</span></span></li>
+          <li><span class="n">ii</span><span class="t">Method development, ion-pair RP</span><span class="q">How quickly can a 20-mer be separated from five related impurities? <span class="id">01-00766-EN · Sep 2024</span></span></li>
+          <li><span class="n">iii</span><span class="t">siRNA without ion pairs</span><span class="q">Can both strands of a duplex be confirmed with no ion-pair reagent? <span class="id">01-01180-EN · May 2026</span></span></li>
+          <li><span class="n">iv</span><span class="t">HILIC for impurities</span><span class="q">Can HILIC replace ion pairing for impurity analysis? <span class="id">01-01238-EN · Jul 2026</span></span></li>
+        </ol>
+      </div>
+      <p class="small hide-m">The strand on screen is the 20-mer full-length product from note 01-00766, one sphere per nucleotide. Its geometry is illustrative.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 -->
+<section class="ch" id="c2" style="height:260vh" data-name="Charges" data-read="ESI/APCI (DUIS) · one molecule, many <i>m/z</i>">
+  <div class="stick scrim">
+    <div class="beat top" data-a=".03" data-b=".42">
+      <span class="eyebrow">02 · Many charges</span>
+      <h2>Every linkage<br>is a <span class="c">charge</span>.</h2>
+      <p>Oligonucleotides carry a phosphate (or phosphorothioate) linkage between neighbouring nucleotides, so they are usually detected as negative ions. One molecule picks up several charges at once and appears at a whole ladder of <i>m/z</i> values.</p>
+    </div>
+    <div class="beat" data-a=".44" data-b=".98">
+      <span class="eyebrow">Charge ladder · published peaks</span>
+      <div class="panel" id="ladder">
+        <div class="seg" role="group" aria-label="Spectrum" id="ladSet"></div>
+        <div class="rungs" id="ladRungs" role="group" aria-label="Charge state"></div>
+        <div class="calcline" id="ladCalc"></div>
+        <div class="big"><span id="ladM">0</span><small>Da from this rung</small></div>
+        <p class="small" id="ladNote"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section class="ch" id="c3" style="height:340vh" data-name="Adducts" data-read="Qarray <i id='hQ'>−10 V</i> · HFIP 95 mM · TEA 4.3 mM">
+  <div class="stick scrim">
+    <div class="beat top" data-a=".02" data-b=".3">
+      <span class="eyebrow">03 · Ion pairing · SSI note</span>
+      <h2>Shake off<br>the <span class="h">HFIP</span>.</h2>
+      <p>Ion-pair LC puts HFIP and triethylamine in the mobile phase (here 95 mM HFIP and 4.3 mM TEA). Some HFIP reaches the mass spectrometer still attached, so each charge state splits into [M]<sup>z−</sup>, [M+HFIP]<sup>z−</sup> and [M+2HFIP]<sup>z−</sup>. That clutter makes deconvolution harder.</p>
+    </div>
+    <div class="beat" data-a=".32" data-b=".68">
+      <span class="eyebrow">Scroll to sweep the Qarray voltage</span>
+      <div class="panel">
+        <div class="qv"><span class="big" id="qV">−10 V</span><span class="small">Qarray</span></div>
+        <div class="seg" role="group" aria-label="Oligomer" id="qLen"></div>
+        <div class="bars">
+          <div class="bar"><span>M</span><span class="tr"><i id="qBM" style="background:var(--strand)"></i></span><span class="v" id="qVM"></span></div>
+          <div class="bar"><span>M+HFIP</span><span class="tr"><i id="qBH" style="background:var(--hfip)"></i></span><span class="v" id="qVH"></span></div>
+        </div>
+        <p class="small" id="qNote"></p>
+      </div>
+      <p>Of the seven source settings, Qarray voltage had the most substantial effect on signal and adducts. At the default −20 V and below, adducts were high and total signal low. Signal rose up to about −40 V for the 15-mer and about −60 V for the 30- and 60-mer, then fell past −70 V. <b>−40 V</b> was chosen.</p>
+    </div>
+    <div class="beat" data-a=".7" data-b=".99">
+      <span class="eyebrow">Optimized source · and what it gave</span>
+      <div class="panel">
+        <div class="tw"><table>
+          <thead><tr><th>Setting</th><th class="num">Range tested</th><th class="num">Chosen</th></tr></thead>
+          <tbody>
+            <tr><td>Qarray voltage</td><td class="num">−10 to −90 V</td><td class="num">−40 V</td></tr>
+            <tr><td>Interface voltage</td><td class="num">−1 to −4 kV</td><td class="num">−3 kV</td></tr>
+            <tr><td>Desolvation line temp.</td><td class="num">150–250 °C</td><td class="num">250 °C</td></tr>
+            <tr><td>Desolvation temp.</td><td class="num">350–500 °C</td><td class="num">500 °C</td></tr>
+            <tr><td>Nebulizing gas</td><td class="num">0.5–3 L/min</td><td class="num">2 L/min</td></tr>
+            <tr><td>Drying gas</td><td class="num">3–5 L/min</td><td class="num">5 L/min</td></tr>
+            <tr><td>Heating gas</td><td class="num">3–7 L/min</td><td class="num">7 L/min</td></tr>
+          </tbody></table></div>
+        <div class="tw"><table>
+          <thead><tr><th>DNA</th><th class="num">Theoretical</th><th class="num">Observed</th><th class="num">Error</th></tr></thead>
+          <tbody>
+            <tr><td>15-mer</td><td class="num">4528.8</td><td class="num">4528.3</td><td class="num">0.5 Da</td></tr>
+            <tr><td>30-mer</td><td class="num">9111.6</td><td class="num">9110.9</td><td class="num">0.7 Da</td></tr>
+            <tr><td>60-mer</td><td class="num">18292.2</td><td class="num">18290.4</td><td class="num">1.8 Da</td></tr>
+          </tbody></table></div>
+        <p class="small">Most abundant masses after deconvolution in Insight Biologics. Hotter desolvation also cut adducts; drying gas mattered little.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 -->
+<section class="ch" id="c4" style="height:300vh" data-name="Lookalikes" data-read="Screen · <i>2 HFIP × 4 TEA × 3 organic</i> = 24 runs">
+  <div class="stick scrim">
+    <div class="beat top" data-a=".02" data-b=".34">
+      <span class="eyebrow">04 · Method development · 01-00766</span>
+      <h2>Six strands<br>that <em>look alike</em>.</h2>
+      <p>The sample mixes a 20-mer full-length product (FLP) with five impurities: two 19-mers each missing one end nucleotide (one at the 3′ end, one at the 5′ end), an n-3 17-mer, an n+1 21-mer, and "PO", the FLP with one phosphorothioate at the 5′ end turned into a phosphate diester. Their UV spectra are almost identical (similarity 0.99 or higher).</p>
+    </div>
+    <div class="beat" data-a=".36" data-b=".99">
+      <span class="eyebrow">Initial screen · tap a cell</span>
+      <div class="panel">
+        <div class="grid24" id="grid"></div>
+        <div class="detail" id="gridD"></div>
+        <div class="eqn">Evaluation value = P × (Rs<sub>1</sub> + Rs<sub>2</sub> + … + Rs<sub>P−1</sub>)</div>
+        <p class="small">P is the number of peaks found and Rs the resolution between neighbours. LabSolutions MD ranks every run by this value; only the published top 10 carry a number here. Dashed cells showed baseline fluctuation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 -->
+<section class="ch" id="c5" style="height:380vh" data-name="Optimum" data-read="ACN <i>54%</i> · oven <i>65 °C</i> · initial <i>8%</i> B">
+  <div class="stick scrim">
+    <div class="beat top" data-a=".02" data-b=".36">
+      <span class="eyebrow">05 · Optimization · 01-00766</span>
+      <h2>Chasing<br>the last <em>0.44</em>.</h2>
+      <p>Starting from the best screen (100 mM HFIP, 10 mM TEA), three more settings were varied: acetonitrile share of the organic solvent (40, 50, 60%), oven temperature (55, 60, 65 °C) and initial gradient concentration (6, 7, 8%). Resolution generally improved as each went up, though the design spaces showed the best acetonitrile share depended on the pair.</p>
+      <p>Overlaid design spaces then found the point that maximizes the hardest pair, n-1(5′)/n-1(3′), while keeping n-1(3′)/PO above Rs 0.7 and the last peak before 16 min: <b>ACN 54% / MeOH 46%, 65 °C, initial 8%</b>.</p>
+    </div>
+    <div class="beat top right" data-a=".38" data-b=".7">
+      <span class="eyebrow">At the optimum · Fig. 13</span>
+      <div class="panel">
+        <div class="tw"><table>
+          <thead><tr><th>Pair</th><th class="num">Rs</th><th>Criterion</th></tr></thead>
+          <tbody>
+            <tr><td class="nw">n-3 / n-1(5′)</td><td class="num">7.4</td><td></td></tr>
+            <tr><td class="nw">n-1(5′) / n-1(3′)</td><td class="num">0.44</td><td>maximized</td></tr>
+            <tr><td class="nw">n-1(3′) / PO</td><td class="num">0.81</td><td class="tag-ok">&gt; 0.7 ✓</td></tr>
+            <tr><td>PO / FLP</td><td class="num">1.4</td><td></td></tr>
+            <tr><td>FLP / n+1</td><td class="num">3.5</td><td class="nw">n+1 &lt; 16 min ✓</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+    <div class="beat top" data-a=".72" data-b=".99">
+      <span class="eyebrow">Tracking peaks by mass</span>
+      <div class="panel">
+        <div class="tw"><table>
+          <thead><tr><th>Peak</th><th class="num">Length</th><th class="num">Estimated MW</th><th class="num">Theoretical</th></tr></thead>
+          <tbody>
+            <tr><td class="nw">n-3</td><td class="num">17</td><td class="num">5985</td><td class="num">5986</td></tr>
+            <tr><td class="nw">n-1(5′)</td><td class="num">19</td><td class="num">6772</td><td class="num">6774</td></tr>
+            <tr><td class="nw">n-1(3′)</td><td class="num">19</td><td class="num">6773</td><td class="num">6775</td></tr>
+            <tr><td>PO</td><td class="num">20</td><td class="num">7151</td><td class="num">7152</td></tr>
+            <tr><td>FLP</td><td class="num">20</td><td class="num">7167</td><td class="num">7168</td></tr>
+            <tr><td class="nw">n+1</td><td class="num">21</td><td class="num">7561</td><td class="num">7563</td></tr>
+          </tbody></table></div>
+        <p class="small">Retention times shift whenever a setting changes, and the UV spectra are too similar to track peaks by, so LabSolutions MD tracked them through all runs by molecular weight from the LCMS-2050. The two n-1 strands differ by only 1 Da; the note attributes their poor separation to their very similar structure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 -->
+<section class="ch" id="c6" style="height:300vh" data-name="Unzipped" data-read="DUIS <i>positive</i> · 10 mM NH<sub>4</sub>HCO<sub>3</sub> / methanol · no ion pair">
+  <div class="stick scrim">
+    <div class="beat top" data-a=".02" data-b=".4">
+      <span class="eyebrow">06 · siRNA without ion pairs · 01-01180</span>
+      <h2>A duplex<br>comes <em>apart</em>.</h2>
+      <p>Ion-pair reagents such as hexylamine or triethylamine raise concerns that instrument contamination may affect other analyses. This note drops them: a C18 column (Shim-pack Scepter Claris C18-300) with 10 mM ammonium bicarbonate in water and a methanol gradient.</p>
+      <p>The sample is a double-stranded siRNA based on the patisiran sequence, two 21-nt strands.</p>
+    </div>
+    <div class="beat top" data-a=".42" data-b=".99">
+      <span class="eyebrow">What came off the column</span>
+      <div class="panel">
+        <p>At both 25 °C and 60 °C the UV trace showed <b>two peaks</b>, not one, so the duplex had dissociated into single strands. Insight Biologics identified them as the sense and antisense strands, each within 1 Da of its theoretical mass.</p>
+        <div class="tw"><table>
+          <thead><tr><th>Sense strand, 60 °C</th><th class="num">m/z</th></tr></thead>
+          <tbody>
+            <tr><td>[M+4H]<sup>4+</sup></td><td class="num">1691.85</td></tr>
+            <tr><td>[M+5H]<sup>5+</sup></td><td class="num">1353.81</td></tr>
+            <tr><td>[M+6H]<sup>6+</sup></td><td class="num">1128.25</td></tr>
+            <tr><td>Deconvoluted mass</td><td class="num">6763.75</td></tr>
+          </tbody></table></div>
+        <p class="small">Detected in positive mode with charges 4+ to 6+, which shows the mass can be confirmed without an ion-pair reagent. The two strands are drawn here as separating for illustration.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 -->
+<section class="ch" id="c7" style="height:340vh" data-name="HILIC" data-read="HILICpak VN-50 2D · 100 mM NH<sub>4</sub>OAc · DUIS <i>negative</i>">
+  <div class="stick scrim">
+    <div class="beat top" data-a=".02" data-b=".36">
+      <span class="eyebrow">07 · HILIC · 01-01238</span>
+      <h2>A <span class="w">water</span> layer<br>instead.</h2>
+      <p>Hydrophilic interaction chromatography needs no ion-pair reagent. On a Shodex HILICpak VN-50 2D column, with 100 mmol/L ammonium acetate mixed 30:70 into water (A) or acetonitrile (B) and a gradient from 92% B downward, a mipomersen-based 20-mer and its n-1(5′) and n-3(5′) variants eluted at <b>8.432, 8.956 and 9.300 min</b>: shortest strand first.</p>
+    </div>
+    <div class="beat top" data-a=".38" data-b=".7">
+      <span class="eyebrow">Quantities from mixed peaks</span>
+      <div class="panel">
+        <p>When peaks overlap, Insight Biologics splits the UV area by each component's share of the MS signal:</p>
+        <div class="eqn">component area = UV peak area × MS area of component ÷ sum of MS areas in that peak</div>
+        <div class="tw"><table>
+          <thead><tr><th>Check</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>FLP 1–20 µmol/L</td><td>r² ≥ 0.999</td></tr>
+            <tr><td><span class="nw">n-1(5′)</span>, <span class="nw">n-3(5′)</span> at 2–50% of a 10 µmol/L FLP</td><td>all detected and identified</td></tr>
+            <tr><td class="nw">n-3(5′) linearity</td><td class="mono">y = 15705x + 2102.7, r² 0.9995</td></tr>
+            <tr><td class="nw">n-1(5′) linearity</td><td class="mono">y = 15484x + 53054, r² 0.9996</td></tr>
+            <tr><td>Mass errors (FLP and variants)</td><td>within 0.3 Da</td></tr>
+          </tbody></table></div>
+      </div>
+    </div>
+    <div class="beat top" data-a=".72" data-b=".99">
+      <span class="eyebrow">The trade-offs</span>
+      <div class="panel">
+        <p><b>Sensitivity:</b> MS signal was about one-fifth to one-tenth of that in ion-pair reversed phase, so low concentrations remain a challenge.</p>
+        <p><b>Buffer:</b> ammonium bicarbonate (pH 8) also worked, but retention times shortened over consecutive runs as dissolved CO₂ from the air changed the mobile phase, and MS signal was about half that with ammonium acetate. Ammonia at pH 10 gave no gain. Ammonium acetate was preferred.</p>
+        <p><b>Upside:</b> with no ion-pair reagent, the system need not be dedicated to this one analysis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<section class="end" id="compare">
+  <div class="end-in">
+    <div style="display:grid;gap:14px">
+      <span class="eyebrow">08 · Side by side</span>
+      <h2>Four routes to the <em>same</em> answer.</h2>
+      <p>All four used the LCMS-2050 with its DUIS (ESI/APCI) source on a Nexera UHPLC. What changed was how the strands were separated and what reached the ion source.</p>
+    </div>
+    <div class="tw"><table class="compare">
+      <thead><tr><th>Note</th><th>Separation</th><th>Mobile phase</th><th>Column</th><th>MS</th><th>Sample</th><th>Main result</th></tr></thead>
+      <tbody>
+        <tr><td>SSI 02-SSI-LCMS-173<br><span class="small">Ion-source optimization</span></td><td>Ion-pair RP, 50 °C</td><td>95 mM HFIP + 4.3 mM TEA; B in 50% MeOH</td><td>Shim-pack Scepter Claris C18-120, 150 × 2.1 mm, 1.9 µm</td><td>Negative, m/z 550–2000</td><td>DNA 15-, 30-, 60-mer</td><td>Qarray −40 V and hotter desolvation removed HFIP adducts; masses within 0.5–1.8 Da</td></tr>
+        <tr><td>01-00766-EN<br><span class="small">Method development</span></td><td>Ion-pair RP, LabSolutions MD screening</td><td>HFIP 100/200 mM + TEA 5–20 mM; ACN/MeOH blends</td><td>Shim-pack Scepter Claris, 100 × 2.1 mm, 3 µm</td><td>Negative, m/z 500–2000</td><td>Antisense 20-mer + 5 impurities</td><td>Optimum ACN 54%, 65 °C, initial 8%; peaks tracked by MW</td></tr>
+        <tr><td>01-01180-EN<br><span class="small">siRNA, ion-pair-free</span></td><td>RP, no ion pair, 25 or 60 °C</td><td>10 mM ammonium bicarbonate / methanol</td><td>Shim-pack Scepter Claris C18-300, 50 × 2.1 mm, 1.9 µm</td><td>Positive, m/z 800–2000</td><td>Patisiran-based siRNA duplex</td><td>Strands eluted separately; each within 1 Da</td></tr>
+        <tr><td>01-01238-EN<br><span class="small">HILIC</span></td><td>HILIC, 60 °C</td><td>100 mM ammonium acetate, 30:70 with water (A) or ACN (B)</td><td>Shodex HILICpak VN-50 2D</td><td>Negative, m/z 650–2000</td><td>Mipomersen-based 20-mer + n-1(5′), n-3(5′)</td><td>Impurities 2–50% identified, linear r² ≥ 0.999; ~1/5–1/10 of RP-IP MS signal</td></tr>
+      </tbody></table></div>
+
+    <div class="cols">
+      <div>
+        <h3>Sources</h3>
+        <ol class="refs">
+          <li>Jayasundara U., Johnson V. <i>Improving Oligonucleotide Analysis: Enhancing Mass Spectra Quality with LCMS-2050 Ion-Source Optimization.</i> Shimadzu Scientific Instruments, 02-SSI-LCMS-173, Nov 2024.</li>
+          <li>Fujisaki S., Suzuki R. <i>Efficient Method Development of Oligonucleotides by Reversed-Phase Ion-Pair Chromatography.</i> Shimadzu Application News 01-00766-EN, Sep 2024.</li>
+          <li>Nakazono J. <i>Ion-Pair-Free Reversed-Phase LC/MS Analysis of siRNA Using a Single Quadrupole Mass Spectrometer.</i> Shimadzu Application News 01-01180-EN, May 2026.</li>
+          <li>Hayakawa M., Kato N., Uchiyama K. <i>Analysis of Oligonucleotides Using a Single Quadrupole Mass Spectrometer with Hydrophilic Interaction Chromatography (HILIC).</i> Shimadzu Application News 01-01238-EN, Jul 2026.</li>
+        </ol>
+      </div>
+      <div>
+        <h3>What is drawn, and what is data</h3>
+        <p class="small">Tables, masses, m/z values, conditions and equations are copied from the notes. Chromatograms at the bottom of the screen are redrawn: peak positions and heights are read from the published figures and are approximate. Qarray bar values are read from Fig. 1 of the SSI note and are approximate. The 3D strands, adducts, duplex and columns are illustrations, not structures.</p>
+        <p class="small">"Daltons from this rung" in the charge ladder is simple arithmetic, |z| × m/z ± |z| × 1.00728; the deconvoluted masses are the software's published results.</p>
+      </div>
+    </div>
+    <footer>
+      <span>An independent, unofficial companion to four Shimadzu application notes. Not affiliated with, sponsored or endorsed by Shimadzu Corporation. LabSolutions, LabSolutions Insight, Nexera, Shim-pack Scepter, DUIS and Qarray are trademarks of Shimadzu Corporation or its affiliated companies; Shodex and HILICpak belong to their respective owner. For research use only.</span>
+      <span>Companion sites: <a href="https://kogason2010.github.io/nexera-uc-epsa/">nexera-uc-epsa</a> · <a href="https://kogason2010.github.io/nexera-ic/">nexera-ic</a> · <a href="https://kogason2010.github.io/nexera-ic-applications/">nexera-ic-applications</a></span>
+    </footer>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+(()=>{
+/* ---------- helpers ---------- */
+const $=id=>document.getElementById(id);
+const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const sstep=(a,b,x)=>{const t=clamp((x-a)/(b-a));return t*t*(3-2*t)};
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarse=matchMedia('(pointer:coarse)').matches;
+const narrow=()=>innerWidth<=720;
+const fmt=(x,d=2)=>x.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const PROTON=1.00728;
+
+/* ---------- data (from the four notes) ---------- */
+// FLP of 01-00766, 5'→3' bases (modifications omitted for drawing)
+const FLP_SEQ='TCTTGGTTACATGAAATCCC';
+const BASECOL={A:0x6a94cc,C:0xcfb27a,G:0x72b596,T:0xc48896,U:0xc48896};
+// Published charge ladders
+const LADDERS=[
+ {id:'n3',name:'n-3(5′) · HILIC',sign:-1,M:5970.15,src:'01-01238 Fig. 2',ions:[[3,1989.00],[4,1491.43],[5,1193.39],[6,994.00],[7,852.19]]},
+ {id:'n1',name:'n-1(5′) · HILIC',sign:-1,M:6756.80,src:'01-01238 Fig. 3',ions:[[4,1688.36],[5,1350.33],[7,964.29],[8,843.86],[9,749.94]]},
+ {id:'si',name:'siRNA sense · +',sign:1,M:6763.75,src:'01-01180 Fig. 5',ions:[[4,1691.85],[5,1353.81],[6,1128.25]]}];
+// SSI Fig. 1, read from the bar chart (approximate)
+const QV=[-10,-20,-30,-40,-50,-60,-70,-80,-90];
+const QDATA={
+ '15-mer':{z:6,exp:7,M:[.19,.75,2.72,4.00,3.72,3.63,3.15,1.27,.08],H:[1.06,1.88,1.06,.33,.30,.28,.21,.08,.01]},
+ '30-mer':{z:10,exp:6,M:[.55,2.32,6.93,7.50,7.57,7.69,7.65,6.47,2.10],H:[1.92,3.27,2.08,.90,.85,.76,.62,.28,.22]},
+ '60-mer':{z:10,exp:6,M:[.12,1.12,4.53,8.10,8.45,8.45,7.25,5.06,1.05],H:[3.00,4.87,3.33,1.43,1.03,1.12,.75,.58,.30]}};
+// 01-00766 Fig. 3 top 10 (HFIP mM, TEA mM, ACN % of organic, value)
+const TOP10=[[100,10,50,54.074],[100,15,50,53.77],[100,5,50,52.477],[100,20,50,51.919],[200,20,50,47.016],[200,15,50,46.926],[200,10,50,46.836],[200,5,50,45.719],[100,10,100,38.822],[200,10,100,37.732]];
+// 01-00766 Fig. 13 (positions/heights read from the figure, approximate)
+const OPT=[['n-3',17,11.15,15],['n-1(5′)',19,13.35,20],['n-1(3′)',19,13.48,17],['PO',20,13.78,21],['FLP',20,14.17,183],['n+1',21,15.02,16]];
+// 01-01180 Fig. 3 UV (approximate)
+const SIR={t60:[1.50,1.88],h60:[1,1.02],t25:[2.33,2.73],h25:[.6,.72]};
+// 01-01238 Table: RTs exact; heights read from Fig. 1 (approximate)
+const HIL=[['n-3(5′)',17,8.432,.52],['n-1(5′)',19,8.956,.63],['FLP',20,9.300,1]];
+
+/* ---------- sections ---------- */
+const secs=[...document.querySelectorAll('.ch')];
+const N=secs.length;
+let tops=[],hs=[],vh=innerHeight,W=innerWidth,H=innerHeight;
+function measure(){vh=innerHeight;W=innerWidth;H=innerHeight;tops=secs.map(s=>s.offsetTop);hs=secs.map(s=>s.offsetHeight)}
+function stateAt(y){let i=0;for(let j=0;j<N;j++)if(y>=tops[j]-1)i=j;return{i,lp:clamp((y-tops[i])/Math.max(1,hs[i]-vh))}}
+const beats=secs.map(s=>[...s.querySelectorAll('.beat')].map(b=>({el:b,a:+b.dataset.a,b:+b.dataset.b})));
+
+/* ---------- charge ladder widget ---------- */
+let lad=LADDERS[0],ladZ=lad.ions[1][0];
+LADDERS.forEach(L=>{const b=document.createElement('button');b.className='chip';b.textContent=L.name;b.dataset.id=L.id;
+ b.onclick=()=>{lad=L;ladZ=L.ions[Math.min(1,L.ions.length-1)][0];renderLad()};$('ladSet').appendChild(b)});
+function renderLad(){
+ [...$('ladSet').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.id===lad.id));
+ const r=$('ladRungs');r.innerHTML='';
+ lad.ions.forEach(([z,mz])=>{const b=document.createElement('button');b.className='rung'+(lad.sign>0?' pos':'');
+  b.setAttribute('aria-pressed',z===ladZ);b.innerHTML=`${z}${lad.sign>0?'+':'−'}<span>${fmt(mz)}</span>`;
+  b.onclick=()=>{ladZ=z;renderLad()};r.appendChild(b)});
+ const mz=lad.ions.find(i=>i[0]===ladZ)[1];
+ const M=ladZ*mz-lad.sign*ladZ*PROTON;
+ const op=lad.sign<0?'+':'−';
+ $('ladCalc').innerHTML=`M = ${ladZ} × ${fmt(mz)} ${op} ${ladZ} × 1.00728 = <b>${fmt(M)}</b>`;
+ $('ladM').textContent=fmt(M);
+ const spread=lad.ions.map(([z,m])=>z*m-lad.sign*z*PROTON);
+ $('ladNote').innerHTML=`The labelled peaks give ${fmt(Math.min(...spread))}–${fmt(Math.max(...spread))} Da individually. Single-quadrupole data are unit resolution, and Insight Biologics combines every charge state into one deconvoluted mass, <b style="color:var(--ink)">${fmt(lad.M)}</b> (${lad.src}).`;
+ chargeLevel=ladZ/9;
+}
+let chargeLevel=.5;
+renderLad();
+
+/* ---------- Qarray widget ---------- */
+let qLen='30-mer',qIdx=0;
+Object.keys(QDATA).forEach(k=>{const b=document.createElement('button');b.className='chip';b.textContent=k;b.dataset.k=k;b.onclick=()=>{qLen=k;renderQ()};$('qLen').appendChild(b)});
+function renderQ(){
+ [...$('qLen').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.k===qLen));
+ const d=QDATA[qLen],mx=Math.max(...d.M,...d.H);
+ const m=d.M[qIdx],h=d.H[qIdx];
+ $('qV').textContent=`−${-QV[qIdx]} V`;
+ $('qBM').style.width=(m/mx*100)+'%';$('qBH').style.width=(h/mx*100)+'%';
+ $('qVM').textContent=`${m.toFixed(2)}e${d.exp}`;$('qVH').textContent=`${h.toFixed(2)}e${d.exp}`;
+ $('qNote').textContent=`Peak area of the ${d.z}− charge state, ${qLen}. Values read from SSI Fig. 1; approximate.`;
+ const hq=document.getElementById('hQ');if(hq)hq.textContent=`−${-QV[qIdx]} V`;
+}
+renderQ();
+const adductFrac=()=>{const d=QDATA[qLen];return d.H[qIdx]/(d.M[qIdx]+d.H[qIdx])};
+
+/* ---------- screening grid ---------- */
+const COLW=['ACN 0%','ACN 50%','ACN 100%'],ACN=[0,50,100];
+const rowsG=[];[100,200].forEach(h=>[5,10,15,20].forEach(t=>rowsG.push([h,t])));
+const g=$('grid');g.innerHTML='<span class="hd">HFIP / TEA</span>'+COLW.map(c=>`<span class="hd" style="text-align:right">${c}</span>`).join('');
+let gSel=null;
+const top10=(h,t,a)=>TOP10.findIndex(r=>r[0]===h&&r[1]===t&&r[2]===a);
+rowsG.forEach(([h,t])=>{
+ const lab=document.createElement('span');lab.className='hd';lab.textContent=`${h} / ${t} mM`;g.appendChild(lab);
+ ACN.forEach(a=>{const b=document.createElement('button');const k=top10(h,t,a);
+  const flag=h===200&&a===100;
+  if(k>=0){b.className='top';const v=TOP10[k][3];const s=(v-35)/(55-35);b.style.background=`color-mix(in srgb, var(--strand) ${Math.round(18+42*s)}%, #141a24)`;b.textContent=v.toFixed(3)}
+  else{b.textContent='·'}
+  if(flag)b.classList.add('flag');
+  b.setAttribute('aria-label',`${h} mM HFIP, ${t} mM TEA, ACN ${a}% of organic`);
+  b.onclick=()=>{gSel=b;[...g.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',x===b));
+   const org=`ACN ${a}% / MeOH ${100-a}%`;
+   let txt=`<b>${h} mM HFIP, ${t} mM TEA, ${org}.</b> `;
+   txt+=k>=0?`Rank ${k+1} of 24, evaluation value ${TOP10[k][3]}.`:'Not in the published top 10.';
+   if(k===0)txt+=' Best screen: still, n-1(5′) and n-1(3′) were not well separated.';
+   if(flag)txt+=' Baseline fluctuation was seen here (200 mM HFIP with 100% ACN).';
+   $('gridD').innerHTML=txt};
+  g.appendChild(b)})});
+[...g.querySelectorAll('button.top')].find(b=>b.textContent==='54.074').click();
+
+/* ---------- gate ---------- */
+const gateStart=performance.now();let gateDone=false;
+const gateSeq=LADDERS[0].ions.slice().reverse();
+function gateTick(now){
+ const k=reduce?1:clamp((now-gateStart)/1800);const e=ease(k);$('gateBar').style.transform=`scaleX(${e})`;
+ const n=Math.min(gateSeq.length,Math.floor(e*gateSeq.length+.001));
+ $('gateL').innerHTML=gateSeq.slice(0,n).map(([z,m])=>`<b>${z}−</b> ${m.toFixed(2)}`).join(' · ')||'&nbsp;';
+ if(k>=1){$('gateBtns').classList.add('show');return}
+ requestAnimationFrame(gateTick)}
+requestAnimationFrame(gateTick);
+setTimeout(()=>$('gateBtns').classList.add('show'),2600);
+function enter(demo){if(gateDone)return;gateDone=true;$('gate').classList.add('gone');document.body.classList.remove('locked');measure();if(demo)setTimeout(startDemo,500);else $('bDemo').focus({preventScroll:true})}
+$('enterD').onclick=()=>enter(true);$('enterQ').onclick=()=>enter(false);
+
+/* ---------- guided demo, paced by reading time ----------
+   Each text block stays fully on screen long enough to read at ~190 words per minute
+   (plus time per table row and for widgets). Animations get minimum durations, fades are
+   short, and the change from one chapter to the next takes TRANS seconds. */
+const WPS=3.2,FADE=.8,BASE=6,TRANS=1.8;
+const ANIM={3:[[.3,.7,16]],4:[[.38,1,8]],5:[[.36,.68,12]],6:[[.25,.6,6],[.42,.8,8]],7:[[.12,.5,10]]};
+const SPEEDS=[1,1.5,2,.75];let speedI=0;
+function readSec(el){const c=el.cloneNode(true);c.querySelectorAll('table,.grid24,.rungs,.seg,.cue').forEach(x=>x.remove());
+ const w=(c.textContent.match(/\S+/g)||[]).length;return 1.5+w/WPS+el.querySelectorAll('tbody tr').length*.45+(el.querySelector('.grid24,.rungs,.bars')?3:0)}
+let TL=[[0,0]],demo=false,demoT=0;
+function buildTimeline(){measure();TL=[];let t=0;const E=1e-6;
+ for(let i=0;i<N;i++){const span=Math.max(1,hs[i]-vh);
+  const bs=beats[i].map(b=>({a:b.a,b:b.b,v0:b.a===0?0:b.a+.05,v1:b.b>=.95?1:b.b-.05,read:readSec(b.el)}));
+  const P=new Set([0,1]);bs.forEach(b=>[b.a,b.v0,b.v1,b.b].forEach(x=>P.add(clamp(x))));(ANIM[i]||[]).forEach(([a,b])=>{P.add(a);P.add(b)});
+  const pts=[...P].sort((x,y)=>x-y);TL.push([t,tops[i]]);
+  for(let k=0;k<pts.length-1;k++){const x0=pts[k],x1=pts[k+1],L=x1-x0;if(L<E)continue;let d=L*BASE;
+   bs.forEach(b=>{if(x0>=b.v0-E&&x1<=b.v1+E)d=Math.max(d,b.read*L/(b.v1-b.v0));
+    if((x0>=b.a-E&&x1<=b.v0+E&&b.a>0)||(b.b<.95&&x0>=b.v1-E&&x1<=b.b+E))d=Math.max(d,FADE*L/.05)});
+   (ANIM[i]||[]).forEach(([a,b,sec])=>{if(x0>=a-E&&x1<=b+E)d=Math.max(d,sec*L/(b-a))});
+   t+=d;TL.push([t,tops[i]+x1*span])}
+  if(i<N-1){t+=TRANS;TL.push([t,tops[i+1]])}}
+ const m=Math.round(demoTotal()/60);$('gateMin').textContent=`about ${m} min`;}
+const demoTotal=()=>TL[TL.length-1][0];
+function yAtDemo(t){if(t<=0)return TL[0][1];for(let k=1;k<TL.length;k++){if(t<=TL[k][0]){const[t0,y0]=TL[k-1],[t1,y1]=TL[k];return lerp(y0,y1,t1>t0?(t-t0)/(t1-t0):1)}}return TL[TL.length-1][1]}
+function demoAtY(y){for(let k=1;k<TL.length;k++){if(y<=TL[k][1]+.5){const[t0,y0]=TL[k-1],[t1,y1]=TL[k];return y1>y0?lerp(t0,t1,clamp((y-y0)/(y1-y0))):t0}}return demoTotal()}
+function setDemoUI(){$('bDemo').classList.toggle('on',demo);$('bDemo').setAttribute('aria-pressed',demo);$('demoBar').classList.toggle('on',demo);
+ $('bDemoL').textContent=demo?'Pause demo':(demoT>0&&demoT<demoTotal()-.5?'Resume demo':'Play demo');
+ $('bDemoIco').innerHTML=demo?'<path d="M2 1h3v10H2zM7 1h3v10H7z"/>':'<path d="M2 1v10l9-5z"/>';
+ $('bSpeed').textContent=SPEEDS[speedI]+'×';$('bSpeed').hidden=!demo&&!(demoT>0)}
+function startDemo(){buildTimeline();const endY=TL[TL.length-1][1];if(scrollY>=endY-4){scrollTo(0,0);demoT=0}else demoT=demoAtY(scrollY);demo=true;setDemoUI()}
+function pauseDemo(){if(!demo)return;demo=false;setDemoUI()}
+function tickDemo(dt){if(!demo)return;demoT+=dt*SPEEDS[speedI];scrollTo(0,yAtDemo(demoT));$('demoBar').style.width=(clamp(demoT/demoTotal())*100)+'%';
+ if(demoT>=demoTotal()){demo=false;demoT=0;setDemoUI();setTimeout(()=>$('compare').scrollIntoView({behavior:reduce?'auto':'smooth'}),400)}}
+$('bSpeed').onclick=()=>{speedI=(speedI+1)%SPEEDS.length;setDemoUI()};
+$('bDemo').onclick=()=>demo?pauseDemo():startDemo();
+$('bTop').onclick=()=>{pauseDemo();demoT=0;scrollTo({top:0,behavior:reduce?'auto':'smooth'})};
+$('bEnd').onclick=()=>{pauseDemo();$('compare').scrollIntoView({behavior:reduce?'auto':'smooth'})};
+['wheel','touchstart'].forEach(ev=>addEventListener(ev,e=>{if(!(e.target.closest&&e.target.closest('.ctl')))pauseDemo()},{passive:true}));
+addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,button'))if(e.key!=='d'&&e.key!=='D')return;
+ if(e.key==='d'||e.key==='D'){demo?pauseDemo():(gateDone?startDemo():enter(true));return}
+ if(['ArrowDown','ArrowUp','PageDown','PageUp',' ','Home','End'].includes(e.key))pauseDemo()});
+
+/* ---------- chromatogram ---------- */
+const chrom=$('chrom'),cctx=chrom.getContext('2d');
+function sizeChrom(){const d=Math.min(devicePixelRatio||1,2);chrom.width=chrom.clientWidth*d;chrom.height=chrom.clientHeight*d;chrom._d=d}
+sizeChrom();
+function drawChrom(spec,prog,vis){
+ chrom.style.opacity=vis.toFixed(3);if(vis<.01||!spec)return;
+ const d=chrom._d,w=chrom.width,h=chrom.height,ctx=cctx;ctx.clearRect(0,0,w,h);
+ const pl=Math.max(20,W*.06)*d,pr=Math.max(20,W*.06)*d,[t0,t1]=spec.range,X=t=>pl+(t-t0)/(t1-t0)*(w-pl-pr);
+ const base=h-18*d,amp=h-(W<720?54:40)*d;
+ ctx.font=`${11*d}px "IBM Plex Mono", monospace`;
+ ctx.strokeStyle='rgba(236,237,243,.16)';ctx.lineWidth=d;ctx.beginPath();ctx.moveTo(pl,base+.5);ctx.lineTo(w-pr,base+.5);ctx.stroke();
+ ctx.fillStyle='rgba(141,146,166,.9)';ctx.textAlign='center';
+ for(let t=Math.ceil(t0);t<=t1;t+=spec.step){ctx.fillText(String(t),X(t),h-3*d)}
+ ctx.textAlign='right';ctx.fillText(spec.title,w-pr,14*d);
+ const tc=lerp(t0,t1,prog);
+ spec.traces.forEach(tr=>{ctx.strokeStyle=tr.col;ctx.lineWidth=1.5*d;ctx.beginPath();
+  const x1=X(Math.min(tc,t1));let first=true;
+  for(let x=pl;x<=x1;x+=1.2*d){const t=t0+(x-pl)/(w-pl-pr)*(t1-t0);let v=0;
+   for(const p of tr.peaks)v+=p.h*Math.exp(-.5*((t-p.t)/p.s)**2);
+   const y=base-tr.off*amp-v*amp*tr.scale;first?(ctx.moveTo(x,y),first=false):ctx.lineTo(x,y)}ctx.stroke();
+  ctx.textAlign='center';
+  for(const p of tr.peaks){if(p.label&&tc>p.t+.05){const y=base-tr.off*amp-p.h*amp*tr.scale-6*d;ctx.fillStyle=p.lc||'rgba(236,237,243,.9)';ctx.fillText(W<720&&p.short?p.short:p.label,X(p.t)+(p.dx||0)*d,y-(p.dy||0)*d)}}
+  if(tr.name){ctx.textAlign='left';ctx.fillStyle=tr.col;ctx.fillText(tr.name,pl,base-tr.off*amp-6*d)}});
+ if(tc<t1){ctx.strokeStyle='rgba(236,237,243,.45)';ctx.lineWidth=d;ctx.beginPath();ctx.moveTo(X(tc),16*d);ctx.lineTo(X(tc),base);ctx.stroke()}
+}
+const SPEC={
+ 5:{range:[10.5,15.5],step:1,title:'UV 260 nm · Fig. 13, redrawn · min',traces:[{col:'rgba(76,184,164,.95)',off:0,scale:1/190,peaks:OPT.map(([n,len,t,hh],i)=>({t,h:hh,s:.045+(n==='FLP'?.012:0),label:n,dx:[0,-14,10,6,0,0][i],dy:[0,8,22,0,0,0][i]}))}]},
+ 6:{range:[0,4.5],step:1,title:'UV 260 nm · Fig. 3, redrawn · min',traces:[
+   {name:'60 °C',col:'rgba(76,184,164,.95)',off:.5,scale:.45,peaks:SIR.t60.map((t,i)=>({t,h:SIR.h60[i],s:.025}))},
+   {name:'25 °C',col:'rgba(111,159,212,.95)',off:0,scale:.45,peaks:SIR.t25.map((t,i)=>({t,h:SIR.h25[i],s:.025}))}]},
+ 7:{range:[7,10.5],step:1,title:'UV 260 nm · 01-01238 Fig. 1, redrawn · min',traces:[{col:'rgba(111,159,212,.95)',off:0,scale:.9,peaks:HIL.map(([n,len,t,hh])=>({t,h:hh,s:.13,label:`${n} ${t.toFixed(3)}`,short:t.toFixed(2)}))}]}};
+
+/* ---------- labels ---------- */
+const tags=[];
+function tag(html,cls){const el=document.createElement('div');el.className='tag '+(cls||'');el.innerHTML=html;$('tags').appendChild(el);const t={el,obj:null,o:0,show:0,side:cls==='side'};tags.push(t);return t}
+
+/* ---------- 3D ---------- */
+let GL=false,renderer,scene,camera,composer;
+try{renderer=new THREE.WebGLRenderer({canvas:$('gl'),antialias:true,powerPreference:'high-performance'});GL=!!renderer.getContext()}catch(e){GL=false}
+if(!GL)document.body.classList.add('nogl');
+
+let main=null,adducts=null,column=null,duplex=null,hilic=null,dust=null,haloTex=null;
+const tmpV=GL?new THREE.Vector3():null;
+
+function haloTexture(){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');
+ const gr=x.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.35,'rgba(255,255,255,.35)');gr.addColorStop(1,'rgba(255,255,255,0)');
+ x.fillStyle=gr;x.fillRect(0,0,64,64);const t=new THREE.CanvasTexture(c);return t}
+
+/* A fadeable group: every material registered so opacity can be set at once */
+function fader(group){const mats=[];group.traverse(o=>{if(o.material){(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{m.transparent=true;m.userData.base=m.opacity;mats.push(m)})}});
+ return o=>{group.visible=o>.005;mats.forEach(m=>m.opacity=m.userData.base*o)}}
+
+/* Single helical strand along x. Geometry is illustrative. */
+function makeStrand({seq,r=1.6,rise=.62,turn=.62,phase=0,col=0x4cb8a4,phR=.32,baseLen=.75,halo=true,dir=1}){
+ const n=seq.length,group=new THREE.Group(),pts=[];
+ const phMat=new THREE.MeshStandardMaterial({color:0xe0b04a,emissive:0x8a5e1a,emissiveIntensity:.32,roughness:.3,metalness:.35});
+ const phG=new THREE.SphereGeometry(phR,16,12);
+ const phos=[],halos=[];
+ for(let i=0;i<n;i++){
+  const a=i*turn*dir+phase,x=(i-(n-1)/2)*rise;
+  const p=new THREE.Vector3(x,Math.cos(a)*r,Math.sin(a)*r);pts.push(p);
+  const m=new THREE.Mesh(phG,phMat);m.position.copy(p);group.add(m);phos.push(m);
+  const bc=BASECOL[seq[i]]||0xffffff;
+  const bm=new THREE.MeshStandardMaterial({color:bc,emissive:bc,emissiveIntensity:.16,roughness:.55});
+  const inward=new THREE.Vector3(0,-Math.cos(a),-Math.sin(a));
+  const cyl=new THREE.Mesh(new THREE.CylinderGeometry(phR*.38,phR*.38,r*baseLen,8),bm);
+  cyl.position.copy(p).addScaledVector(inward,r*baseLen/2+phR*.6);
+  cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),inward);group.add(cyl);
+  if(halo){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:haloTex,color:0xb07a30,blending:THREE.AdditiveBlending,depthWrite:false,opacity:.0}));
+   s.position.copy(p);s.scale.setScalar(phR*6);group.add(s);halos.push(s)}
+ }
+ const curve=new THREE.CatmullRomCurve3(pts);
+ const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,n*8,phR*.28,8,false),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.35,roughness:.4}));
+ group.add(tube);
+ const fade=fader(group);
+ halos.forEach(s=>s.material.userData.base=1);
+ return{group,phos,halos,fade,pts,len:n,phMat,tubeMat:tube.material,setCharge(k,t){halos.forEach((s,i)=>{s.material.opacity=k*(.3+.2*Math.sin(t*3+i*.9))*s.material.userData.o;});phMat.emissiveIntensity=.32+k*.4}};
+}
+
+/* Column: translucent cylinder along x with rings */
+function makeColumn(len,rad,col){
+ const g=new THREE.Group();
+ const cyl=new THREE.Mesh(new THREE.CylinderGeometry(rad,rad,len,48,1,true),new THREE.MeshStandardMaterial({color:col,emissive:col,emissiveIntensity:.05,opacity:.08,transparent:true,side:THREE.DoubleSide,depthWrite:false}));
+ cyl.rotation.z=Math.PI/2;g.add(cyl);
+ const ringG=new THREE.TorusGeometry(rad,.04,6,64);
+ for(let i=0;i<=10;i++){const r=new THREE.Mesh(ringG,new THREE.MeshBasicMaterial({color:col,opacity:i%5?0.18:.5}));r.rotation.y=Math.PI/2;r.position.x=-len/2+i*len/10;g.add(r)}
+ return g}
+
+if(GL){
+ const pr=Math.min(devicePixelRatio||1,coarse?1.5:1.75);
+ renderer.setPixelRatio(pr);renderer.setSize(W,H,false);renderer.setClearColor(0x06070c,1);
+ scene=new THREE.Scene();scene.fog=new THREE.FogExp2(0x06070c,.012);
+ camera=new THREE.PerspectiveCamera(42,W/H,.1,500);camera.position.set(0,2,26);
+ scene.add(new THREE.AmbientLight(0x56607c,1.0));
+ const dl=new THREE.DirectionalLight(0xf0ece4,1.25);dl.position.set(6,10,12);scene.add(dl);
+ const rim=new THREE.DirectionalLight(0x7a6ab8,.55);rim.position.set(-8,-4,-10);scene.add(rim);
+ if(THREE.EffectComposer&&THREE.UnrealBloomPass&&THREE.RenderPass){
+  composer=new THREE.EffectComposer(renderer);composer.setPixelRatio&&composer.setPixelRatio(pr);composer.setSize(W,H);
+  composer.addPass(new THREE.RenderPass(scene,camera));
+  composer.addPass(new THREE.UnrealBloomPass(new THREE.Vector2(W,H),.42,.4,.52));
+ }
+ haloTex=haloTexture();
+
+ /* dust */
+ const DN=coarse||narrow()?1500:3500,dg=new THREE.BufferGeometry(),dp=new Float32Array(DN*3);
+ for(let i=0;i<DN;i++){dp[i*3]=(Math.random()*2-1)*90;dp[i*3+1]=(Math.random()*2-1)*50;dp[i*3+2]=(Math.random()*2-1)*90-10}
+ dg.setAttribute('position',new THREE.BufferAttribute(dp,3));
+ dust=new THREE.Points(dg,new THREE.PointsMaterial({color:0x8d92a6,size:.18,map:haloTex,transparent:true,opacity:.45,depthWrite:false}));scene.add(dust);
+
+ /* main 20-mer */
+ main=makeStrand({seq:FLP_SEQ});main.halos.forEach(s=>s.material.userData.o=1);scene.add(main.group);
+
+ /* HFIP adducts: small violet spheres clinging near phosphates */
+ adducts={group:new THREE.Group(),items:[]};
+ const adG=new THREE.SphereGeometry(.2,10,8),adM=new THREE.MeshStandardMaterial({color:0x9a86d8,emissive:0x5a4a9a,emissiveIntensity:.3,roughness:.5});
+ main.pts.forEach((p,i)=>{for(let k=0;k<2;k++){const m=new THREE.Mesh(adG,adM);adducts.group.add(m);
+  adducts.items.push({m,p,ph:Math.random()*6.28,k,thr:(i*2+k)/(main.len*2),drift:new THREE.Vector3((Math.random()-.5)*6,2+Math.random()*5,(Math.random()-.5)*6)})}});
+ main.group.add(adducts.group);adducts.fade=fader(adducts.group);
+
+ /* RP-IP column of six lookalikes */
+ column={group:new THREE.Group(),len:40,strands:[]};
+ column.group.add(makeColumn(column.len,4.2,0x4cb8a4));
+ const cols6=[0x5f88bf,0xb97a89,0xc2a368,0x9a86d8,0x4cb8a4,0xd27a8d];
+ OPT.forEach(([n,len,t],i)=>{const s=makeStrand({seq:FLP_SEQ.padEnd(21,'C').slice(0,len),r:.6,rise:.24,turn:.7,phR:.15,col:cols6[i],halo:false,phase:i});
+  s.group.position.set(0,(i-2.5)*1.45,0);column.group.add(s.group);const mk=new THREE.Object3D();mk.position.x=(len-1)/2*.24+.6;s.group.add(mk);column.strands.push({s,t,name:n,mk,lab:tag(`${n} <i>${len}-mer</i>`,'side')})});
+ scene.add(column.group);column.fade=fader(column.group);
+
+ /* siRNA duplex: two 21-nt strands */
+ duplex={group:new THREE.Group()};
+ const SENSE='GUAACCAAGAGUAUUCCAUTT',ANTI='AUGGAAUACUCUUGGUUACTT';
+ duplex.a=makeStrand({seq:SENSE,r:1.7,rise:.55,turn:.55,phase:0,col:0x4cb8a4,halo:false});
+ duplex.b=makeStrand({seq:ANTI.split('').reverse().join(''),r:1.7,rise:.55,turn:.55,phase:Math.PI*.85,col:0x6f9fd4,halo:false});
+ duplex.group.add(duplex.a.group,duplex.b.group);scene.add(duplex.group);duplex.fade=fader(duplex.group);
+ duplex.la=tag('sense <i>21 nt</i>');duplex.lb=tag('antisense <i>21 nt</i>');
+
+ /* HILIC column with a water layer */
+ hilic={group:new THREE.Group(),len:40,strands:[]};
+ hilic.group.add(makeColumn(hilic.len,4.2,0x6f9fd4));
+ const WN=coarse?900:1800,wg=new THREE.BufferGeometry(),wp=new Float32Array(WN*3);
+ for(let i=0;i<WN;i++){const a=Math.random()*6.283,rr=3.55+Math.random()*.55;wp[i*3]=(Math.random()-.5)*hilic.len;wp[i*3+1]=Math.cos(a)*rr;wp[i*3+2]=Math.sin(a)*rr}
+ wg.setAttribute('position',new THREE.BufferAttribute(wp,3));
+ hilic.water=new THREE.Points(wg,new THREE.PointsMaterial({color:0x6f9fd4,size:.18,map:haloTex,opacity:.45,depthWrite:false,blending:THREE.AdditiveBlending}));hilic.group.add(hilic.water);
+ HIL.forEach(([n,len,t],i)=>{const s=makeStrand({seq:FLP_SEQ.slice(0,len),r:.6,rise:.24,turn:.7,phR:.15,col:[0x5f88bf,0xb97a89,0x4cb8a4][i],halo:false,phase:i});
+  s.group.position.set(0,(i-1)*1.6,0);hilic.group.add(s.group);const mk=new THREE.Object3D();mk.position.x=(len-1)/2*.24+.6;s.group.add(mk);hilic.strands.push({s,t,name:n,mk,lab:tag(`${n} <i>${len}-mer</i>`,'side')})});
+ scene.add(hilic.group);hilic.fade=fader(hilic.group);
+}
+
+/* Place a subject in the free area right of the text (wide screens), scaled to fit. ppu = screen px per world unit at the focal plane. */
+let ppu=20,phoneY=innerHeight/2,phoneVis=1;
+function place(group,width){
+ if(narrow()){group.position.x=0;group.scale.setScalar(1);return}
+ const L=Math.max(20,.06*W)+((H<=520&&W>=560)?Math.min(480,W*.58):Math.min(560,W*.45))+30,R=W-56;
+ const s=clamp((R-L)/ppu/width,.4,1.15);
+ group.scale.setScalar(s);group.position.x=((L+R)/2-W/2)/ppu;
+}
+/* camera keyframes per chapter: [pos, target] */
+const CAM=[
+ [[0,1.5,22],[0,0,0]],[[7,5,24],[0,0,0]],[[0,0,19],[0,0,0]],[[-3,3,18],[0,0,0]],
+ [[0,9,62],[0,0,0]],[[0,4,58],[0,0,0]],[[0,3,26],[0,0,0]],[[0,9,62],[0,0,0]]];
+const cPos=GL?new THREE.Vector3():null,cTar=GL?new THREE.Vector3():null,tmpA=GL?new THREE.Vector3():null,tmpB=GL?new THREE.Vector3():null;
+
+/* ---------- resize ---------- */
+function resize(){measure();sizeChrom();if(demo){const y=scrollY;buildTimeline();demoT=demoAtY(y)}if(!GL)return;camera.aspect=W/H;camera.fov=W<H?58:42;camera.updateProjectionMatrix();renderer.setSize(W,H,false);composer&&composer.setSize(W,H)}
+addEventListener('resize',resize);
+measure();
+
+/* ---------- frame ---------- */
+let last=performance.now(),time=0,sy=scrollY,lastChapter=-1;
+function frame(now){
+ const dt=Math.min(.05,(now-last)/1000);last=now;time+=reduce?dt*.25:dt;
+ tickDemo(dt);
+ const kS=reduce?1:1-Math.exp(-dt*9);sy=lerp(sy,scrollY,kS);
+ const {i,lp}=stateAt(sy);const gp=i+lp;
+ const endFade=1-sstep(tops[N-1]+hs[N-1]-vh*1.0,tops[N-1]+hs[N-1]-vh*.2,sy);
+
+ // beats
+ beats.forEach((bs,k)=>bs.forEach(b=>{let o=0;if(k===i){o=b.a===0?1:sstep(b.a,b.a+.05,lp);if(b.b<.95)o*=1-sstep(b.b-.05,b.b,lp)}
+  if(demo&&k===i&&o>.5){const pn=b.pn||(b.pn=b.el.querySelector('.panel')||0);if(pn&&pn.scrollHeight>pn.clientHeight+4){const v0=b.a===0?0:b.a+.05,v1=b.b>=.95?1:b.b-.05;pn.scrollTop=(pn.scrollHeight-pn.clientHeight)*sstep(.15,.85,clamp((lp-v0)/(v1-v0)))}}b.el.style.opacity=o.toFixed(3);b.el.style.visibility=o<.02?'hidden':'visible'}));
+ const ci=(sy>tops[N-1]+hs[N-1]-vh*.4)?N:i;
+ if(ci!==lastChapter){lastChapter=ci;$('hIdx').textContent=String(ci).padStart(2,'0');$('hName').textContent=ci===N?'Side by side':secs[ci].dataset.name;if(ci<N)$('hRead').innerHTML=secs[ci].dataset.read;renderQ()}
+ $('rail').style.height=(clamp(sy/Math.max(1,tops[N-1]+hs[N-1]-vh))*100)+'%';
+ document.querySelector('.hud-bl').style.opacity=endFade.toFixed(3);
+
+ // Qarray scrub in chapter 3
+ if(i===3){const qi=Math.round(clamp((lp-.3)/.4)*8);if(qi!==qIdx){qIdx=qi;renderQ()}}
+
+ // chromatogram
+ const cs=i===5?{s:SPEC[5],p:sstep(.36,.66,lp),v:sstep(.34,.4,lp)*(1-sstep(.95,1,lp))}:
+          i===6?{s:SPEC[6],p:sstep(.42,.8,lp),v:sstep(.4,.46,lp)*(1-sstep(.95,1,lp))}:
+          i===7?{s:SPEC[7],p:sstep(.12,.5,lp),v:sstep(.08,.14,lp)*(1-sstep(.95,1,lp))}:{s:null,p:0,v:0};
+ let panelUp=false;if(cs.v>.01){const ct=H-chrom.clientHeight-parseFloat(getComputedStyle(chrom).bottom);panelUp=beats[i].some(b=>+b.el.style.opacity>.05&&b.el.getBoundingClientRect().bottom>ct+6)}
+ drawChrom(cs.s,cs.p,cs.v*endFade*(panelUp?0:1));
+ if(narrow()){let top=64,bot=H-112;if(cs.v>.01&&!panelUp)bot=Math.min(bot,chrom.getBoundingClientRect().top);
+  let ut=Infinity,ub=-Infinity;beats[i].forEach(b=>{if(+b.el.style.opacity>.05){const r=b.el.getBoundingClientRect();ut=Math.min(ut,r.top);ub=Math.max(ub,r.bottom)}});
+  let c=(top+bot)/2,gap=bot-top;if(ut<ub){const g1=ut-top,g2=bot-ub;c=g1>g2?top+g1/2:ub+g2/2;gap=Math.max(g1,g2)}
+  const kp=reduce?1:1-Math.exp(-dt*4);phoneY=lerp(phoneY,c,kp);phoneVis=lerp(phoneVis,clamp((gap-90)/110,.22,1),kp)}else phoneVis=1;
+
+ if(GL){
+  // visibility weights by global progress
+  // scene changes hand off in sequence: the old subject fades out at the end of its chapter,
+  // the stage is empty while the page scrolls to the next chapter, then the new subject fades in
+  const wMain=1-sstep(3.86,3.97,gp);
+  const wCol=sstep(4,4.08,gp)*(1-sstep(5.86,5.97,gp));
+  const wDup=sstep(6,6.08,gp)*(1-sstep(6.86,6.97,gp));
+  const wHil=sstep(7,7.08,gp);
+  const pv=phoneVis;main.fade(wMain*endFade*pv);column.fade(wCol*endFade*pv);duplex.fade(wDup*endFade*pv);hilic.fade(wHil*endFade*pv);
+  dust.material.opacity=.45*endFade;
+
+  // main strand behaviour
+  place(main.group,15);
+  main.group.rotation.x=time*.25;
+  main.group.rotation.y=Math.sin(time*.15)*.15+(i<=1?(1-lp)*.2:0);
+  const chargeK=i===2?sstep(.05,.3,lp)*(.4+chargeLevel*.6):(i===3?.35:0);
+  main.halos.forEach(s=>s.material.userData.o=wMain*pv);
+  main.setCharge(chargeK,time);
+  // adducts
+  let af=0;if(i===3)af=lp<.3?sstep(.05,.25,lp)*.62:adductFrac();
+  adducts.fade((i===3?1:0)*wMain*endFade*pv);
+  adducts.items.forEach((a,k)=>{const on=a.thr<af*1.6;const tgt=on?0:1;a.off=lerp(a.off??1,tgt,1-Math.exp(-dt*5));
+   const orbit=.75+.15*Math.sin(time*2+a.ph);
+   a.m.position.set(a.p.x+Math.cos(time*1.5+a.ph+a.k*3.14)*orbit*.6,a.p.y*1.32+Math.sin(time+a.ph)*.15,a.p.z*1.32+Math.sin(time*1.5+a.ph+a.k*3.14)*orbit*.6).addScaledVector(a.drift,a.off);
+   a.m.scale.setScalar(Math.max(.001,1-a.off))});
+
+  // RP-IP column: strands travel at speed ∝ 1/tR
+  if(wCol>0){const run=i===4?sstep(.38,1,lp)*.25:(i===5?.25+sstep(.36,.68,lp)*.75:(i<4?0:1));const tau=run*10.5;
+   place(column.group,44);
+   column.strands.forEach(c=>{const x=-column.len/2+3+(column.len-6)*(tau/10.5)*(10.5/c.t);c.s.group.position.x=x;
+    c.s.group.rotation.x=time*.6;c.lab.show=wCol*(i===4&&lp>.3||i===5?1:0)*(column.group.scale.x*ppu>11?1:0);c.lab.obj=c.mk})}
+  else column.strands.forEach(c=>c.lab.show=0);
+
+  // duplex: unzip, then the two strands drift apart
+  if(wDup>0){place(duplex.group,17);const u=i===6?sstep(.25,.6,lp):(i>6?1:0);
+   duplex.a.group.position.set(-u*2,u*3.2,0);duplex.b.group.position.set(u*2,-u*3.2,0);
+   duplex.a.group.rotation.x=time*.35+u*.8;duplex.b.group.rotation.x=time*.35-u*.8;duplex.group.rotation.y=Math.sin(time*.2)*.2;
+   duplex.la.obj=duplex.a.group;duplex.lb.obj=duplex.b.group;duplex.la.show=duplex.lb.show=wDup*sstep(.3,.5,u)}
+  else duplex.la.show=duplex.lb.show=0;
+
+  // HILIC column
+  if(wHil>0){const run=i===7?sstep(.12,.5,lp):(i>7?1:0);const tau=run*7.9;
+   hilic.water.rotation.x=time*.05;
+   place(hilic.group,44);
+   hilic.strands.forEach(c=>{const x=-hilic.len/2+3+(hilic.len-6)*(tau/c.t);c.s.group.position.x=x;c.s.group.rotation.x=time*.6;
+    c.lab.obj=c.mk;c.lab.show=wHil*(run>0?1:0)*(hilic.group.scale.x*ppu>11?1:0)})}
+  else hilic.strands.forEach(c=>c.lab.show=0);
+
+  // camera
+  const k0=CAM[i],k1=CAM[Math.min(N-1,i+1)],t=(i===3||i===5||i===6)?sstep(.97,1,lp):sstep(.82,1,lp);
+  tmpA.set(...k0[0]).lerp(tmpB.set(...k1[0]),t);cPos.lerp(tmpA,reduce?1:1-Math.exp(-dt*5));
+  tmpA.set(...k0[1]).lerp(tmpB.set(...k1[1]),t);cTar.lerp(tmpA,reduce?1:1-Math.exp(-dt*5));
+  const nm=narrow()?1.35:Math.max(1,1.6/(W/H));camera.position.set(cPos.x*nm,cPos.y,cPos.z*nm);
+  ppu=H/(2*camera.position.distanceTo(cTar)*Math.tan(camera.fov*Math.PI/360));
+  camera.lookAt(cTar.x,cTar.y+(narrow()?(phoneY-H/2)/ppu:0),cTar.z);
+  camera.updateMatrixWorld();
+  ppu=H/(2*camera.position.distanceTo(cTar)*Math.tan(camera.fov*Math.PI/360));
+
+  // labels
+  const kT=1-Math.exp(-dt*10);
+  tags.forEach(tg=>{tg.o=tg.show<.01&&tg.o<.3?0:lerp(tg.o,tg.show,kT);if(tg.o<.02||!tg.obj){tg.el.style.opacity=0;return}
+   tg.obj.getWorldPosition(tmpV);if(!tg.side)tmpV.y+=1.2;tmpV.project(camera);
+   if(tmpV.z>1){tg.el.style.opacity=0;return}
+   tg.el.style.transform=`translate(${(tmpV.x*.5+.5)*W}px,${(-tmpV.y*.5+.5)*H}px) `+(tg.side?'translate(0,-50%)':'translate(-50%,-140%)');tg.el.style.opacity=tg.o.toFixed(3)});
+
+  composer?composer.render():renderer.render(scene,camera);
+ }
+ requestAnimationFrame(frame);
+}
+if(GL){cPos.set(...CAM[0][0]);cTar.set(...CAM[0][1])}
+resize();
+buildTimeline();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>{if(!demo)buildTimeline()});
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
