@@ -214,6 +214,11 @@ window.PORTFOLIO = {
     { type: "builtin", id: "settings", title: "Settings", app: "settings", icon: "settings" },
     { type: "builtin", id: "notepad", title: "Notepad", app: "notepad", icon: "notepad" },
     { type: "builtin", id: "recycle", title: "Recycle Bin", app: "explorer", location: "recycle", icon: "recycle" },
+    {
+      type: "builtin", id: "resolve", title: "Resolve", app: "resolve", icon: "resolve",
+      description: "A method-development game. Tune the gradient and column temperature until every peak pair is resolved, inside the run-time limit.",
+    },
+    { type: "builtin", id: "restore-desktop", title: "Restore Desktop", app: "reset", icon: "restoreApp" },
 
     /* ---------- Documents (open in Notepad) ---------- */
     {
@@ -236,6 +241,8 @@ What's on this desktop
   Explainers           and five HPLC detectors, as live schematics
   HPLC Tools           everyday HPLC calculators: method transfer,
                        gradients, buffers, system suitability
+  Resolve              a method-development game: tune the gradient
+                       until every peak pair is resolved
   Solvane              a design study for a fictional
                        analytical-science company
 
@@ -276,6 +283,10 @@ Rearrange the desktop
   taskbar or Start, see its Properties, or send it to the Recycle
   Bin (you can restore it from there).
 
+Start over
+  Restore Desktop (on the desktop) puts everything back the way
+  it was: icons, pins, the Recycle Bin, theme and wallpaper.
+
 Shortcuts
   Start typing on the desktop to search.
   The Terminal understands a few commands. Type "help".
@@ -285,8 +296,8 @@ Shortcuts
   ],
 
   /* Where things appear (ids, or "group:<id>" for a folder) */
-  desktop: ["recycle", "showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "photos", "about", "terminal"],
-  pinned: ["showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "photos", "terminal", "settings", "notepad", "about", "readme"],
+  desktop: ["recycle", "showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "resolve", "photos", "about", "terminal", "restore-desktop"],
+  pinned: ["showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "resolve", "photos", "terminal", "settings", "notepad", "about", "readme"],
   taskbar: ["explorer", "showcase", "hplc-tools", "photos", "terminal"],
   startup: ["showcase"],
 };
