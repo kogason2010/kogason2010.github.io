@@ -49,58 +49,49 @@ window.PORTFOLIO = {
 
   groups: [
     {
-      id: "nexera",
-      title: "Nexera App Notes",
+      id: "appnotes",
+      title: "Application Notes",
       description:
-        "Three interactive showcases of Nexera chromatography systems and their published application notes, built with real-time 3D.",
+        "Interactive companions to published Shimadzu application notes: the methods, conditions and results, retold in real-time 3D.",
       note:
         "Independent, unofficial projects. Not affiliated with, sponsored or endorsed by Shimadzu Corporation.",
+    },
+    {
+      id: "explainers",
+      title: "Instrument Explainers",
+      description:
+        "How the instruments work: ion chromatography from eluent to suppressor, and five HPLC detectors as live animated schematics.",
+      note:
+        "Independent projects. Nexera is a trademark of Shimadzu Corporation; these sites are not affiliated with or endorsed by Shimadzu.",
     },
   ],
 
   apps: [
-    /* ---------- Projects (standalone apps bundled from GitHub) ---------- */
+    /* ---------- Application Notes folder ---------- */
     {
       type: "github",
-      repo: "kogason2010/nexera-ic",
-      title: "Nexera IC",
-      group: "nexera",
+      repo: "kogason2010/lcms-2050-oligos",
+      title: "Strand by Strand",
+      group: "appnotes",
       bundle: true,
-      icon: "icons/nexera-ic.svg",
+      icon: "icons/lcms-2050-oligos.svg",
       description:
-        "A cinematic, interactive explainer of ion chromatography built around the Nexera IC: suppression, separation, dual-channel analysis and published method data.",
-      stack: ["React", "three.js", "GSAP", "TypeScript"],
-      updated: "2026-10-08",
+        "A scroll-driven 3D walk through four application notes on confirming synthetic oligonucleotides with the LCMS-2050 single quadrupole mass spectrometer: by charge state, by mass, and by where they elute.",
+      tip: "Press D inside the app for a guided demo, or explore the charge ladder and screening grid yourself.",
+      stack: ["three.js", "Single HTML file"],
+      updated: "2026-10-15",
       shots: [
-        ["media/nexera-ic/1.webp", "Every ion, accounted for: the Nexera IC as an illustrative 3D model"],
-        ["media/nexera-ic/2.webp", "The system: an SI-150 autosampler with one IC-150 main unit"],
-        ["media/nexera-ic/3.webp", "Published method data, from drinking water to wastewater"],
-        ["media/nexera-ic/4.webp", "Suppression: silence the background, amplify the ion"],
-      ],
-    },
-    {
-      type: "github",
-      repo: "kogason2010/nexera-ic-applications",
-      title: "Nexera IC Applications",
-      group: "nexera",
-      bundle: true,
-      icon: "icons/nexera-ic-applications.svg",
-      description:
-        "Published Nexera IC methods (EPA 300.1 Parts A and B, ASTM D6919-17 cations, dual channel) told through procedurally built 3D ions, with an ion atlas and a methods table.",
-      stack: ["React", "three.js", "GSAP", "TypeScript"],
-      updated: "2026-10-08",
-      shots: [
-        ["media/nexera-ic-applications/1.webp", "Three published methods, sixteen ions, one ion chromatograph"],
-        ["media/nexera-ic-applications/2.webp", "The ion atlas: every ion as a 3D model"],
-        ["media/nexera-ic-applications/3.webp", "Three methods, side by side"],
-        ["media/nexera-ic-applications/4.webp", "EPA 300.1 Part A: seven anions in one twenty-minute run"],
+        ["media/lcms-2050-oligos/1.webp", "Strand by strand: a 20-mer oligonucleotide in 3D"],
+        ["media/lcms-2050-oligos/2.webp", "The charge ladder: one molecule, many m/z values, one deconvoluted mass"],
+        ["media/lcms-2050-oligos/3.webp", "The 24-run screening grid from LabSolutions MD method development"],
+        ["media/lcms-2050-oligos/4.webp", "Ion-pair-free LC/MS of an siRNA: both strands confirmed separately"],
       ],
     },
     {
       type: "github",
       repo: "kogason2010/nexera-uc-epsa",
       title: "Exposed: EPSA by SFC",
-      group: "nexera",
+      group: "appnotes",
       bundle: true,
       icon: "icons/nexera-uc-epsa.svg",
       description:
@@ -118,26 +109,32 @@ window.PORTFOLIO = {
     },
     {
       type: "github",
-      repo: "kogason2010/solvane",
-      title: "Solvane",
+      repo: "kogason2010/nexera-ic-applications",
+      title: "Nexera IC Applications",
+      group: "appnotes",
       bundle: true,
-      icon: "icons/solvane.svg",
+      icon: "icons/nexera-ic-applications.svg",
       description:
-        "A cinematic website for Solvane, a fictional analytical-science company. A design study in separation, detection and motion.",
-      stack: ["React", "three.js", "GSAP", "Lenis"],
+        "Published Nexera IC methods (EPA 300.1 Parts A and B, ASTM D6919-17 cations, dual channel) told through procedurally built 3D ions, with an ion atlas and a methods table.",
+      stack: ["React", "three.js", "GSAP", "TypeScript"],
       updated: "2026-10-08",
       shots: [
-        ["media/solvane/1.webp", "From complexity, clarity: a particle sample entering the column"],
-        ["media/solvane/2.webp", "Five ways to see a molecule"],
-        ["media/solvane/3.webp", "Applications across seven industries"],
-        ["media/solvane/4.webp", "Four steps between a vial and an answer"],
+        ["media/nexera-ic-applications/1.webp", "Three published methods, sixteen ions, one ion chromatograph"],
+        ["media/nexera-ic-applications/2.webp", "The ion atlas: every ion as a 3D model"],
+        ["media/nexera-ic-applications/3.webp", "Three methods, side by side"],
+        ["media/nexera-ic-applications/4.webp", "EPA 300.1 Part A: seven anions in one twenty-minute run"],
       ],
     },
 
+    /* ---------- Instrument Explainers folder ---------- */
     {
       type: "github",
       repo: "kogason2010/hplc-detectors",
       title: "HPLC Detectors",
+      group: "explainers",
+      bundle: true,
+      // only source is in the repo, so the sync script builds it first
+      build: { run: "npm ci && npm run build", dir: "dist" },
       icon: "icons/hplc-detectors.svg",
       description:
         "How five HPLC detectors turn chemistry into a peak: UV / PDA / DAD, fluorescence, refractive index, ELSD, and single and triple quadrupole mass spectrometry, each as a live animated schematic.",
@@ -153,20 +150,59 @@ window.PORTFOLIO = {
     },
     {
       type: "github",
-      repo: "kogason2010/lcms-2050-oligos",
-      title: "Strand by Strand",
+      repo: "kogason2010/nexera-ic",
+      title: "Nexera IC",
+      group: "explainers",
       bundle: true,
-      icon: "icons/lcms-2050-oligos.svg",
+      icon: "icons/nexera-ic.svg",
       description:
-        "A scroll-driven 3D walk through four application notes on confirming synthetic oligonucleotides with the LCMS-2050 single quadrupole mass spectrometer: by charge state, by mass, and by where they elute.",
-      tip: "Press D inside the app for a guided demo, or explore the charge ladder and screening grid yourself.",
-      stack: ["three.js", "Single HTML file"],
-      updated: "2026-10-15",
+        "A cinematic, interactive explainer of ion chromatography built around the Nexera IC: suppression, separation, dual-channel analysis and published method data.",
+      stack: ["React", "three.js", "GSAP", "TypeScript"],
+      updated: "2026-10-08",
       shots: [
-        ["media/lcms-2050-oligos/1.webp", "Strand by strand: a 20-mer oligonucleotide in 3D"],
-        ["media/lcms-2050-oligos/2.webp", "The charge ladder: one molecule, many m/z values, one deconvoluted mass"],
-        ["media/lcms-2050-oligos/3.webp", "The 24-run screening grid from LabSolutions MD method development"],
-        ["media/lcms-2050-oligos/4.webp", "Ion-pair-free LC/MS of an siRNA: both strands confirmed separately"],
+        ["media/nexera-ic/1.webp", "Every ion, accounted for: the Nexera IC as an illustrative 3D model"],
+        ["media/nexera-ic/2.webp", "The system: an SI-150 autosampler with one IC-150 main unit"],
+        ["media/nexera-ic/3.webp", "Published method data, from drinking water to wastewater"],
+        ["media/nexera-ic/4.webp", "Suppression: silence the background, amplify the ion"],
+      ],
+    },
+
+    /* ---------- Tools and design studies ---------- */
+    {
+      type: "github",
+      repo: "kogason2010/HPLC-tools",
+      id: "hplc-tools",
+      title: "HPLC Tools",
+      bundle: true,
+      icon: "icons/hplc-tools.svg",
+      size: [1180, 800],
+      description:
+        "Browser-based calculators for everyday HPLC and UHPLC work: method transfer with USP <621> checks, gradient design, system suitability, buffer recipes with activity corrections, back-pressure and viscosity, and unit conversions.",
+      tip: "Inputs are remembered, and every tab has a Copy link button that shares the current values.",
+      stack: ["JavaScript", "No dependencies", "Unit tested"],
+      updated: "2026-10-16",
+      shots: [
+        ["media/hplc-tools/1.webp", "Method transfer: scale a method between column geometries with USP <621> checks"],
+        ["media/hplc-tools/2.webp", "Gradient design: k*, gradient volume and peak capacity"],
+        ["media/hplc-tools/3.webp", "System suitability: resolution, symmetry, signal-to-noise and %RSD"],
+        ["media/hplc-tools/4.webp", "Buffer preparation from the full charge balance, not just Henderson–Hasselbalch"],
+      ],
+    },
+    {
+      type: "github",
+      repo: "kogason2010/solvane",
+      title: "Solvane",
+      bundle: true,
+      icon: "icons/solvane.svg",
+      description:
+        "A cinematic website for Solvane, a fictional analytical-science company. A design study in separation, detection and motion.",
+      stack: ["React", "three.js", "GSAP", "Lenis"],
+      updated: "2026-10-08",
+      shots: [
+        ["media/solvane/1.webp", "From complexity, clarity: a particle sample entering the column"],
+        ["media/solvane/2.webp", "Five ways to see a molecule"],
+        ["media/solvane/3.webp", "Applications across seven industries"],
+        ["media/solvane/4.webp", "Four steps between a vial and an answer"],
       ],
     },
 
@@ -192,15 +228,16 @@ to see: chromatography explained with real-time 3D, scroll-driven
 stories and published app notes.
 
 What's on this desktop
-  Showcase           every project, with screenshots
-  Nexera App Notes   three showcases of Nexera chromatography
-                     systems and their application notes
-  Solvane            a design study for a fictional
-                     analytical-science company
-  Inside the HPLC    how five HPLC detectors turn chemistry
-  Detector           into a peak, as live schematics
-  Strand by Strand   confirming synthetic oligonucleotides
-                     on a single quadrupole LC/MS
+  Showcase             every project, with screenshots
+  Application Notes    published Shimadzu app notes retold in
+                       3D: ion chromatography, EPSA by SFC and
+                       oligonucleotides on a single quad LC/MS
+  Instrument           how the instruments work: the Nexera IC
+  Explainers           and five HPLC detectors, as live schematics
+  HPLC Tools           everyday HPLC calculators: method transfer,
+                       gradients, buffers, system suitability
+  Solvane              a design study for a fictional
+                       analytical-science company
 
 Every project runs as an app right here. Open one from the
 desktop, the Start menu or Showcase.
@@ -231,10 +268,13 @@ Move windows around
   a quarter. Drag it to the top edge to maximize.
   Hover over the maximize button for more snap layouts.
   Task view, next to Search on the taskbar, shows every open window.
+  Hover a taskbar button to preview its window.
 
 Rearrange the desktop
-  Drag icons wherever you like. Right-click the desktop and choose
-  Sort by name to tidy up again.
+  Drag icons wherever you like. Right-click the desktop for View
+  (icon size) and Sort by. Right-click an icon to pin it to the
+  taskbar or Start, see its Properties, or send it to the Recycle
+  Bin (you can restore it from there).
 
 Shortcuts
   Start typing on the desktop to search.
@@ -245,8 +285,8 @@ Shortcuts
   ],
 
   /* Where things appear (ids, or "group:<id>" for a folder) */
-  desktop: ["recycle", "showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "lcms-2050-oligos", "photos", "about", "terminal"],
-  pinned: ["showcase", "explorer", "group:nexera", "solvane", "hplc-detectors", "lcms-2050-oligos", "photos", "terminal", "settings", "notepad", "about", "readme"],
-  taskbar: ["explorer", "showcase", "group:nexera", "solvane", "hplc-detectors", "lcms-2050-oligos", "terminal"],
+  desktop: ["recycle", "showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "photos", "about", "terminal"],
+  pinned: ["showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "photos", "terminal", "settings", "notepad", "about", "readme"],
+  taskbar: ["explorer", "showcase", "hplc-tools", "photos", "terminal"],
   startup: ["showcase"],
 };
