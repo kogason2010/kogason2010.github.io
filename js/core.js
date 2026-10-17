@@ -145,7 +145,7 @@
   Object.assign(OS, { APPS, GROUPS, addApp, groupMembers, sites, docs, byUpdated, resolve, keyFor, findAppByUrl });
 
   /* ---------- what the visitor changed: pins and the Recycle Bin (kept in this browser) ---------- */
-  const UNDELETABLE = new Set(['recycle']);
+  const UNDELETABLE = new Set(['recycle', 'restore-desktop']);
   let recycled = store.get('recycled', []);
   let purged = store.get('purged', []);
   let taskPins = store.get('taskPins', null);

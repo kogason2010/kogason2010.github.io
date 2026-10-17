@@ -25,6 +25,7 @@ The desktop sorts them into two folders, plus a couple of standalone apps.
 
 - **[HPLC Tools](https://github.com/kogason2010/HPLC-tools)**: calculators for everyday HPLC work: method transfer with USP <621> checks, gradients, buffers, system suitability, back-pressure.
 - **[Solvane](https://github.com/kogason2010/solvane)**: a design study for a fictional analytical-science company.
+- **Resolve** (built into the desktop): a method-development game. Each level is a sample whose peaks overlap; tune the gradient and column temperature until every pair hits Rs 1.5 inside the run-time limit. Retention follows the linear-solvent-strength model, migrated numerically through the gradient (`js/resolve-engine.js`).
 
 The Shimadzu-related projects are independent and unofficial, and aren't affiliated with Shimadzu.
 
@@ -39,6 +40,7 @@ Besides the projects there's a File Explorer, Photos, Notepad, Settings and a Te
 - There's Task view, a taskbar search box, a notification center, quick settings, and light and dark mode.
 - File Explorer has Pictures (every screenshot), This PC and a Details view with real file sizes.
 - Desktop icons can be dragged, box-selected and resized.
+- **Restore Desktop** puts icons, pins, the Recycle Bin, theme and wallpaper back to how they started.
 
 ## How it works
 
