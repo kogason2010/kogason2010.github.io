@@ -376,7 +376,10 @@
     clockBtn,
     bellBtn,
     el('button', { class: 'showdesk', title: 'Show desktop', 'aria-label': 'Show desktop', onclick: () => OS.minimizeAll() }));
-  const taskbar = el('footer', { id: 'taskbar' }, el('div', { class: 'tb-side' }), el('div', { id: 'tb-center' }, startBtn, searchPill, searchBtn, tvBtn, appsEl), tray);
+  /* Way back to the 3D lab, in the taskbar's empty left corner (zooms back out of the lab's monitor). */
+  const labBtn = el('button', { class: 'tb-lab', title: 'Back to the 3D lab', 'aria-label': 'Back to the lab', onclick: () => OS.launch('lab') },
+    el('img', { src: '../favicon.svg', alt: '', draggable: 'false' }), el('span', {}, 'Back to lab'));
+  const taskbar = el('footer', { id: 'taskbar' }, el('div', { class: 'tb-side' }, labBtn), el('div', { id: 'tb-center' }, startBtn, searchPill, searchBtn, tvBtn, appsEl), tray);
 
   /* Hidden-icons overflow (the ^ in the tray). */
   const overNode = el('div', { class: 'fly over', id: 'over', role: 'dialog', 'aria-label': 'Hidden icons' },

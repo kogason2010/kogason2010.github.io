@@ -395,6 +395,11 @@ body.dragging .win { transition: none; }
   background: var(--mica); backdrop-filter: blur(30px) saturate(1.6); -webkit-backdrop-filter: blur(30px) saturate(1.6);
   border-top: 1px solid var(--stroke);
 }
+.tb-side { display: flex; align-items: center; min-width: 0; padding-left: max(8px, env(safe-area-inset-left, 0px)); }
+.tb-lab { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 8px; border: 1px solid var(--stroke); border-radius: 18px; background: var(--hover); color: var(--fg); font: 500 13px/1 var(--ui); white-space: nowrap; cursor: pointer; transition: background .15s, border-color .15s; }
+.tb-lab:hover { background: var(--press); border-color: var(--stroke-2); }
+.tb-lab:active { transform: translateY(1px); }
+.tb-lab img { width: 20px; height: 20px; flex: none; border-radius: 5px; }
 #tb-center { display: flex; align-items: center; gap: 4px; min-width: 0; max-width: calc(100vw - 150px); overflow-x: auto; scrollbar-width: none; }
 #tb-center::-webkit-scrollbar { display: none; }
 .tb-apps { display: flex; gap: 4px; }

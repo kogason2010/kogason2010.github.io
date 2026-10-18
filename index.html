@@ -754,6 +754,13 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     const th = 48 * u, ty = H - th;
     g.fillStyle = P.mica; g.fillRect(0, ty, W, th);
     g.fillStyle = P.stroke; g.fillRect(0, ty, W, 1);
+    // "Back to lab" pill in the taskbar's left corner (matches KogasonOS)
+    { const ph = 36 * u, px = 8 * u, py = ty + (th - ph) / 2;
+      g.font = `500 ${13 * u}px ${font}`; const pw = 8 * u + 20 * u + 8 * u + g.measureText("Back to lab").width + 14 * u;
+      g.fillStyle = dark ? "rgba(255,255,255,0.06)" : "rgba(16,30,44,0.055)"; rr(px, py, pw, ph, ph / 2); g.fill();
+      g.strokeStyle = P.stroke; g.lineWidth = 1; rr(px, py, pw, ph, ph / 2); g.stroke();
+      labIcon(px + 8 * u, py + (ph - 20 * u) / 2, 20 * u);
+      g.fillStyle = P.fg; g.textBaseline = "middle"; g.fillText("Back to lab", px + 36 * u, py + ph / 2 + 0.5); g.textBaseline = "alphabetic"; }
     const bw = 40 * u, gap = 4 * u, pillW = 128 * u, n = 6;
     const total = bw + gap + pillW + gap + bw + gap + n * bw + (n - 1) * gap;
     let x = (W - total) / 2; const by = ty + (th - bw) / 2;
