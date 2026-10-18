@@ -1360,7 +1360,9 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 
   lab.updateMatrixWorld(true);
   { const ab = new THREE.Box3(), ac = new THREE.Vector3();
-    hotspots.forEach(h => { ab.setFromObject(h.focusObj || h.group); ab.getCenter(ac); h.anchor.set(ac.x, ab.max.y + 0.28, ac.z); }); }
+    hotspots.forEach(h => { ab.setFromObject(h.focusObj || h.group); ab.getCenter(ac); h.anchor.set(ac.x, ab.max.y + 0.28, ac.z); });
+    // the workstation's tag sits at keyboard level so it doesn't collide with the Nexera IC tag above it
+    hotspots.find(h => h.key === "icpc").anchor.set(BX + 0.3, BT + 0.12, pcZ - 0.05); }
 
   /* ---------- Live KogasonOS on the monitor (kogason2010.github.io, desktop browsers) ----------
      The real desktop runs in a same-origin frame placed on the screen with CSS3D. The WebGL screen
