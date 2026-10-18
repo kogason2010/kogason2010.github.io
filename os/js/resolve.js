@@ -330,7 +330,7 @@
   OS.restoreEverything = function () {
     OS.WM.wins.slice().forEach((x) => OS.close(x));
     try {
-      Object.keys(localStorage).filter((k) => k.startsWith('kos:') && !k.startsWith('kos:resolve')).forEach((k) => localStorage.removeItem(k));
+      Object.keys(localStorage).filter((k) => k.startsWith('kos:')).forEach((k) => localStorage.removeItem(k));
     } catch { /* storage unavailable */ }
     OS.prefs.night = false;
     OS.prefs.bright = 1;
@@ -340,7 +340,7 @@
     OS.resetDesktop();
     setTimeout(() => {
       (OS.CFG.startup || []).forEach((t) => OS.launch(t));
-      OS.toast({ title: 'Desktop restored', body: 'Icons, pins, the Recycle Bin, windows and personalization are back to how they started.', iconName: 'restoreApp', timeout: 5000 });
+      OS.toast({ title: 'Desktop restored', body: 'Icons, pins, the Recycle Bin, windows, personalization and Resolve progress are back to how they started.', iconName: 'restoreApp', timeout: 5000 });
     }, 220);
   };
   OS.APPDEFS.reset = {
@@ -352,7 +352,7 @@
       w.body.append(el('div', { class: 'rd' },
         el('div', { class: 'rd-top' }, icon('restoreApp'),
           el('div', {}, el('h2', {}, 'Restore the desktop?'),
-            el('p', {}, 'This puts the icons, pins, Recycle Bin, theme and wallpaper back the way they were, and closes every window. Your Resolve progress is kept.'))),
+            el('p', {}, 'This puts the icons, pins, Recycle Bin, theme and wallpaper back the way they were, closes every window, and resets your Resolve progress.'))),
         el('div', { class: 'pr-btns' },
           el('button', { class: 'btn primary', onclick: () => OS.restoreEverything() }, 'Restore'),
           el('button', { class: 'btn', onclick: () => OS.close(w) }, 'Cancel'))));
