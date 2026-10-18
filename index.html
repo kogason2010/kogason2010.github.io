@@ -66,6 +66,9 @@ body {
 .tag .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
 .tag h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(26px, 4.4vw, 44px); line-height: .95; letter-spacing: -.02em; text-wrap: balance; }
 .tag p { margin: 2px 0 0; color: var(--ink-soft); max-width: 30ch; }
+.tag h1, .tag p, .tag .eyebrow { text-shadow: 0 0 3px var(--bg), 0 0 10px var(--bg), 0 0 18px var(--bg); }
+.tag, .tools, .hint { transition: opacity .3s; }
+body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer-events: none; }
 
 .tools {
   position: fixed; z-index: 2;
@@ -1566,6 +1569,7 @@ body {
     const home = focusHome ? { pos: focusHome.pos.clone(), tgt: focusHome.tgt.clone() } : { pos: camera.position.clone(), tgt: controls.target.clone() };
     focusHome = null;
     deskOpen = true;
+    document.body.classList.add("os-mode");
     closeSheet(true); setHover(null);
     labelsEl.hidden = true; hint.hidden = true;
     tween = null; controls.enabled = false;
@@ -1591,6 +1595,7 @@ body {
       desk.hidden = true;
       animateCamera(savedView.pos, savedView.tgt, 1.0, () => {
         deskOpen = false; controls.enabled = true; controls.minDistance = 8;
+        document.body.classList.remove("os-mode");
         labelsEl.hidden = pMode; if (!pMode) hint.hidden = false;
         if (typeof after === "function") after();
       });
