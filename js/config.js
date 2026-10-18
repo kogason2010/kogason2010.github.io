@@ -207,6 +207,15 @@ window.PORTFOLIO = {
     },
 
     /* ---------- Built-in apps ---------- */
+    /* ---------- The 3D lab (opens full-page and zooms out of its monitor) ---------- */
+    {
+      type: "github",
+      repo: "kogason2010/lab",
+      title: "Lab",
+      open: "top",              // leave KogasonOS and open the lab in this tab
+      hash: "#desktop",         // the lab starts inside its monitor and pulls back to the room
+      description: "A 3D analytical chemistry lab: an HPLC, a Nexera IC bench, a TOC analyzer and a fume hood distillation. Its monitor leads back here.",
+    },
     { type: "builtin", id: "showcase", title: "Showcase", app: "showcase", icon: "showcase" },
     { type: "builtin", id: "explorer", title: "File Explorer", app: "explorer", location: "home", icon: "explorer" },
     { type: "builtin", id: "photos", title: "Photos", app: "photos", icon: "photos" },
@@ -296,8 +305,8 @@ Shortcuts
   ],
 
   /* Where things appear (ids, or "group:<id>" for a folder) */
-  desktop: ["recycle", "showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "resolve", "photos", "about", "terminal", "restore-desktop"],
+  desktop: ["recycle", "lab", "showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "resolve", "photos", "about", "terminal", "restore-desktop"],
   pinned: ["showcase", "explorer", "group:appnotes", "group:explainers", "hplc-tools", "solvane", "resolve", "photos", "terminal", "settings", "notepad", "about", "readme"],
-  taskbar: ["explorer", "showcase", "hplc-tools", "photos", "terminal"],
+  taskbar: ["lab", "explorer", "showcase", "hplc-tools", "photos", "terminal"],
   startup: ["showcase"],
 };

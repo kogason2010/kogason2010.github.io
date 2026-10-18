@@ -720,6 +720,8 @@
     }
     if (r.type === 'group') return openWindow({ key: 'loc:' + t, app: 'explorer', location: t });
     const a = r.app;
+    /* Entries marked open: "top" replace KogasonOS in this tab instead of opening a window (the 3D lab). */
+    if (a.open === 'top' && a.url) { location.assign(a.url.replace(/#.*$/, '') + (a.hash || '')); return null; }
     if (a.kind === 'site') return openWindow({ key: a.id, app: 'site', ref: a, ...extra });
     if (a.kind === 'doc') return openWindow({ key: a.id, app: 'notepad', ref: a });
     if (a.app === 'explorer') {
