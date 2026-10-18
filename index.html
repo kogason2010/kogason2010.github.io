@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Portfolio of kogason2010: a 3D analytical chemistry lab, with KogasonOS running on its monitor.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="canonical" href="https://kogason2010.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="kogason2010 · 3D lab">
+<meta property="og:description" content="A 3D analytical chemistry lab with KogasonOS on its monitor: interactive 3D websites about analytical science.">
+<meta property="og:url" content="https://kogason2010.github.io/">
+<meta property="og:image" content="https://kogason2010.github.io/og-lab.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0f181e">
 <style>
   :root { color-scheme: light; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   body { margin: 0; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
@@ -110,7 +118,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 .sheet {
   position: fixed; z-index: 3;
   top: calc(16px + env(safe-area-inset-top, 0px));
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  max-height: calc(100% - 32px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   right: max(16px, env(safe-area-inset-right, 0px));
   width: min(400px, calc(100% - 32px));
   background: var(--sheet); border: 1px solid var(--line); border-radius: 18px;
@@ -123,7 +131,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 .sheet .kicker { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .sheet h2 { margin: 6px 0 0; font: 800 28px/1.05 var(--display); letter-spacing: -.015em; text-wrap: balance; }
 .close { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 18px; cursor: pointer; }
-.sheet .body { padding: 16px 20px 22px; overflow-y: auto; display: grid; gap: 14px; align-content: start; line-height: 1.55; }
+.sheet .body { min-height: 0; padding: 16px 20px 22px; overflow-y: auto; display: grid; gap: 14px; align-content: start; line-height: 1.55; }
 .sheet .body p { margin: 0; max-width: 62ch; }
 .sheet a { color: var(--accent); }
 .row { display: grid; gap: 4px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
@@ -196,8 +204,82 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 .launch .addr { font: 400 12px/1 var(--mono); color: var(--ink-soft); user-select: all; }
 .tb-clock { justify-self: end; text-align: right; font: 400 12px/1.35 "Segoe UI", var(--body); font-variant-numeric: tabular-nums; }
 
+/* Intro actions: projects one click from the first screen */
+.tag .intro-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; pointer-events: auto; }
+.tag .intro-actions .btn { text-decoration: none; display: inline-flex; align-items: center; }
+.tag .featured { margin-top: 8px; font: 400 12px/1.5 var(--mono); color: var(--ink-soft); pointer-events: auto; max-width: 42ch; }
+.tag .featured a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+.tag .featured a:hover { border-bottom-color: var(--accent); }
+.tag a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sheet .body .also { font-size: 14px; color: var(--ink-soft); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* IC Workstation: the usable computer on the Nexera IC bench */
+.ws { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center; background: color-mix(in srgb, var(--bg) 55%, transparent);
+  padding-block: calc(16px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  opacity: 0; transition: opacity .3s; }
+.ws.show { opacity: 1; }
+.ws-win { width: min(1080px, 100%); height: min(720px, 100%); display: flex; flex-direction: column; overflow: hidden;
+  background: var(--sheet); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
+.ws-bar { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; background: var(--bg-2); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.ws-title { font: 800 15px/1 var(--display); letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 8px; }
+.ws-title::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--glow); }
+.ws-tabs { display: flex; gap: 4px; flex: 1; min-width: 0; overflow-x: auto; }
+.ws-tabs button { font: 500 12px/1 var(--mono); padding: 8px 12px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
+.ws-tabs button[aria-selected="true"] { background: var(--sheet); color: var(--ink); border-color: var(--line); }
+.ws-close { font: 500 12px/1 var(--mono); padding: 9px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--sheet); color: var(--ink); cursor: pointer; white-space: nowrap; }
+.ws-close:hover, .ws-tabs button:hover { border-color: var(--accent); }
+.ws-tabs button:focus-visible, .ws-close:focus-visible, .ws-topic:focus-visible, .ws input:focus-visible, .ws-seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ws-body { flex: 1; min-height: 0; overflow: auto; padding: 18px; }
+.ws-status { padding: 8px 16px; border-top: 1px solid var(--line); font: 400 11px/1.4 var(--mono); color: var(--ink-soft); background: var(--bg-2); }
+.ws-cols { display: grid; grid-template-columns: minmax(200px, 250px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.ws-topics { display: grid; gap: 6px; }
+.ws-topic { text-align: left; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font: 600 13px/1.3 var(--body); }
+.ws-topic small { display: block; font: 400 11px/1.3 var(--mono); color: var(--ink-soft); margin-top: 3px; }
+.ws-topic[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.ws-detail { min-width: 0; display: grid; gap: 14px; }
+.ws-detail h3 { margin: 0; font: 800 24px/1.1 var(--display); letter-spacing: -.015em; text-wrap: balance; }
+.ws-detail .lede { margin: 0; color: var(--ink-soft); max-width: 62ch; line-height: 1.5; }
+.ws-table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; }
+.ws-table { width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.45; }
+.ws-table th, .ws-table td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+.ws-table tr:last-child td, .ws-table tr:last-child th { border-bottom: 0; }
+.ws-table thead th { font: 600 12px/1.2 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soft); background: var(--bg-2); }
+.ws-table tbody th { font: 500 12px/1.4 var(--mono); color: var(--ink-soft); width: 26%; }
+.ws-choose { margin: 0; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--glow) 12%, transparent); border: 1px solid color-mix(in srgb, var(--glow) 40%, transparent); line-height: 1.5; }
+.ws-choose b { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-right: 6px; }
+.ws-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.ws-form label { display: grid; gap: 6px; font: 500 12px/1.2 var(--mono); color: var(--ink-soft); }
+.ws-form input { font: 500 15px/1 var(--mono); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); width: 100%; box-sizing: border-box; font-variant-numeric: tabular-nums; }
+.ws-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 16px; }
+.ws-res { padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; display: grid; gap: 4px; }
+.ws-res span { font: 400 11px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.ws-res b { font: 700 22px/1.1 var(--mono); font-variant-numeric: tabular-nums; }
+.ws-res small { color: var(--ink-soft); font-size: 12px; }
+.ws-note { margin: 14px 0 0; color: var(--ink-soft); font-size: 13px; line-height: 1.5; max-width: 70ch; }
+.ws-seg { display: inline-flex; gap: 4px; padding: 3px; border-radius: 10px; background: var(--bg-2); border: 1px solid var(--line); margin-bottom: 12px; }
+.ws-seg button { font: 500 12px/1 var(--mono); padding: 8px 12px; border-radius: 7px; border: 0; background: transparent; color: var(--ink-soft); cursor: pointer; }
+.ws-seg button[aria-pressed="true"] { background: var(--sheet); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.ws-chart { width: 100%; height: 300px; display: block; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.ws-run-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; font: 400 12px/1.4 var(--mono); color: var(--ink-soft); }
+@media (max-width: 720px) {
+  .ws-cols { grid-template-columns: minmax(0, 1fr); }
+  .ws-topics { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .ws-chart { height: 220px; }
+}
+
+/* Background: a slow color drift behind the room */
+#stage::before { content: ""; position: absolute; inset: -20%; z-index: -1; pointer-events: none;
+  background: radial-gradient(38% 34% at 18% 26%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 70%),
+              radial-gradient(34% 30% at 82% 74%, color-mix(in srgb, var(--glow) 15%, transparent), transparent 70%),
+              radial-gradient(30% 28% at 70% 18%, color-mix(in srgb, #b48cff 12%, transparent), transparent 70%);
+  animation: bgdrift 46s ease-in-out infinite alternate; }
+@keyframes bgdrift { from { transform: translate(-4%, -3%) scale(1); } to { transform: translate(4%, 3%) scale(1.08); } }
+@media (prefers-reduced-motion: reduce) { #stage::before { animation: none; } }
 @media (max-width: 640px) {
   .tag p { display: none; }
+  .tag .featured { display: none; }
   .sheet { top: auto; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; max-height: 62%; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
   .sheet.closed { transform: translateY(calc(100% + 40px)); }
   .hot { font-size: 11px; }
@@ -206,13 +288,19 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 </style>
 </head>
 <body>
+<noscript><div style="position:fixed;inset:0;overflow:auto;background:#0f181e;color:#e3ecf1;font:16px/1.6 system-ui,sans-serif;padding:48px 16px;z-index:10"><div style="max-width:640px;margin:0 auto"><h1>kogason2010</h1><p>The 3D lab needs JavaScript. You can still browse <a style="color:#6aa6f0" href="https://kogason2010.github.io/projects/">every project</a> or open <a style="color:#6aa6f0" href="https://kogason2010.github.io/os/">KogasonOS</a>.</p></div></div></noscript>
 <div id="stage"></div>
 <div id="labels"></div>
 
 <div class="tag">
   <span class="eyebrow">Portfolio · lab 01</span>
   <h1>kogason2010</h1>
-  <p>Interactive web pages built from instrument application notes. Click around the lab.</p>
+  <p>Interactive 3D sites about analytical science. Explore the lab, or jump straight to the projects.</p>
+  <div class="intro-actions">
+    <a class="btn primary" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">View projects</a>
+    <a class="btn" href="https://kogason2010.github.io/projects/" target="_blank" rel="noopener" data-same>All projects</a>
+  </div>
+  <p class="featured">Featured: <a href="https://kogason2010.github.io/HPLC-tools/" target="_blank" rel="noopener" data-launch="hplc-tools">HPLC Tools</a> · <a href="https://kogason2010.github.io/nexera-ic/" target="_blank" rel="noopener" data-launch="nexera-ic">Nexera IC</a> · <a href="https://kogason2010.github.io/lcms-2050-oligos/" target="_blank" rel="noopener" data-launch="lcms-2050-oligos">Strand by Strand</a></p>
 </div>
 
 <div class="tools">
@@ -231,6 +319,58 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   </header>
   <div class="body" id="sheetBody"></div>
 </aside>
+
+<div class="ws" id="ws" hidden role="dialog" aria-modal="true" aria-labelledby="wsTitle">
+  <div class="ws-win">
+    <div class="ws-bar">
+      <span class="ws-title" id="wsTitle">IC Workstation</span>
+      <nav class="ws-tabs" role="tablist" aria-label="Workstation tools">
+        <button type="button" role="tab" id="wsTab-columns" data-tab="columns" aria-selected="true">Columns</button>
+        <button type="button" role="tab" id="wsTab-scale" data-tab="scale" aria-selected="false">Scale a method</button>
+        <button type="button" role="tab" id="wsTab-run" data-tab="run" aria-selected="false">Typical separation</button>
+      </nav>
+      <button type="button" class="ws-close" id="wsClose">← Back to lab</button>
+    </div>
+    <div class="ws-body">
+      <section data-panel="columns" role="tabpanel" aria-labelledby="wsTab-columns">
+        <div class="ws-cols">
+          <div class="ws-topics" id="wsTopics"></div>
+          <div class="ws-detail" id="wsDetail" aria-live="polite"></div>
+        </div>
+      </section>
+      <section data-panel="scale" role="tabpanel" aria-labelledby="wsTab-scale" hidden>
+        <div class="ws-detail">
+          <h3>Scale a method to a new column</h3>
+          <p class="lede">Moving to a different column diameter or length? Keep the same linear velocity and these are the numbers that change.</p>
+        </div>
+        <form class="ws-form" id="wsScale" onsubmit="return false" style="margin-top:16px">
+          <label for="sOldId">Current i.d. (mm)<input id="sOldId" type="number" min="0.5" max="10" step="0.1" value="4"></label>
+          <label for="sNewId">New i.d. (mm)<input id="sNewId" type="number" min="0.5" max="10" step="0.1" value="2"></label>
+          <label for="sFlow">Current flow (mL/min)<input id="sFlow" type="number" min="0.01" max="10" step="0.01" value="1.0"></label>
+          <label for="sInj">Current injection (µL)<input id="sInj" type="number" min="1" max="1000" step="1" value="25"></label>
+          <label for="sOldL">Current length (mm)<input id="sOldL" type="number" min="10" max="500" step="5" value="250"></label>
+          <label for="sNewL">New length (mm)<input id="sNewL" type="number" min="10" max="500" step="5" value="150"></label>
+        </form>
+        <div class="ws-results" id="wsScaleOut"></div>
+        <p class="ws-note">Flow and injection volume scale with the square of the diameter. At the same linear velocity, run time and backpressure scale with length, and resolution with its square root. Real columns differ in particle size and chemistry, so treat these as starting points.</p>
+      </section>
+      <section data-panel="run" role="tabpanel" aria-labelledby="wsTab-run" hidden>
+        <div class="ws-detail">
+          <h3>Typical separation</h3>
+          <p class="lede">The same water sample, run once on an anion-exchange column and once on a cation-exchange column.</p>
+        </div>
+        <div class="ws-seg" role="group" aria-label="Column type" style="margin-top:14px">
+          <button type="button" data-mode="anion" aria-pressed="true">Anion column</button>
+          <button type="button" data-mode="cation" aria-pressed="false">Cation column</button>
+        </div>
+        <canvas class="ws-chart" id="wsChart" role="img" aria-label="Illustrative ion chromatogram"></canvas>
+        <div class="ws-run-meta" id="wsRunMeta"></div>
+        <p class="ws-note">Illustrative chromatogram showing a typical elution order. Actual retention times depend on the column, eluent and conditions.</p>
+      </section>
+    </div>
+    <div class="ws-status">General ion chromatography guidance, not specifications for any particular instrument or column.</div>
+  </div>
+</div>
 
 <div class="desk" id="desk" hidden aria-label="Desktop portfolio">
   <div class="dicons" id="dicons" hidden></div>
@@ -264,7 +404,8 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
       html: `
         <p>I take application notes, the short technical write-ups that show an instrument solving a real analytical problem, and rebuild them as interactive web pages.</p>
         <p>The rule for every page is the same: stay factual and accurate to the source. The interactivity is there to make the method easier to follow, not to dress it up.</p>
-        <div class="chips"><span class="chip">HTML</span><span class="chip">JavaScript</span><span class="chip">GitHub Pages</span><span class="chip">Three.js</span></div>`
+        <div class="chips"><span class="chip">HTML</span><span class="chip">JavaScript</span><span class="chip">GitHub Pages</span><span class="chip">Three.js</span></div>
+        <a class="cta" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Browse the projects</a>`
     },
     notes: {
       kicker: "Desktop · app note series",
@@ -282,8 +423,9 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
         <p>Nexera IC is Shimadzu's ion chromatograph, announced in February 2026. Ion chromatography separates charged species, such as the anions in drinking water, on an ion-exchange column.</p>
         <p>Shimadzu highlights a compact design, low maintenance, a simpler interface, and software that watches system status and results to help prevent errors.</p>
         <div class="row"><span class="k">Featured applications</span><span class="v">Drinking-water analysis following EPA Method 300.1 · high-sensitivity analysis with a cation suppressor</span></div>
-        <a class="cta" href="https://kogason2010.github.io/nexera-ic/" target="_blank" rel="noopener">Open my Nexera IC site</a>
-        <p>Also see <a href="https://kogason2010.github.io/nexera-ic-applications/" target="_blank" rel="noopener">Nexera IC Applications</a> and <a href="https://www.shimadzu.com/an/products/liquid-chromatography/ion-chromatograph/nexera-ic/index.html" target="_blank" rel="noopener">Shimadzu's product page</a>. For research use only.</p>`
+        <div class="row"><span class="k">IC workstation</span><span class="v">Click the computer on the bench to compare column types and scale a method</span></div>
+        <a class="cta" href="https://kogason2010.github.io/nexera-ic/" target="_blank" rel="noopener" data-launch="nexera-ic">Open the Nexera IC project</a>
+        <p>Also see <a href="https://kogason2010.github.io/nexera-ic-applications/" target="_blank" rel="noopener" data-launch="nexera-ic-applications">Nexera IC Applications</a> and <a href="https://www.shimadzu.com/an/products/liquid-chromatography/ion-chromatograph/nexera-ic/index.html" target="_blank" rel="noopener">Shimadzu's product page</a>. For research use only.</p>`
     },
     hplc: {
       kicker: "Back bench · HPLC",
@@ -291,7 +433,8 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
       html: `
         <p>High-performance liquid chromatography pumps a liquid sample through a packed column at high pressure. Compounds move through the column at different speeds, so they reach the detector one after another.</p>
         <div class="row"><span class="k">Stack, top to bottom</span><span class="v">Solvent bottles · system controller · degasser · detector · pump · autosampler, with the column oven in the tower beside it</span></div>
-        <div class="row"><span class="k">On the monitor</span><span class="v">A chromatogram: detector signal over run time</span></div>`
+        <a class="cta" href="https://kogason2010.github.io/hplc-detectors/" target="_blank" rel="noopener" data-launch="hplc-detectors">See related project: HPLC Detectors</a>
+        <p class="also">Also: <a href="https://kogason2010.github.io/HPLC-tools/" target="_blank" rel="noopener" data-launch="hplc-tools">HPLC Tools</a>, browser calculators for everyday HPLC work.</p>`
     },
     toc: {
       kicker: "Island bench · TOC analyzer",
@@ -300,7 +443,8 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
         <p>A total organic carbon analyzer measures how much organically bound carbon is in a water sample.</p>
         <p>A common method oxidizes the sample over a heated catalyst, which turns the carbon into CO₂, then measures that CO₂ with a non-dispersive infrared (NDIR) detector.</p>
         <div class="row"><span class="k">Turntable</span><span class="v">Rotates sample vials to the injection needle, one at a time</span></div>
-        <div class="row"><span class="k">Orange window</span><span class="v">The furnace, shown glowing</span></div>`
+        <div class="row"><span class="k">Orange window</span><span class="v">The furnace, shown glowing</span></div>
+        <a class="cta" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Browse all projects</a>`
     },
     build: {
       kicker: "Workstation · this lab",
@@ -670,7 +814,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     g.fillStyle = "#97a9b4"; g.fillText("min", w - 30, h - 6);
   }, 320, 190);
   // Monitor showing a desktop (click opens the desktop portfolio)
-  const gScreen = hotGroup("desktop", "Desktop", new THREE.Vector3(1.3, 3.6, -3.85));
+  const gScreen = hotGroup("desktop", "Projects", new THREE.Vector3(1.3, 3.6, -3.85));
   function scaleAbout(g, s, px, py, pz) { g.scale.setScalar(s); g.position.set(px * (1 - s), py * (1 - s), pz * (1 - s)); }
   const deskCanvas = document.createElement("canvas"); deskCanvas.width = 768; deskCanvas.height = 445;
   const deskTex = new THREE.CanvasTexture(deskCanvas); deskTex.encoding = THREE.sRGBEncoding; deskTex.anisotropy = 4;
@@ -1018,12 +1162,13 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     g.fillStyle = "#1d2c36"; g.fillRect(0, H - 24, W, 24); g.fillStyle = "#3fd17a"; g.fillRect(10, H - 16, 8, 8);
     g.fillStyle = "#cfe3ee"; g.fillText("Ready  ·  run 4 of 12", 24, H - 8);
   }, 320, 190);
-  box(0.04, 0.5, 0.84, C.metal, BX - 0.2, BT + 0.44, pcZ, gInst);
-  plane(0.78, 0.44, new THREE.MeshBasicMaterial({ map: icSoft }), BX - 0.178, BT + 0.44, pcZ, Math.PI / 2, gInst);
-  box(0.06, 0.2, 0.06, C.metal, BX - 0.24, BT + 0.1, pcZ, gInst);
-  box(0.22, 0.02, 0.28, C.metal, BX - 0.22, BT + 0.01, pcZ, gInst);
-  box(0.2, 0.025, 0.56, 0x3a4047, BX + 0.18, BT + 0.013, pcZ, gInst);
-  box(0.11, 0.02, 0.07, 0x3a4047, BX + 0.2, BT + 0.012, pcZ - 0.4, gInst);
+  const gPC = hotGroup("icpc", "IC workstation", new THREE.Vector3(BX, BT + 1.0, pcZ));
+  box(0.04, 0.5, 0.84, C.metal, BX - 0.2, BT + 0.44, pcZ, gPC);
+  const icScreen = plane(0.78, 0.44, new THREE.MeshBasicMaterial({ map: icSoft }), BX - 0.178, BT + 0.44, pcZ, Math.PI / 2, gPC);
+  box(0.06, 0.2, 0.06, C.metal, BX - 0.24, BT + 0.1, pcZ, gPC);
+  box(0.22, 0.02, 0.28, C.metal, BX - 0.22, BT + 0.01, pcZ, gPC);
+  box(0.2, 0.025, 0.56, 0x3a4047, BX + 0.18, BT + 0.013, pcZ, gPC);
+  box(0.11, 0.02, 0.07, 0x3a4047, BX + 0.2, BT + 0.012, pcZ - 0.4, gPC);
   box(0.42, 0.48, 0.2, 0x2a3036, BX, 0.61, pcZ + 0.3, gInst);
   led(BX + 0.215, 0.78, pcZ + 0.3, 0x63d3ff, gInst);
   // lower shelf: waste carboy + consumables
@@ -1138,6 +1283,81 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     cyl(0.25, 0.25, 0.03, C.steel, p[0], 0.03, p[1], null, 5, { metalness: 0.6 });
   });
 
+  /* ---------- Robot vacuum: an original little cleaner that tours the open floor ---------- */
+  const bot = new THREE.Group(); lab.add(bot);
+  const BOT_R = 0.24;
+  cyl(BOT_R, BOT_R * 0.97, 0.11, 0x2b3136, 0, 0.066, 0, bot, 40, { roughness: 0.35, metalness: 0.25 });
+  cyl(BOT_R * 0.94, BOT_R * 0.94, 0.012, 0xe6ebee, 0, 0.127, 0, bot, 40, { roughness: 0.3 });
+  cyl(BOT_R * 0.38, BOT_R * 0.38, 0.006, 0xcfd6da, 0, 0.136, 0, bot, 32, { roughness: 0.25 });
+  cyl(0.045, 0.045, 0.012, 0x1a1f23, 0, 0.14, 0, bot, 24);
+  const bumper = new THREE.Mesh(new THREE.TorusGeometry(BOT_R + 0.004, 0.022, 8, 28, Math.PI), mat(0x1a1f23, { roughness: 0.6 }));
+  bumper.rotation.set(Math.PI / 2, 0, -Math.PI / 2); bumper.position.y = 0.06; bumper.castShadow = true; bot.add(bumper);
+  const botLight = new THREE.MeshBasicMaterial({ color: 0x3fe0d0 });
+  const lightArc = new THREE.Mesh(new THREE.TorusGeometry(BOT_R * 0.7, 0.009, 6, 24, Math.PI * 0.6), botLight);
+  lightArc.rotation.set(Math.PI / 2, 0, -Math.PI * 0.3); lightArc.position.y = 0.135; bot.add(lightArc);
+  box(0.05, 0.022, 0.09, 0x1a1f23, BOT_R * 0.72, 0.138, 0, bot);
+  [-1, 1].forEach(s => { const wh = cyl(0.036, 0.036, 0.03, 0x111111, -0.02, 0.036, s * (BOT_R - 0.035), bot, 16); wh.rotation.x = Math.PI / 2; });
+  const brush = new THREE.Group(); brush.position.set(BOT_R * 0.6, 0.014, -BOT_R * 0.6); bot.add(brush);
+  for (let i = 0; i < 3; i++) { const b = box(0.11, 0.006, 0.012, 0x6d7a82, 0.055, 0, 0, brush); b.position.set(Math.cos(i * 2.094) * 0.055, 0, Math.sin(i * 2.094) * 0.055); b.rotation.y = -i * 2.094; }
+  // a loop through the open floor, around the island, clear of benches, stools and the gas cylinder
+  const botPath = new THREE.CatmullRomCurve3([[-1.6, -2.35], [0.2, -2.12], [2.6, -2.12], [3.45, -1.5], [3.55, 0.3], [3.6, 2.6], [2.6, 3.45], [0.4, 3.5], [-1.8, 3.1], [-2.3, 0.45], [-2.2, -1.2]]
+    .map(p => new THREE.Vector3(p[0], 0, p[1])), true, "centripetal");
+  const botLen = botPath.getLength();
+  let botU = Math.random(), botSpin = 0, botFlash = 0, botNext = 8 + Math.random() * 6;
+  function spinBot() { botSpin = Math.max(botSpin, 1.3); botFlash = 1.3; }
+  function updateBot(dt, time) {
+    brush.rotation.y += dt * 18;
+    botNext -= dt;
+    if (botNext <= 0 && botSpin <= 0) { spinBot(); botNext = 14 + Math.random() * 10; }
+    const p = botPath.getPointAt(botU), t = botPath.getTangentAt(botU), heading = Math.atan2(-t.z, t.x);
+    if (botSpin > 0) { botSpin -= dt; bot.rotation.y = heading + (1 - Math.max(0, botSpin) / 1.3) * Math.PI * 2; }
+    else { botU = (botU + dt * 0.32 / botLen) % 1; bot.rotation.y = heading; }
+    bot.position.set(p.x, 0.003, p.z);
+    botFlash -= dt;
+    botLight.color.set(botFlash > 0 && Math.sin(time * 22) > 0 ? 0xffffff : 0x3fe0d0);
+  }
+  updateBot(0, 0);
+
+  /* ---------- Background: slow floating molecules around the diorama ---------- */
+  const bgGroup = new THREE.Group(); scene.add(bgGroup);
+  const hexTex = tex((g, w) => {
+    const r = w * 0.3, pts = [];
+    for (let i = 0; i < 6; i++) { const a = Math.PI / 6 + i * Math.PI / 3; pts.push([w / 2 + Math.cos(a) * r, w / 2 + Math.sin(a) * r]); }
+    g.strokeStyle = "#fff"; g.lineWidth = 6; g.lineJoin = "round"; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); g.stroke();
+    g.lineWidth = 4; g.beginPath(); g.arc(w / 2, w / 2, r * 0.55, 0, 7); g.stroke();
+    g.fillStyle = "#fff"; pts.forEach(p => { g.beginPath(); g.arc(p[0], p[1], 8, 0, 7); g.fill(); });
+  }, 128, 128);
+  const glowTex = tex((g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(0.35, "rgba(255,255,255,0.6)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, w, w); }, 64, 64);
+  const BG_COLS = [0x63d3ff, 0x4fd1b8, 0xb48cff, 0xffb24a, 0x7aa2ff].map(c => new THREE.Color(c));
+  const viewDir = HOME.clone().sub(TARGET).normalize();
+  function bgCloud(n, size, map, opacity) {
+    const pos = new Float32Array(n * 3), col = new Float32Array(n * 3), base = new Float32Array(n * 3), ph = new Float32Array(n);
+    const v = new THREE.Vector3();
+    for (let i = 0; i < n; i++) {
+      do { v.set(-24 + Math.random() * 34, -9 + Math.random() * 22, -24 + Math.random() * 34); }
+      while ((Math.abs(v.x) < 5.2 && Math.abs(v.z) < 5.2 && v.y > -1.5 && v.y < 6.5) || v.clone().sub(TARGET).dot(viewDir) > 1.5);
+      base.set([v.x, v.y, v.z], i * 3); pos.set([v.x, v.y, v.z], i * 3); ph[i] = Math.random() * 6.28;
+      const c = BG_COLS[i % BG_COLS.length]; col.set([c.r, c.g, c.b], i * 3);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size, map, vertexColors: true, transparent: true, opacity, depthWrite: false, sizeAttenuation: true }));
+    pts.frustumCulled = false; bgGroup.add(pts);
+    return { geo, pos, base, ph, n };
+  }
+  const bgHex = bgCloud(70, 1.1, hexTex, 0.5), bgDots = bgCloud(240, 0.35, glowTex, 0.55);
+  function updateBg(time) {
+    [bgHex, bgDots].forEach((c, k) => {
+      for (let i = 0; i < c.n; i++) {
+        const j = i * 3, p = c.ph[i];
+        c.pos[j] = c.base[j] + Math.sin(time * 0.11 + p) * 0.6;
+        c.pos[j + 1] = c.base[j + 1] + Math.sin(time * (0.22 + k * 0.1) + p * 1.3) * (0.8 + k * 0.3);
+        c.pos[j + 2] = c.base[j + 2] + Math.cos(time * 0.09 + p) * 0.6;
+      }
+      c.geo.attributes.position.needsUpdate = true;
+    });
+  }
+
   lab.updateMatrixWorld(true);
   { const ab = new THREE.Box3(), ac = new THREE.Vector3();
     hotspots.forEach(h => { ab.setFromObject(h.focusObj || h.group); ab.getCenter(ac); h.anchor.set(ac.x, ab.max.y + 0.28, ac.z); }); }
@@ -1181,7 +1401,8 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     Object.assign(cssRenderer.domElement.style, { zIndex: "5", pointerEvents: "auto" });
     renderer.domElement.style.visibility = "hidden";
     try { history.pushState({ os: true }, "", "#os"); } catch (e) {}
-    try { osFrame.contentWindow.postMessage({ type: "kogasonos:enter" }, location.origin); } catch (e) {}
+    try { osFrame.contentWindow.postMessage({ type: "kogasonos:enter", launch: pendingLaunch || undefined }, location.origin); } catch (e) {}
+    pendingLaunch = null;
     try { osFrame.focus(); } catch (e) {}
   }
   function exitOsFull() {
@@ -1199,6 +1420,29 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     if (location.hash === "#os") history.back(); else exitOsFull();
   });
   window.addEventListener("popstate", () => { if (osFull && location.hash !== "#os") exitOsFull(); });
+
+  /* ---------- Project links: open the project inside KogasonOS on the monitor ---------- */
+  const PROJECT_URLS = {
+    showcase: "https://kogason2010.github.io/os/",
+    "hplc-tools": "https://kogason2010.github.io/HPLC-tools/",
+    "hplc-detectors": "https://kogason2010.github.io/hplc-detectors/",
+    "nexera-ic": "https://kogason2010.github.io/nexera-ic/",
+    "nexera-ic-applications": "https://kogason2010.github.io/nexera-ic-applications/",
+    "lcms-2050-oligos": "https://kogason2010.github.io/lcms-2050-oligos/",
+    "nexera-uc-epsa": "https://kogason2010.github.io/nexera-uc-epsa/",
+    solvane: "https://kogason2010.github.io/solvane/",
+  };
+  let pendingLaunch = null;
+  function openProjects(id) {
+    if (EMBED && osLive) { pendingLaunch = id; openDesktop(); return; }
+    location.assign(PROJECT_URLS[id] || "https://kogason2010.github.io/os/");
+  }
+  if (ON_SITE) document.querySelectorAll("a[data-same]").forEach((a) => a.removeAttribute("target"));
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest && e.target.closest("a[data-launch]");
+    if (!a || !ON_SITE) return;               // elsewhere (e.g. a preview), the link opens normally
+    e.preventDefault(); openProjects(a.dataset.launch);
+  });
 
   /* ---------- Lights ---------- */
   const hemi = new THREE.HemisphereLight(0xfff4e8, 0x5f6f7a, 0.5); scene.add(hemi);
@@ -1433,6 +1677,11 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     const r = renderer.domElement.getBoundingClientRect();
     out.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
   }
+  function botHit(ev) {
+    if (pMode || deskOpen || !lab.visible) return false;
+    toNDC(ev, ndc); ray.setFromCamera(ndc, camera);
+    return ray.intersectObject(bot, true).length > 0;
+  }
   function pick(ev) {
     if (pMode) return null;
     toNDC(ev, ndc);
@@ -1446,12 +1695,12 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   const cv = renderer.domElement;
   cv.addEventListener("pointermove", ev => {
     toNDC(ev, pointerNDC); pointerIn = true;
-    if (ev.pointerType === "mouse" && !downAt) setHover(pick(ev));
+    if (ev.pointerType === "mouse" && !downAt) { const k = pick(ev); setHover(k); cv.style.cursor = k || botHit(ev) ? "pointer" : "grab"; }
   });
   cv.addEventListener("pointerleave", () => { pointerIn = false; });
   cv.addEventListener("pointerdown", ev => { downAt = { x: ev.clientX, y: ev.clientY }; toNDC(ev, pointerNDC); pointerIn = true; });
   cv.addEventListener("pointerup", ev => {
-    if (downAt && Math.hypot(ev.clientX - downAt.x, ev.clientY - downAt.y) < 6) { const k = pick(ev); if (k) openSection(k); }
+    if (downAt && Math.hypot(ev.clientX - downAt.x, ev.clientY - downAt.y) < 6) { if (botHit(ev)) spinBot(); else { const k = pick(ev); if (k) openSection(k); } }
     downAt = null;
     if (ev.pointerType !== "mouse") pointerIn = false;
   });
@@ -1462,6 +1711,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   const sheetBody = document.getElementById("sheetBody");
   function openSection(key) {
     if (key === "desktop") { openDesktop(); return; }
+    if (key === "icpc") { openWorkstation(); return; }
     const s = SECTIONS[key]; if (!s) return;
     document.getElementById("sheetKicker").textContent = s.kicker;
     document.getElementById("sheetTitle").textContent = s.title;
@@ -1480,7 +1730,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   document.getElementById("closeBtn").addEventListener("click", () => closeSheet());
   document.addEventListener("keydown", e => {
     if (e.key !== "Escape") return;
-    if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else closeSheet();
+    if (wsOpen) closeWorkstation(); else if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else closeSheet();
   });
 
   /* ---------- Desktop portfolio (opens when the monitor is clicked) ---------- */
@@ -1610,6 +1860,169 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   }
   document.getElementById("deskBack").addEventListener("click", () => closeDesktop());
 
+  /* ---------- IC Workstation: the usable computer on the Nexera IC bench ---------- */
+  const WS_TOPICS = [
+    { id: "exchange", name: "Anion vs cation exchange", hint: "Which ions the column holds",
+      lede: "The column's fixed charge decides which ions it holds on to. Opposite charges attract, so a positively charged resin retains anions and a negatively charged one retains cations.",
+      cols: ["Anion-exchange", "Cation-exchange"],
+      rows: [
+        ["Retains", "Negative ions (anions)", "Positive ions (cations)"],
+        ["Fixed groups on the resin", "Positively charged, typically quaternary ammonium", "Negatively charged, typically carboxylate or sulfonate"],
+        ["Typical eluent", "Carbonate/bicarbonate, or hydroxide", "Methanesulfonic acid or another dilute acid"],
+        ["Common ions, typical order", "F⁻, Cl⁻, NO₂⁻, Br⁻, NO₃⁻, PO₄³⁻, SO₄²⁻", "Li⁺, Na⁺, NH₄⁺, K⁺, Mg²⁺, Ca²⁺"],
+        ["Example method", "EPA 300.1: inorganic anions in drinking water", "ASTM D6919: alkali and alkaline-earth cations and ammonium in water"],
+      ],
+      choose: "Pick by the ions you need. Anions and cations need different columns, run one after the other or side by side on a dual-channel system." },
+    { id: "suppression", name: "Suppressed vs non-suppressed", hint: "How the background is handled",
+      lede: "Conductivity detectors see the eluent too. A suppressor after the column strips most of the eluent's conductivity so the analyte peaks stand out.",
+      cols: ["Suppressed", "Non-suppressed"],
+      rows: [
+        ["How it works", "The suppressor swaps the eluent's cations for H⁺, so a carbonate eluent becomes weakly conducting carbonic acid while the analyte becomes a more conductive acid", "No suppressor: the detector reads the analyte against the eluent's own background"],
+        ["Background conductivity", "Low", "Higher"],
+        ["Sensitivity", "Higher, with lower detection limits", "Lower, suited to higher concentrations"],
+        ["Columns and eluents", "Higher-capacity columns, stronger eluents", "Low-capacity columns with low-conductivity eluents"],
+        ["Hardware", "Needs a suppressor and its regenerant or electrolytic supply", "Simpler flow path"],
+      ],
+      choose: "Choose suppressed IC for trace levels in drinking and environmental water. Non-suppressed works for simpler, higher-concentration samples." },
+    { id: "diameter", name: "4 mm vs 2 mm i.d.", hint: "Column internal diameter",
+      lede: "A 2 mm column has a quarter of the cross-section of a 4 mm one. Run at the same linear velocity, it uses far less eluent and gives more signal for the same amount of sample.",
+      cols: ["4 mm i.d.", "2 mm i.d."],
+      rows: [
+        ["Typical flow", "About 1.0 mL/min", "About 0.25 mL/min (flow scales with diameter²)"],
+        ["Eluent use", "Baseline", "About a quarter"],
+        ["Injection volume", "Larger", "About a quarter, for the same column loading"],
+        ["Mass sensitivity", "Baseline", "Higher, because peaks are less diluted"],
+        ["System demands", "Tolerant of extra-column volume", "Needs low-dispersion tubing and fittings"],
+      ],
+      choose: "Choose 2 mm to save eluent and waste, or when sample is limited. 4 mm is the robust everyday default." },
+    { id: "length", name: "150 mm vs 250 mm length", hint: "Column length",
+      lede: "A longer column gives ions more chances to separate, at the cost of time and pressure. Resolution grows only with the square root of length.",
+      cols: ["150 mm", "250 mm"],
+      rows: [
+        ["Resolution", "Baseline", "About 1.3× higher (√(250 / 150))"],
+        ["Run time, same flow", "Baseline", "About 1.7× longer"],
+        ["Backpressure", "Baseline", "About 1.7× higher"],
+        ["Best for", "Fast screening and simple samples", "Complex samples with closely eluting ions"],
+      ],
+      choose: "Start short when the peaks are well apart. Go longer only when a critical pair needs more resolution." },
+    { id: "capacity", name: "Standard vs high capacity", hint: "Ion-exchange sites on the resin",
+      lede: "Capacity is how many ion-exchange sites the column has. More sites means more room before a big peak swamps its neighbours.",
+      cols: ["Standard capacity", "High capacity"],
+      rows: [
+        ["Sample tolerance", "Can overload with high-ionic-strength samples", "Handles salty samples and larger injections"],
+        ["Close peak pairs", "Good", "Better, with more room to separate"],
+        ["Eluent strength needed", "Lower", "Higher, often with longer runs"],
+        ["Typical use", "Clean drinking water, routine anions", "Wastewater, brines, trace ions beside large peaks"],
+      ],
+      choose: "Use high capacity when a large matrix peak, like chloride in seawater, sits next to the trace ion you care about." },
+    { id: "guard", name: "Guard vs analytical", hint: "Protecting the column",
+      lede: "A guard column is a short, inexpensive column in front of the analytical one. It takes the damage so the analytical column doesn't.",
+      cols: ["Guard column", "Analytical column"],
+      rows: [
+        ["Job", "Traps particles and strongly retained contaminants", "Does the separation"],
+        ["Length", "Short, a few centimetres", "Typically 100 to 250 mm"],
+        ["Packing", "Usually the same chemistry as its analytical column", "The resin chosen for the separation"],
+        ["Replaced", "Often, when pressure rises or peaks degrade", "Rarely, when it is well protected"],
+      ],
+      choose: "Always run a guard with real samples. Replacing it is much cheaper than replacing the analytical column." },
+  ];
+  const wsEl = document.getElementById("ws"), wsTopics = document.getElementById("wsTopics"), wsDetail = document.getElementById("wsDetail");
+  let wsTopic = "exchange", wsMode = "anion", wsOpen = false, wsHome = null;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function wsRenderTopics() {
+    wsTopics.innerHTML = WS_TOPICS.map((t) => `<button type="button" class="ws-topic" data-topic="${t.id}" aria-pressed="${t.id === wsTopic}">${esc(t.name)}<small>${esc(t.hint)}</small></button>`).join("");
+    const t = WS_TOPICS.find((x) => x.id === wsTopic);
+    wsDetail.innerHTML = `<h3>${esc(t.name)}</h3><p class="lede">${esc(t.lede)}</p>
+      <div class="ws-table-wrap"><table class="ws-table"><thead><tr><th scope="col"><span class="visually-hidden">Property</span></th><th scope="col">${esc(t.cols[0])}</th><th scope="col">${esc(t.cols[1])}</th></tr></thead>
+      <tbody>${t.rows.map((r) => `<tr><th scope="row">${esc(r[0])}</th><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("")}</tbody></table></div>
+      <p class="ws-choose"><b>When to choose</b>${esc(t.choose)}</p>`;
+  }
+  wsTopics.addEventListener("click", (e) => { const b = e.target.closest("[data-topic]"); if (!b) return; wsTopic = b.dataset.topic; wsRenderTopics(); wsTopics.querySelector(`[data-topic="${wsTopic}"]`).focus(); });
+  const num = (id, d) => { const v = parseFloat(document.getElementById(id).value); return isFinite(v) && v > 0 ? v : d; };
+  const fmt = (v, dp) => (Math.round(v * Math.pow(10, dp)) / Math.pow(10, dp)).toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  function wsScale() {
+    const oid = num("sOldId", 4), nid = num("sNewId", 2), f = num("sFlow", 1), inj = num("sInj", 25), ol = num("sOldL", 250), nl = num("sNewL", 150);
+    const k = Math.pow(nid / oid, 2), nf = f * k, saved = (f - nf) * 1440, lr = nl / ol;
+    const res = [
+      ["New flow", fmt(nf, 3) + " mL/min", "Same linear velocity"],
+      ["New injection", fmt(inj * k, 1) + " µL", "Same column loading"],
+      [saved >= 0 ? "Eluent saved / 24 h" : "Extra eluent / 24 h", fmt(Math.abs(saved) / 1000, 2) + " L", "Running continuously"],
+      ["Run time", "× " + fmt(lr, 2), "Scales with length"],
+      ["Backpressure", "× " + fmt(lr, 2), "Scales with length"],
+      ["Resolution", "× " + fmt(Math.sqrt(lr), 2), "Scales with √length"],
+    ];
+    document.getElementById("wsScaleOut").innerHTML = res.map((r) => `<div class="ws-res"><span>${esc(r[0])}</span><b>${esc(r[1])}</b><small>${esc(r[2])}</small></div>`).join("");
+  }
+  document.getElementById("wsScale").addEventListener("input", wsScale);
+  const RUNS = {
+    anion: { unit: "µS/cm", eluent: "Carbonate/bicarbonate eluent, suppressed conductivity", ions: [["F⁻", 3.1, 0.55], ["Cl⁻", 4.6, 0.9], ["NO₂⁻", 5.6, 0.32], ["Br⁻", 6.9, 0.28], ["NO₃⁻", 7.9, 0.6], ["PO₄³⁻", 10.2, 0.3], ["SO₄²⁻", 12.1, 0.75]] },
+    cation: { unit: "µS/cm", eluent: "Methanesulfonic acid eluent, suppressed conductivity", ions: [["Li⁺", 3.6, 0.3], ["Na⁺", 4.6, 0.85], ["NH₄⁺", 5.3, 0.45], ["K⁺", 6.8, 0.5], ["Mg²⁺", 9.6, 0.7], ["Ca²⁺", 11.7, 0.8]] },
+  };
+  function wsChart() {
+    const cv = document.getElementById("wsChart"), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const W = cv.clientWidth, H = cv.clientHeight; if (!W || !H) return;
+    cv.width = W * dpr; cv.height = H * dpr;
+    const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const cs = getComputedStyle(document.documentElement), ink = cs.getPropertyValue("--ink").trim(), soft = cs.getPropertyValue("--ink-soft").trim(), line = cs.getPropertyValue("--line").trim(), acc = cs.getPropertyValue("--accent").trim();
+    const run = RUNS[wsMode], T = 14, pl = 44, pr = 16, pt = 18, pb = 34, cw = W - pl - pr, ch = H - pt - pb;
+    g.clearRect(0, 0, W, H);
+    g.strokeStyle = line; g.lineWidth = 1; g.font = "11px " + cs.getPropertyValue("--mono"); g.fillStyle = soft;
+    for (let m = 0; m <= T; m += 2) { const x = pl + (m / T) * cw; g.beginPath(); g.moveTo(x, pt); g.lineTo(x, pt + ch); g.stroke(); g.textAlign = "center"; g.fillText(String(m), x, H - 14); }
+    g.textAlign = "left"; g.fillText("min", W - pr - 22, H - 2); g.fillText(run.unit, 6, pt + 4);
+    g.beginPath(); g.moveTo(pl, pt + ch); g.lineTo(pl + cw, pt + ch); g.strokeStyle = soft; g.stroke();
+    g.strokeStyle = acc; g.lineWidth = 2; g.beginPath();
+    for (let i = 0; i <= cw; i++) {
+      const t = (i / cw) * T; let y = 0.02 + 0.01 * Math.sin(t * 1.7);
+      run.ions.forEach(([, rt, h]) => { const s = 0.09 + rt * 0.012; y += h * Math.exp(-Math.pow(t - rt, 2) / (2 * s * s)); });
+      const py = pt + ch - Math.min(1, y) * ch * 0.92; i ? g.lineTo(pl + i, py) : g.moveTo(pl + i, py);
+    }
+    g.stroke();
+    g.fillStyle = ink; g.textAlign = "center"; g.font = "600 12px " + cs.getPropertyValue("--body");
+    run.ions.forEach(([n, rt, h]) => g.fillText(n, pl + (rt / T) * cw, pt + ch - h * ch * 0.92 - 8));
+    document.getElementById("wsRunMeta").innerHTML = `<span>${esc(run.eluent)}</span><span>Elution order: ${esc(run.ions.map((x) => x[0]).join(", "))}</span>`;
+  }
+  wsEl.querySelector(".ws-seg").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-mode]"); if (!b) return; wsMode = b.dataset.mode;
+    wsEl.querySelectorAll(".ws-seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); wsChart();
+  });
+  wsEl.querySelector(".ws-tabs").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-tab]"); if (!b) return;
+    wsEl.querySelectorAll(".ws-tabs [data-tab]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    wsEl.querySelectorAll("[data-panel]").forEach((p) => { p.hidden = p.dataset.panel !== b.dataset.tab; });
+    if (b.dataset.tab === "run") requestAnimationFrame(wsChart);
+  });
+  window.addEventListener("resize", () => { if (wsOpen) wsChart(); });
+  wsRenderTopics(); wsScale();
+  function openWorkstation() {
+    if (wsOpen || deskOpen) return;
+    const home = focusHome ? { pos: focusHome.pos.clone(), tgt: focusHome.tgt.clone() } : { pos: camera.position.clone(), tgt: controls.target.clone() };
+    focusHome = null; wsHome = home; wsOpen = true; deskOpen = true;
+    document.body.classList.add("os-mode");
+    closeSheet(true); setHover(null);
+    labelsEl.hidden = true; hint.hidden = true; tween = null; controls.enabled = false;
+    const sb = new THREE.Box3().setFromObject(icScreen), c = new THREE.Vector3(), s = new THREE.Vector3(); sb.getCenter(c); sb.getSize(s);
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const d = Math.max((s.y / 2) / tv, (s.z / 2) / tv / camera.aspect) * 1.04;
+    animateCamera(new THREE.Vector3(c.x + d, c.y, c.z), c, 1.0, () => {
+      wsEl.hidden = false; requestAnimationFrame(() => { wsEl.classList.add("show"); wsChart(); });
+      document.getElementById("wsClose").focus({ preventScroll: true });
+    });
+  }
+  function closeWorkstation() {
+    if (!wsOpen) return;
+    wsEl.classList.remove("show");
+    setTimeout(() => {
+      wsEl.hidden = true;
+      animateCamera(wsHome.pos, wsHome.tgt, 0.9, () => {
+        wsOpen = false; deskOpen = false; controls.enabled = true; controls.minDistance = 8;
+        document.body.classList.remove("os-mode");
+        labelsEl.hidden = pMode; if (!pMode) hint.hidden = false;
+      });
+    }, reduce ? 0 : 250);
+  }
+  document.getElementById("wsClose").addEventListener("click", closeWorkstation);
+  wsEl.addEventListener("click", (e) => { if (e.target === wsEl) closeWorkstation(); });
+
   /* ---------- Focus camera: clicked item becomes the centre of the view ---------- */
   let focusHome = null;
   const FRONT = { about: [1, 0, 0], ic: [1, 0, 0], hplc: [0, 0, 1], contact: [0, 0, 1], toc: [0, 0, 1], desktop: [0, 0, 1] };
@@ -1705,6 +2118,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
       if (!reduce) {
         leds.forEach((l, i) => { l.visible = i % 3 !== 1 || Math.sin(time * 3 + i) > -0.3; });
         updateDistill(dt, time);
+        updateBot(dt, time);
         rotorTimer += dt;
         if (rotorTimer > 1.6) { rotorTimer = 0; rotorTarget -= Math.PI * 2 / 16; }
         rotorAngle += (rotorTarget - rotorAngle) * Math.min(1, dt * 6);
@@ -1715,6 +2129,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
       furnaceGlow.intensity = night ? 0.8 : 0.0;
     }
 
+    if (!reduce && !osFull) updateBg(time);
     if (P) {
       const u = P.uniforms;
       const cur = u.uMix.value;

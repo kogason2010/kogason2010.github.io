@@ -8,7 +8,7 @@ on:
     - cron: "17 9 * * 1"
   push:
     branches: [main]
-    paths: ["os/js/config.js", "os/tools/sync-apps.mjs"]
+    paths: ["os/js/config.js", "os/tools/sync-apps.mjs", "os/tools/build-index.mjs"]
 
 permissions:
   contents: write
@@ -30,13 +30,16 @@ jobs:
       - name: Copy built sites into os/apps/
         run: node os/tools/sync-apps.mjs
 
+      - name: Rebuild the project index, sitemap and robots.txt
+        run: node os/tools/build-index.mjs
+
       - name: Commit changes
         run: |
-          if [ -n "$(git status --porcelain os/apps)" ]; then
+          if [ -n "$(git status --porcelain os/apps projects sitemap.xml robots.txt)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-            git add os/apps
-            git commit -m "Sync bundled apps"
+            git add os/apps projects sitemap.xml robots.txt
+            git commit -m "Sync bundled apps and project index"
             git push
           else
             echo "Bundled apps are already up to date."

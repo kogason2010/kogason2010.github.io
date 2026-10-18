@@ -10,7 +10,7 @@
 
   /* ---------- layers ---------- */
   const wallpaper = el('div', { id: 'wallpaper', class: 'wallbg', html: OS.traceSVG() });
-  const iconsEl = el('div', { id: 'icons', role: 'list', 'aria-label': 'Desktop' });
+  const iconsEl = el('div', { id: 'icons', role: 'group', 'aria-label': 'Desktop shortcuts' });
   const winLayer = el('div', { id: 'windows' });
   const snapEl = el('div', { id: 'snap', 'aria-hidden': 'true' });
   const desktop = el('main', { id: 'desktop', 'aria-label': sysName }, iconsEl, winLayer, snapEl);
@@ -237,7 +237,7 @@
     iconsEl.style.setProperty('--dw', CELL_W - 4 + 'px');
     iconsEl.replaceChildren(...desktopTargets().map((t) => {
       const r = resolve(t);
-      const b = el('button', { class: 'dicon', role: 'listitem', 'aria-label': r.title, dataset: { t } }, desktopIcon(t), el('span', {}, r.title));
+      const b = el('button', { class: 'dicon', type: 'button', 'aria-label': r.title, dataset: { t } }, desktopIcon(t), el('span', {}, r.title));
       b.addEventListener('click', (e) => { e.stopPropagation(); if (suppressClick) return; selectIcon(b, e.ctrlKey || e.metaKey); if (OS.coarse()) OS.launch(t); });
       b.addEventListener('dblclick', () => { if (!suppressClick) OS.launch(t); });
       b.addEventListener('keydown', (e) => {
@@ -782,8 +782,10 @@
   if (OS.embedded) {
     let started = false;
     window.addEventListener('message', (e) => {
-      if (e.origin !== location.origin || !e.data || e.data.type !== 'kogasonos:enter' || started) return;
-      started = true; runStartup();
+      if (e.origin !== location.origin || !e.data || e.data.type !== 'kogasonos:enter') return;
+      const t = e.data.launch;   // the lab can ask for a specific project (a View projects or Featured link)
+      if (!started) { started = true; if (t && t !== 'showcase') OS.launch(t); else runStartup(); }
+      else if (t) OS.launch(t);
     });
   } else runStartup();
   setTimeout(() => OS.toast({
