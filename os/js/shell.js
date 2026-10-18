@@ -774,7 +774,15 @@
     renderDesktop(); renderTaskbar(); if (openFly === 'start') renderStartHome();
   });
 
-  (CFG.startup || []).forEach((t) => OS.launch(t));
+  /* On the lab's monitor, wait until the visitor zooms in before opening the startup apps. */
+  const runStartup = () => (CFG.startup || []).forEach((t) => OS.launch(t));
+  if (OS.embedded) {
+    let started = false;
+    window.addEventListener('message', (e) => {
+      if (e.origin !== location.origin || !e.data || e.data.type !== 'kogasonos:enter' || started) return;
+      started = true; runStartup();
+    });
+  } else runStartup();
   setTimeout(() => OS.toast({
     title: 'Welcome to ' + sysName,
     body: 'Every project runs as an app here. Start with Showcase, or double-click any icon.',

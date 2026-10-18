@@ -1,5 +1,7 @@
 # KogasonOS
 
+> **Layout:** the site's front door (`index.html` at the root) is a 3D analytical chemistry lab built with Three.js. KogasonOS lives in `os/` (kogason2010.github.io/os/) and runs live on the lab's monitor: zoom into the screen to use it, and click **Lab** to zoom back out.
+
 **Live at [kogason2010.github.io](https://kogason2010.github.io/)**
 
 This is my portfolio, built to look and behave like a Windows 11 desktop. Instead of a page of links, each of my projects is an app you can open, move around, snap side by side or go full screen with. Showcase, the app that opens first, has screenshots and details for every project if you'd rather browse.
@@ -44,7 +46,7 @@ Besides the projects there's a File Explorer, Photos, Notepad, Settings and a Te
 
 ## How it works
 
-Everything on the desktop comes from one file, `js/config.js`. Each project is a single entry there, and the desktop, Start menu, taskbar, File Explorer and Showcase all build themselves from that list. Adding a GitHub project takes one line:
+Everything on the desktop comes from one file, `os/js/config.js`. Each project is a single entry there, and the desktop, Start menu, taskbar, File Explorer and Showcase all build themselves from that list. Adding a GitHub project takes one line:
 
 ```js
 { type: "github", repo: "kogason2010/my-new-site", bundle: true },
@@ -54,18 +56,18 @@ The live URL, source link and icon are worked out from the repo name. You can al
 
 ### Projects as standalone apps
 
-Rather than embedding each project from its own URL, I keep a copy of each one's built site in `apps/`, so every project runs straight from this site as its own app. Links between projects are caught and open the other project in a new window instead of navigating away.
+Rather than embedding each project from its own URL, I keep a copy of each one's built site in `os/apps/`, so every project runs straight from this site as its own app. Links between projects are caught and open the other project in a new window instead of navigating away.
 
-To keep those copies current, `tools/sync-apps.mjs` pulls the latest build of each bundled project from its repo. Projects that only keep source code in their repo (like the HPLC detectors site) get a `build` entry in the config, and the script builds them before copying. It also writes `apps/manifest.json` with each bundle's size, which File Explorer and Properties show. A GitHub Action (`.github/workflows/sync-apps.yml`) runs it every Monday, whenever `config.js` changes, and on demand from the Actions tab. It commits any changes it finds.
+To keep those copies current, `os/tools/sync-apps.mjs` pulls the latest build of each bundled project from its repo. Projects that only keep source code in their repo (like the HPLC detectors site) get a `build` entry in the config, and the script builds them before copying. It also writes `os/apps/manifest.json` with each bundle's size, which File Explorer and Properties show. A GitHub Action (`.github/workflows/sync-apps.yml`) runs it every Monday, whenever `config.js` changes, and on demand from the Actions tab. It commits any changes it finds.
 
 ### Screenshots
 
-`tools/capture-shots.mjs` opens a project's live site in a headless browser and saves four screenshots for Showcase and Photos. It also prints the lines to paste into the config.
+`os/tools/capture-shots.mjs` opens a project's live site in a headless browser and saves four screenshots for Showcase and Photos. It also prints the lines to paste into the config.
 
 ```bash
 npm install --no-save playwright
 npx playwright install chromium
-node tools/capture-shots.mjs my-new-site
+node os/tools/capture-shots.mjs my-new-site
 ```
 
 ### Other kinds of apps
@@ -86,12 +88,12 @@ python3 -m http.server
 
 | Path | What's in it |
 | --- | --- |
-| `js/config.js` | Projects, folders, screenshots, and what appears on the desktop, Start menu and taskbar |
+| `os/js/config.js` | Projects, folders, screenshots, and what appears on the desktop, Start menu and taskbar |
 | `js/core.js` | App registry, settings, window manager and snapping |
 | `js/apps.js` | File Explorer, project windows, Notepad, Terminal, Settings |
 | `js/showcase.js` | Showcase and Photos |
 | `js/shell.js` | Desktop, taskbar, Start menu, Task view, notifications |
-| `css/` | All styling, light and dark |
-| `apps/` | Bundled copies of each project's built site |
-| `media/`, `icons/`, `wallpapers/` | Screenshots, project icons and wallpaper art |
-| `tools/` | The sync and screenshot scripts |
+| `os/css/` | All styling, light and dark |
+| `os/apps/` | Bundled copies of each project's built site |
+| `os/media/`, `os/icons/`, `os/wallpapers/` | Screenshots, project icons and wallpaper art |
+| `os/tools/` | The sync and screenshot scripts |

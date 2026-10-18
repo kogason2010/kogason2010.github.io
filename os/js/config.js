@@ -44,7 +44,7 @@ window.PORTFOLIO = {
     user: "kogason2010",
     autoDiscover: true,        // add any other repo that has GitHub Pages turned on
     discoveredGroup: null,     // or a group id, to file discovered sites in a folder
-    exclude: ["kogason2010", "kogason2010.github.io"],
+    exclude: ["kogason2010", "kogason2010.github.io", "lab"],
   },
 
   groups: [
@@ -207,14 +207,15 @@ window.PORTFOLIO = {
     },
 
     /* ---------- Built-in apps ---------- */
-    /* ---------- The 3D lab (opens full-page and zooms out of its monitor) ---------- */
+    /* ---------- The 3D lab: the front door at kogason2010.github.io/ ---------- */
     {
-      type: "github",
-      repo: "kogason2010/lab",
+      type: "website",
+      id: "lab",
       title: "Lab",
-      open: "top",              // leave KogasonOS and open the lab in this tab
+      url: "https://kogason2010.github.io/",
+      open: "top",              // back to the lab: zooms out of its monitor (or opens it full-page from /os/)
       hash: "#desktop",         // the lab starts inside its monitor and pulls back to the room
-      description: "A 3D analytical chemistry lab: an HPLC, a Nexera IC bench, a TOC analyzer and a fume hood distillation. Its monitor leads back here.",
+      description: "A 3D analytical chemistry lab: an HPLC, a Nexera IC bench, a TOC analyzer and a fume hood distillation. KogasonOS runs on its monitor.",
     },
     { type: "builtin", id: "showcase", title: "Showcase", app: "showcase", icon: "showcase" },
     { type: "builtin", id: "explorer", title: "File Explorer", app: "explorer", location: "home", icon: "explorer" },

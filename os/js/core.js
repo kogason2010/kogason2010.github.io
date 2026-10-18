@@ -6,6 +6,8 @@
   const ICONS = window.ICONS || {};
   const PREVIEW = !!window.PORTFOLIO_PREVIEW;
   const OS = (window.OS = { CFG, ICONS, PREVIEW });
+  /* True when KogasonOS is running on the 3D lab's monitor (same-origin frame). */
+  OS.embedded = (() => { try { return window.parent !== window && window.parent.location.origin === location.origin; } catch (e) { return false; } })();
 
   /* ---------- helpers ---------- */
   function el(tag, props, ...kids) {
@@ -721,7 +723,12 @@
     if (r.type === 'group') return openWindow({ key: 'loc:' + t, app: 'explorer', location: t });
     const a = r.app;
     /* Entries marked open: "top" replace KogasonOS in this tab instead of opening a window (the 3D lab). */
-    if (a.open === 'top' && a.url) { location.assign(a.url.replace(/#.*$/, '') + (a.hash || '')); return null; }
+    if (a.open === 'top' && a.url) {
+      // Running on the lab's monitor: ask the lab to zoom back out instead of loading a new page.
+      if (OS.embedded) { try { window.parent.postMessage({ type: 'kogasonos:exit' }, location.origin); return null; } catch (e) {} }
+      location.assign(a.url.replace(/#.*$/, '') + (a.hash || ''));
+      return null;
+    }
     if (a.kind === 'site') return openWindow({ key: a.id, app: 'site', ref: a, ...extra });
     if (a.kind === 'doc') return openWindow({ key: a.id, app: 'notepad', ref: a });
     if (a.app === 'explorer') {
