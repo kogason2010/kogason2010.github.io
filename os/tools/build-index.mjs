@@ -117,7 +117,8 @@ ${groups.filter((g) => g.items.length).map((g) => `  <section aria-labelledby="g
     <ul class="grid">${g.items.map(card).join('')}
     </ul>
   </section>`).join('\n')}
-  <footer>Generated from KogasonOS's config by os/tools/build-index.mjs.</footer>
+  <!-- Built from os/js/config.js by os/tools/build-index.mjs -->
+  <footer>Made for fun by kogason2010 · <a href="${SITE}">Back to the lab</a></footer>
 </div>
 </body>
 </html>

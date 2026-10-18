@@ -74,7 +74,12 @@ body {
 .tag .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
 .tag h1 { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(26px, 4.4vw, 44px); line-height: .95; letter-spacing: -.02em; text-wrap: balance; }
 .tag p { margin: 2px 0 0; color: var(--ink-soft); max-width: 30ch; }
-.tag h1, .tag p, .tag .eyebrow { text-shadow: 0 0 3px var(--bg), 0 0 10px var(--bg), 0 0 18px var(--bg); }
+.tag { padding: 14px 16px 16px; border-radius: 16px; max-width: min(380px, calc(100% - 32px)); box-sizing: border-box;
+  background: color-mix(in srgb, var(--sheet) 82%, transparent); border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  backdrop-filter: blur(12px) saturate(1.2); -webkit-backdrop-filter: blur(12px) saturate(1.2); box-shadow: 0 8px 28px rgba(0,0,0,.10); }
+.hint { padding: 7px 14px; border-radius: 999px; color: var(--ink);
+  background: color-mix(in srgb, var(--sheet) 82%, transparent); border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .tag, .tools, .hint { transition: opacity .3s; }
 body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer-events: none; }
 
@@ -298,8 +303,8 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   <h1>kogason2010</h1>
   <p>Interactive 3D sites about analytical science. Explore the lab, or jump straight to the projects.</p>
   <div class="intro-actions">
-    <a class="btn primary" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">View projects</a>
-    <a class="btn" href="https://kogason2010.github.io/projects/" target="_blank" rel="noopener" data-same>All projects</a>
+    <a class="btn primary" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Explore the desktop</a>
+    <a class="btn" href="https://kogason2010.github.io/projects/" target="_blank" rel="noopener" data-same>Browse all projects</a>
   </div>
   <p class="featured">Featured: <a href="https://kogason2010.github.io/HPLC-tools/" target="_blank" rel="noopener" data-launch="hplc-tools">HPLC Tools</a> · <a href="https://kogason2010.github.io/nexera-ic/" target="_blank" rel="noopener" data-launch="nexera-ic">Nexera IC</a> · <a href="https://kogason2010.github.io/lcms-2050-oligos/" target="_blank" rel="noopener" data-launch="lcms-2050-oligos">Strand by Strand</a></p>
 </div>
@@ -353,7 +358,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
           <label for="sNewL">New length (mm)<input id="sNewL" type="number" min="10" max="500" step="5" value="150"></label>
         </form>
         <div class="ws-results" id="wsScaleOut"></div>
-        <p class="ws-note">Flow and injection volume scale with the square of the diameter. At the same linear velocity, run time and backpressure scale with length, and resolution with its square root. Real columns differ in particle size and chemistry, so treat these as starting points.</p>
+        <p class="ws-note">Flow scales with the square of the diameter. For the same load relative to column volume, injection volume scales with diameter² × length. At the same linear velocity, run time and backpressure scale with length, and resolution with its square root. Real columns differ in particle size and chemistry, so treat these as starting points.</p>
       </section>
       <section data-panel="run" role="tabpanel" aria-labelledby="wsTab-run" hidden>
         <div class="ws-detail">
@@ -406,7 +411,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
         <p>I take application notes, the short technical write-ups that show an instrument solving a real analytical problem, and rebuild them as interactive web pages.</p>
         <p>The rule for every page is the same: stay factual and accurate to the source. The interactivity is there to make the method easier to follow, not to dress it up.</p>
         <div class="chips"><span class="chip">HTML</span><span class="chip">JavaScript</span><span class="chip">GitHub Pages</span><span class="chip">Three.js</span></div>
-        <a class="cta" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Browse the projects</a>`
+        <a class="cta" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Explore the desktop</a>`
     },
     notes: {
       kicker: "Desktop · app note series",
@@ -445,7 +450,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
         <p>A common method oxidizes the sample over a heated catalyst, which turns the carbon into CO₂, then measures that CO₂ with a non-dispersive infrared (NDIR) detector.</p>
         <div class="row"><span class="k">Turntable</span><span class="v">Rotates sample vials to the injection needle, one at a time</span></div>
         <div class="row"><span class="k">Orange window</span><span class="v">The furnace, shown glowing</span></div>
-        <a class="cta" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Browse all projects</a>`
+        <a class="cta" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Explore the desktop</a>`
     },
     build: {
       kicker: "Workstation · this lab",
@@ -1948,7 +1953,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
     const k = Math.pow(nid / oid, 2), nf = f * k, saved = (f - nf) * 1440, lr = nl / ol;
     const res = [
       ["New flow", fmt(nf, 3) + " mL/min", "Same linear velocity"],
-      ["New injection", fmt(inj * k, 1) + " µL", "Same column loading"],
+      ["New injection", fmt(inj * k * lr, 1) + " µL", "Same load per column volume (d² × length)"],
       [saved >= 0 ? "Eluent saved / 24 h" : "Extra eluent / 24 h", fmt(Math.abs(saved) / 1000, 2) + " L", "Running continuously"],
       ["Run time", "× " + fmt(lr, 2), "Scales with length"],
       ["Backpressure", "× " + fmt(lr, 2), "Scales with length"],
