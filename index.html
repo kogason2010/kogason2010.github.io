@@ -115,6 +115,77 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 .bot-tip span { display: block; margin-top: 3px; padding-top: 4px; border-top: 1px solid var(--line); font-size: 10.5px; }
 .bot-tip.on { opacity: 1; }
 body.os-mode .bot-tip { display: none; }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn:disabled:hover { border-color: var(--line); }
+/* SFC run panel (basement) */
+.sfc { display: grid; gap: 14px; }
+.sfc-about { display: grid; gap: 4px; font-size: 14px; color: var(--ink-soft); }
+.sfc-about span { font: 400 11px/1.4 var(--mono); letter-spacing: .02em; }
+.sfc-vials { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sfc-vial { display: grid; justify-items: center; gap: 7px; padding: 10px 6px 9px; border-radius: 12px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: 600 12.5px/1.2 var(--display); text-align: center; cursor: pointer; }
+.sfc-vial i { width: 14px; height: 24px; border-radius: 3px 3px 5px 5px; background: linear-gradient(var(--cap) 0 26%, color-mix(in srgb, var(--ink) 12%, transparent) 26% 100%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent); }
+.sfc-vial[aria-checked="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 9%, transparent); box-shadow: inset 0 0 0 1px var(--accent); }
+.sfc-vial:disabled { opacity: .55; cursor: default; }
+.sfc-vial:focus-visible, .sfc-ctl input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sfc-ctl { display: grid; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.sfc-ctl label { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 10px; font: 600 13px/1.3 var(--display); }
+.sfc-ctl output { font: 500 12px/1 var(--mono); }
+.sfc-ctl input { grid-column: 1 / -1; width: 100%; margin: 4px 0 0; accent-color: var(--accent); }
+.sfc-go { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sfc-go .btn { justify-self: auto; }
+.sfc-clock { font: 400 12px/1.3 var(--mono); color: var(--ink-soft); }
+.sfc-chart { width: 100%; height: 170px; display: block; border: 1px solid var(--line); border-radius: 12px; }
+.sfc-phase { display: grid; gap: 8px; }
+.sfc-phase canvas { width: 100%; height: 180px; display: block; border: 1px solid var(--line); border-radius: 12px; }
+.sfc-state { display: grid; gap: 4px; font-size: 14px; }
+.sfc-state small { font-size: 12px; color: var(--ink-soft); }
+.sfc-peaks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+.sfc-peaks li { display: grid; grid-template-columns: 20px 1fr auto; align-items: center; gap: 8px; }
+.sfc-peaks i { width: 18px; height: 18px; border-radius: 50%; background: var(--c); color: #0f171c; font: 700 10px/18px var(--mono); text-align: center; font-style: normal; }
+.sfc-peaks b { font: 500 12px/1 var(--mono); }
+.sfc-callout { display: grid; gap: 6px; padding: 12px 14px; border-radius: 12px; background: var(--bg-2); }
+.sfc-callout p { font-size: 13px; color: var(--ink-soft); }
+.sfc-kv { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.sfc-kv b { font: 600 12px/1.3 var(--mono); white-space: nowrap; }
+.sfc-note { font-size: 12px; color: var(--ink-soft); }
+/* SFC workstation app on the basement PC. The live view is a hole in the window: the 3D column shows through it. */
+.sfcw { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center;
+  padding-block: calc(16px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  opacity: 0; transition: opacity .3s; }
+.sfcw.show { opacity: 1; }
+.sfcw-win { width: min(1200px, 100%); height: min(800px, 100%); display: flex; flex-direction: column; overflow: hidden; color: var(--ink);
+  border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.35), 0 0 0 200vmax color-mix(in srgb, var(--bg) 55%, transparent); }
+.sfcw-bar { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; background: var(--bg-2); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.sfcw-bar .ws-title::before { background: var(--accent); }
+.sfcw-stat { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.sfcw-stat span { font: 500 11px/1 var(--mono); padding: 6px 8px; border-radius: 6px; background: var(--sheet); border: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.sfcw-body { flex: 1; min-height: 0; overflow: auto; padding: 16px; display: grid; gap: 14px; align-content: start;
+  grid-template-columns: minmax(270px, 310px) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas: "method live live" "method chrom chrom" "method res phase"; }
+.sfcw-live { grid-area: live; position: relative; height: 250px; border-radius: 12px; border: 1px solid var(--line); background: transparent;
+  box-shadow: 0 0 0 200vmax var(--sheet); }
+.sfcw-live .live-tag { position: absolute; left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 7px; font: 500 11px/1 var(--mono); padding: 6px 9px; border-radius: 999px; background: color-mix(in srgb, var(--sheet) 88%, transparent); border: 1px solid var(--line); }
+.sfcw-live .live-tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #e0413a; animation: livepulse 1.4s ease-in-out infinite; }
+.sfcw-live .live-cap { position: absolute; right: 10px; bottom: 10px; font: 400 11px/1.3 var(--mono); padding: 6px 9px; border-radius: 8px; background: color-mix(in srgb, var(--sheet) 88%, transparent); border: 1px solid var(--line); color: var(--ink-soft); max-width: calc(100% - 20px); }
+@keyframes livepulse { 50% { opacity: .35; } }
+.sfcw-panel { position: relative; z-index: 1; display: grid; gap: 12px; align-content: start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; min-width: 0; }
+.sfcw-panel h3 { margin: 0; font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.sfcw-panel p { margin: 0; }
+.sfcw-method { grid-area: method; }
+.sfcw-chrom { grid-area: chrom; } .sfcw-chrom .sfc-chart { height: 220px; }
+.sfcw-res { grid-area: res; } .sfcw-phase { grid-area: phase; }
+.sfcw-res .sfc-callout a { color: var(--accent); }
+@media (max-width: 860px) {
+  .sfcw { padding: 0; }
+  .sfcw-win { height: 100%; border-radius: 0; border: 0; }
+  .sfcw-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "live" "chrom" "method" "res" "phase"; padding: 12px; }
+  .sfcw-chrom .sfc-chart { height: 170px; }
+  .sfcw-win > .ws-status { display: none; }
+  .sfcw-live { height: 200px; }
+}
+@media (prefers-reduced-motion: reduce) { .sfcw { transition: none; } .sfcw-live .live-tag::before { animation: none; } }
 .hot {
   position: absolute; left: 0; top: 0; pointer-events: auto;
   display: inline-flex; align-items: center; gap: 7px;
@@ -126,6 +197,7 @@ body.os-mode .bot-tip { display: none; }
 }
 .hot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--glow); box-shadow: 0 0 0 3px color-mix(in srgb, var(--glow) 35%, transparent); }
 .hot:hover, .hot.on { border-color: var(--accent); }
+.hot[hidden] { display: none; }
 
 .sheet {
   position: fixed; z-index: 3;
@@ -297,6 +369,13 @@ body.os-mode .bot-tip { display: none; }
   .sheet.closed { transform: translateY(calc(100% + 40px)); }
   .hot { font-size: 11px; }
 }
+@media (max-width: 640px) {
+  .tools { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: none; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .tools::-webkit-scrollbar { display: none; }
+  .tools .btn { flex: none; padding: 8px 11px; }
+  .tag { top: calc(60px + env(safe-area-inset-top, 0px)); }
+  body.sheet-open .tag { opacity: 0; pointer-events: none; }
+}
 @media (max-width: 640px) { .hint { border-radius: 14px; } .bot-tip { white-space: normal; max-width: min(280px, calc(100vw - 16px)); } }
 @media (prefers-reduced-motion: reduce) { .sheet, .hot { transition: none; } }
 </style>
@@ -319,6 +398,7 @@ body.os-mode .bot-tip { display: none; }
 
 <div class="tools">
   <button class="btn primary" id="particleBtn" type="button" aria-pressed="false">Particles</button>
+  <button class="btn" id="levelBtn" type="button" aria-label="Go downstairs to the SFC suite">Go downstairs</button>
   <button class="btn" id="lightsBtn" type="button" aria-pressed="false">Lights off</button>
   <button class="btn" id="resetBtn" type="button">Reset view</button>
 </div>
@@ -383,6 +463,18 @@ body.os-mode .bot-tip { display: none; }
       </section>
     </div>
     <div class="ws-status">General ion chromatography guidance, not specifications for any particular instrument or column.</div>
+  </div>
+</div>
+
+<div class="sfcw" id="sfcApp" hidden role="dialog" aria-modal="true" aria-labelledby="sfcAppTitle">
+  <div class="sfcw-win">
+    <div class="sfcw-bar">
+      <span class="ws-title" id="sfcAppTitle">SFC Workstation</span>
+      <div class="sfcw-stat" id="sfcStat" aria-label="Instrument status"></div>
+      <button type="button" class="ws-close" id="sfcClose">← Back to basement</button>
+    </div>
+    <div class="sfcw-body" id="sfcAppBody"></div>
+    <div class="ws-status">A teaching model, not instrument software. Retention follows rules of thumb for modifier, density and temperature; CO₂ density is estimated with the Peng–Robinson equation.</div>
   </div>
 </div>
 
@@ -469,6 +561,26 @@ body.os-mode .bot-tip { display: none; }
         <div class="row"><span class="k">Interaction</span><span class="v">Points near your cursor's ray are pushed aside on the GPU</span></div>
         <div class="row"><span class="k">More particles</span><span class="v">A CPU-driven system shows vapor rising through the still in the fume hood</span></div>
         <button class="btn primary" type="button" data-particles>Try particle mode</button>`
+    },
+    co2: {
+      kicker: "Basement · gas supply",
+      title: "Where the CO₂ comes from",
+      html: `
+        <p>SFC runs on carbon dioxide drawn from cylinders fitted with a dip tube, so the pump is fed liquid CO₂ rather than gas.</p>
+        <div class="row"><span class="k">Chilled pump head</span><span class="v">Keeps the CO₂ liquid while it is metered. The chiller on the floor circulates the coolant.</span></div>
+        <div class="row"><span class="k">Back-pressure regulator</span><span class="v">Holds the column above CO₂'s critical pressure. Past it, the CO₂ expands back to a gas and goes up the extraction snorkel.</span></div>
+        <div class="row"><span class="k">CO₂ monitor</span><span class="v">CO₂ is heavier than air and can collect in low rooms like basements. OSHA's workplace limit is 5,000 ppm averaged over 8 hours.</span></div>
+        <p>Methanol is the usual modifier: a few percent to a few tens of percent mixed into the CO₂ to move polar compounds along.</p>`
+    },
+    sfc: {
+      kicker: "Basement · supercritical fluid chromatography",
+      title: "Chromatography with CO₂",
+      html: `
+        <p>SFC uses supercritical carbon dioxide as the main mobile phase, usually with some methanol mixed in. The CO₂ is dense enough to dissolve compounds but flows almost like a gas, so runs are fast and use far less organic solvent than HPLC.</p>
+        <div class="row"><span class="k">Flow path</span><span class="v">CO₂ pump and modifier pump · mixer · autosampler · column oven · PDA detector · back-pressure regulator</span></div>
+        <div class="row"><span class="k">Good at</span><span class="v">Chiral separations, fast screening, and polarity measurements such as EPSA</span></div>
+        <button class="btn primary" type="button" data-sfcapp>Open the SFC workstation</button>
+        <p class="also">Related project: <a href="https://kogason2010.github.io/nexera-uc-epsa/" target="_blank" rel="noopener" data-launch="nexera-uc-epsa">Nexera UC EPSA</a></p>`
     },
     contact: {
       kicker: "Whiteboard · contact",
@@ -578,7 +690,13 @@ body.os-mode .bot-tip { display: none; }
   }
 
   // Shell: tiled floor + two walls
-  box(8.4, 0.3, 8.4, 0x6c7880, 0, -0.16, 0);
+  const STAIR_HOLE = { x: -2.0, z: 3.35, r: 0.78 };
+  function slabShape() {
+    const sh = new THREE.Shape(); sh.moveTo(-4.2, -4.2); sh.lineTo(4.2, -4.2); sh.lineTo(4.2, 4.2); sh.lineTo(-4.2, 4.2); sh.lineTo(-4.2, -4.2);
+    const h = new THREE.Path(); h.absarc(STAIR_HOLE.x, -STAIR_HOLE.z, STAIR_HOLE.r, 0, Math.PI * 2, true); sh.holes.push(h); return sh;
+  }
+  const slab = new THREE.Mesh(new THREE.ExtrudeGeometry(slabShape(), { depth: 0.3, bevelEnabled: false, curveSegments: 64 }), mat(0x6c7880));
+  slab.rotation.x = -Math.PI / 2; slab.position.y = -0.31; slab.castShadow = slab.receiveShadow = true; lab.add(slab);
   const floorTex = tex((g, w, h) => {
     g.fillStyle = "#7c8990"; g.fillRect(0, 0, w, h);
     const n = 4, s = w / n;
@@ -592,8 +710,8 @@ body.os-mode .bot-tip { display: none; }
       g.fillRect(x, y, 1.6, 1.6);
     }
   }, 512, 512);
-  floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(4.8, 4.8); floorTex.anisotropy = 8;
-  const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 8.4), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.62, metalness: 0.02 }));
+  floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(4.8 / 8.4, 4.8 / 8.4); floorTex.offset.set(2.4, 2.4); floorTex.anisotropy = 8;
+  const floorMesh = new THREE.Mesh(new THREE.ShapeGeometry(slabShape(), 64), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.62, metalness: 0.02 }));
   floorMesh.rotation.x = -Math.PI / 2; floorMesh.position.y = 0.002; floorMesh.receiveShadow = true; lab.add(floorMesh);
   const aoTex = tex((g, w, h) => { const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "rgba(18,26,32,0.5)"); gr.addColorStop(1, "rgba(18,26,32,0)"); g.fillStyle = gr; g.fillRect(0, 0, w, h); }, 8, 128);
   const aoMat = new THREE.MeshBasicMaterial({ map: aoTex, transparent: true, depthWrite: false });
@@ -665,14 +783,14 @@ body.os-mode .bot-tip { display: none; }
     plane(0.36, 0.18, new THREE.MeshBasicMaterial({ map: fsTex }), -4.19, 1.95, fz, Math.PI / 2);
   })();
   // yellow floor marking in front of the instrument bench
-  box(0.07, 0.006, 3.3, C.yellow, -2.72, 0.014, 1.7).castShadow = false;
+  box(0.07, 0.006, 2.8, C.yellow, -2.72, 0.014, 1.45).castShadow = false;
   box(1.45, 0.006, 0.07, C.yellow, -3.42, 0.014, 0.08).castShadow = false;
 
   /* ---------- Interactive groups ---------- */
   const hotspots = [];
-  function hotGroup(key, label, anchor) {
-    const g = new THREE.Group(); g.userData.key = key; lab.add(g);
-    hotspots.push({ key, label, group: g, anchor: new THREE.Vector3().copy(anchor) });
+  function hotGroup(key, label, anchor, parent, level) {
+    const g = new THREE.Group(); g.userData.key = key; (parent || lab).add(g);
+    hotspots.push({ key, label, group: g, anchor: new THREE.Vector3().copy(anchor), level: level || "up" });
     return g;
   }
 
@@ -1337,17 +1455,20 @@ body.os-mode .bot-tip { display: none; }
   function buildNav() {
     lab.updateMatrixWorld(true);
     const N = GN * GN, solid = new Uint8Array(N), cover = new Uint8Array(N), bb = new THREE.Box3();
+    const toLab = new THREE.Matrix4().copy(lab.matrixWorld).invert(), mw = new THREE.Matrix4();
     lab.traverse(o => {
       if (!o.isMesh) return;
       for (let p = o; p && p !== lab; p = p.parent) if (p === bot || p.userData.noNav || !p.visible) return;
       const g = o.geometry; if (!g.boundingBox) g.computeBoundingBox();
-      bb.copy(g.boundingBox).applyMatrix4(o.matrixWorld);
+      bb.copy(g.boundingBox).applyMatrix4(mw.multiplyMatrices(toLab, o.matrixWorld));
       if (bb.max.y < 0.03 || bb.min.y > 2.2) return;        // floor markings, wall shelves
       const low = bb.min.y < 0.9;                            // reaches below a bench top: the robot can't pass
       const i0 = Math.max(0, cIdx(bb.min.x)), i1 = Math.min(GN - 1, cIdx(bb.max.x));
       const j0 = Math.max(0, cIdx(bb.min.z)), j1 = Math.min(GN - 1, cIdx(bb.max.z));
       for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { cover[j * GN + i] = 1; if (low) solid[j * GN + i] = 1; }
     });
+    // the stair opening is a cliff: keep the whole disc (and the rail's gap) off limits
+    for (let j = 0; j < GN; j++) for (let i = 0; i < GN; i++) if (Math.hypot(cPos(i) - STAIR.x, cPos(j) - STAIR.z) < STAIR.r + 0.17) { solid[j * GN + i] = 1; cover[j * GN + i] = 1; }
     // distance to the nearest obstacle (two-pass chamfer), capped by the distance to the floor's open edges
     const d = new Float32Array(N);
     for (let k = 0; k < N; k++) d[k] = solid[k] ? 0 : 1e6;
@@ -1627,6 +1748,9 @@ body.os-mode .bot-tip { display: none; }
         const n = nearestSpot();
         if (n) { R.path = n.p.pts; R.goal = n.sp; setState("seek"); break; }
         if (R.patrols >= 2) { if (go(nav.ax, nav.az, "dockAlign")) { setState("home"); break; } }
+        // now and then, go and peer down the stairwell
+        const cx = STAIR.x + STAIR.r + 0.05 + NAV_R + 0.2, czz = STAIR.z;
+        if (Math.random() < 0.22 && Math.hypot(R.x - cx, R.z - czz) > 1.5 && go(cx, czz, null)) { R.patrols++; setState("cliffGo"); break; }
         for (let tries = 0; tries < 12; tries++) {
           const k = nav.cells[(Math.random() * nav.cells.length) | 0], x = cPos(k % GN), z = cPos((k / GN) | 0);
           if (Math.hypot(x - R.x, z - R.z) < 1.6 || nav.clear[k] < NAV_R + 0.08) continue;
@@ -1665,6 +1789,20 @@ body.os-mode .bot-tip { display: none; }
         if (R.rethink && spots.length) { R.rethink = false; setState("think"); R.t = 0.6; break; }
         if (follow(dt, 0.3)) { setState("think"); R.t = 0.2; }
         break;
+      case "cliffGo":
+        if (R.rethink && spots.length) { R.rethink = false; setState("think"); R.t = 0.6; break; }
+        if (follow(dt, 0.26)) setState("cliff");
+        break;
+      case "cliff": {
+        // turn to face the opening, creep to the edge, think better of it, back off
+        lidar = 9;
+        if (R.t < 1.2) { turnTo(Math.atan2(-(STAIR.z - R.z), STAIR.x - R.x), dt); break; }
+        if (R.t < 1.8) { R.v = 0.06; R.x += Math.cos(R.h) * 0.06 * dt; R.z -= Math.sin(R.h) * 0.06 * dt; break; }
+        if (R.t < 2.0) { R.v = 0; if (R.msg.indexOf("stairs") < 0 || R.msgT <= 0) { say("Whoa, stairs. Not today."); R.flash = 0.8; } break; }
+        if (R.t < 2.9) { R.v = -0.12; R.x -= Math.cos(R.h) * 0.12 * dt; R.z += Math.sin(R.h) * 0.12 * dt; break; }
+        R.v = 0; setState("think"); R.t = 0.3;
+        break;
+      }
       case "home":
         if (R.rethink && R.battery >= 0.2 && spots.length) { R.rethink = false; setState("think"); R.t = 0.6; break; }
         if (follow(dt, 0.32)) setState("dockAlign");
@@ -1769,6 +1907,8 @@ body.os-mode .bot-tip { display: none; }
       case "clean": return R.goal ? `Cleaning ${R.goal.label} · ${Math.round((1 - R.goal.left) * 100)}%` : "Cleaning";
       case "happy": return "Spotless!";
       case "patrol": return "All clean · on patrol";
+      case "cliffGo": return "Exploring";
+      case "cliff": return "Peeking at the stairs";
       case "home": return R.battery < 0.2 ? "Low battery, heading home" : "Heading home to rest";
       case "bump": return "Oops, bumped something";
       default: return "Docking";
@@ -1788,6 +1928,252 @@ body.os-mode .bot-tip { display: none; }
     const y = py - h - 10 < 8 ? py + 36 : py - h - 10;    // keep the bubble on screen
     botTip.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
   }
+
+  /* ---------- Spiral stair: a round opening in the floor leads down to the basement SFC suite ---------- */
+  const BY = -3.6;                                         // basement floor level (top of the slab)
+  const STAIR = { x: -2.0, z: 3.35, r: 0.78 }, RISE = 0.2, NTREAD = 17;
+  const DTH = THREE.MathUtils.degToRad(25), GAP = THREE.MathUtils.degToRad(64);
+  const stairSteel = mat(0x56636b, { metalness: 0.55, roughness: 0.38 }), treadMat = mat(0x3d474e, { metalness: 0.45, roughness: 0.6 });
+  const railMat = mat(C.steel, { metalness: 0.7, roughness: 0.3 });
+  const treadGeo = (() => {
+    const r0 = 0.07, r1 = 0.74, a = DTH / 2 + 0.012, s = new THREE.Shape();
+    s.moveTo(r0 * Math.cos(-a), r0 * Math.sin(-a)); s.absarc(0, 0, r1, -a, a, false);
+    s.lineTo(r0 * Math.cos(a), r0 * Math.sin(a)); s.absarc(0, 0, r0, a, -a, true);
+    const g = new THREE.ExtrudeGeometry(s, { depth: 0.035, bevelEnabled: false, curveSegments: 6 }); g.rotateX(-Math.PI / 2); return g;
+  })();
+  // angles run counter-clockwise seen from above; direction of angle a on the floor is (cos a, -sin a)
+  const treadTop = i => -(i + 1) * RISE;
+  function spiral(parent, i0, i1, poleBottom, poleTop) {
+    for (let i = i0; i <= i1; i++) {
+      const t = new THREE.Mesh(treadGeo, treadMat); t.rotation.y = i * DTH; t.position.set(STAIR.x, treadTop(i) - 0.035, STAIR.z);
+      t.castShadow = t.receiveShadow = true; parent.add(t);
+      const a = i * DTH + DTH * 0.35, bx = STAIR.x + Math.cos(a) * 0.71, bz = STAIR.z - Math.sin(a) * 0.71;
+      cyl(0.009, 0.009, 0.9, railMat, bx, treadTop(i) + 0.45, bz, parent, 6);
+    }
+    const pts = [];
+    for (let a = i0 * DTH - DTH * 0.5; a <= i1 * DTH + DTH * 0.5 + 1e-6; a += DTH / 4) pts.push(new THREE.Vector3(STAIR.x + Math.cos(a) * 0.71, -(1 + a / DTH) * RISE + 0.9, STAIR.z - Math.sin(a) * 0.71));
+    const rail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), pts.length * 4, 0.02, 8, false), railMat); rail.castShadow = true; parent.add(rail);
+    cyl(0.055, 0.055, poleTop - poleBottom, stairSteel, STAIR.x, (poleTop + poleBottom) / 2, STAIR.z, parent, 16);
+    const cap = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 10), stairSteel); cap.position.set(STAIR.x, poleTop, STAIR.z); parent.add(cap);
+  }
+  // upstairs: guard rail round the opening (open on the room side), a short well, the top two treads
+  const gStairs = hotGroup("stairs", "Downstairs", new THREE.Vector3(STAIR.x, 1.5, STAIR.z));
+  (function () {
+    const R = STAIR.r + 0.05, arc = Math.PI * 2 - GAP;
+    [[1.02, 0.024], [0.56, 0.014]].forEach(([y, th]) => {
+      const t = new THREE.Mesh(new THREE.TorusGeometry(R, th, 8, 80, arc), railMat);
+      t.rotation.set(-Math.PI / 2, 0, GAP / 2); t.position.set(STAIR.x, y, STAIR.z); t.castShadow = true; t.userData.noNav = true; gStairs.add(t);
+    });
+    for (let j = 0; j < 9; j++) { const a = GAP / 2 + j * arc / 8; cyl(0.02, 0.02, 1.02, railMat, STAIR.x + Math.cos(a) * R, 0.51, STAIR.z - Math.sin(a) * R, gStairs, 8); }
+    const kick = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 0.1, 80, 1, true, GAP / 2 + Math.PI / 2, arc), mat(C.yellow, { side: THREE.DoubleSide, roughness: 0.5 }));
+    kick.position.set(STAIR.x, 0.05, STAIR.z); kick.userData.noNav = true; gStairs.add(kick);   // ring-shaped: the robot's map uses an exact disc instead
+    const edge = new THREE.Mesh(new THREE.RingGeometry(STAIR.r, STAIR.r + 0.045, 64), mat(C.yellow, { roughness: 0.6 }));
+    edge.rotation.x = -Math.PI / 2; edge.position.set(STAIR.x, 0.006, STAIR.z); gStairs.add(edge);
+    // the well only goes as deep as the slab, so nothing hangs out under the diorama; it reads as a dark drop
+    const well = new THREE.Mesh(new THREE.CylinderGeometry(STAIR.r, STAIR.r, 0.3, 64, 1, true), mat(0x56626a, { side: THREE.BackSide, roughness: 0.9 }));
+    well.position.set(STAIR.x, -0.15, STAIR.z); gStairs.add(well);
+    const dark = new THREE.Mesh(new THREE.CircleGeometry(STAIR.r, 64), new THREE.MeshBasicMaterial({ color: 0x0b1115 }));
+    dark.rotation.x = -Math.PI / 2; dark.position.set(STAIR.x, -0.29, STAIR.z); gStairs.add(dark);
+    spiral(gStairs, 0, 0, -0.29, 0.98);
+  })();
+
+  /* ---------- Basement: SFC suite (hidden until you take the stairs) ---------- */
+  const basement = new THREE.Group(); basement.visible = false; scene.add(basement);
+  const WTOP = -0.31, WH = WTOP - (BY - 0.3);
+  const concreteTex = tex((g, w, h) => {
+    g.fillStyle = "#8d9497"; g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 70; i++) { const x = Math.random() * w, y = Math.random() * h, r = 20 + Math.random() * 60, gr = g.createRadialGradient(x, y, 0, x, y, r), d = Math.random() < 0.5; gr.addColorStop(0, d ? "rgba(70,78,82,0.07)" : "rgba(200,206,208,0.07)"); gr.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2); }
+    for (let i = 0; i < 3000; i++) { const k = Math.random(); g.fillStyle = k < 0.5 ? "rgba(255,255,255,0.2)" : "rgba(40,48,52,0.22)"; g.fillRect(Math.random() * w, Math.random() * h, 1.4, 1.4); }
+    g.fillStyle = "rgba(48,56,60,0.55)"; g.fillRect(0, 0, w, 2); g.fillRect(0, 0, 2, h);           // saw-cut joints
+  }, 512, 512);
+  concreteTex.wrapS = concreteTex.wrapT = THREE.RepeatWrapping; concreteTex.repeat.set(4, 4); concreteTex.anisotropy = 8;
+  box(8.4, 0.3, 8.4, 0x5d666b, 0, BY - 0.15, 0, basement);
+  const bFloor = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 8.4), new THREE.MeshStandardMaterial({ map: concreteTex, roughness: 0.8, metalness: 0.02 }));
+  bFloor.rotation.x = -Math.PI / 2; bFloor.position.y = BY + 0.002; bFloor.receiveShadow = true; basement.add(bFloor);
+  // painted block walls
+  const blockTex = tex((g, w, h) => {
+    g.fillStyle = "#d5dbd8"; g.fillRect(0, 0, w, h);
+    g.strokeStyle = "rgba(120,132,130,0.55)"; g.lineWidth = 2;
+    for (let r = 0; r < 4; r++) { const y = r * h / 4; g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke(); for (let c = 0; c < 3; c++) { const x = (c + (r % 2) * 0.5) * w / 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y + h / 4); g.stroke(); } }
+    for (let i = 0; i < 900; i++) { g.fillStyle = Math.random() < 0.5 ? "rgba(255,255,255,0.25)" : "rgba(90,100,98,0.12)"; g.fillRect(Math.random() * w, Math.random() * h, 1.5, 1.5); }
+  }, 256, 256);
+  blockTex.wrapS = blockTex.wrapT = THREE.RepeatWrapping;
+  function blockWall(len, x, z, ry) {
+    const t = blockTex.clone(); t.needsUpdate = true; t.repeat.set(len / 0.8, WH / 0.8);
+    const m = plane(len, WH, new THREE.MeshStandardMaterial({ map: t, roughness: 0.85 }), x, BY - 0.3 + WH / 2, z, ry, basement); m.receiveShadow = true;
+  }
+  box(0.3, WH, 8.4, 0xc9d0cd, -4.35, BY - 0.3 + WH / 2, 0, basement);
+  box(8.4, WH, 0.3, 0xc9d0cd, 0, BY - 0.3 + WH / 2, -4.35, basement);
+  blockWall(8.4, -4.199, 0, Math.PI / 2);
+  blockWall(8.4, 0, -4.199, 0);
+  box(0.34, 0.05, 8.44, 0xeef1ef, -4.35, WTOP + 0.025, 0, basement);
+  box(8.44, 0.05, 0.34, 0xeef1ef, 0, WTOP + 0.025, -4.35, basement);
+  box(0.05, 0.9, 8.4, 0x7d8f96, -4.17, BY + 0.45, 0, basement, { roughness: 0.6 });          // painted dado band
+  box(8.4, 0.9, 0.05, 0x7d8f96, 0, BY + 0.45, -4.17, basement, { roughness: 0.6 });
+  // exposed services along the tops of the walls
+  [[0.045, C.steel, 3.02, 0.6], [0.032, 0xb87333, 2.86, 0.35], [0.022, 0x8a9499, 2.74, 0.5]].forEach(([r, c, y, m]) => {
+    cyl(r, r, 8.4, c, 0, BY + y, -4.1 + r, basement, 12, { metalness: m, roughness: 0.4 }).rotation.z = Math.PI / 2;
+    cyl(r, r, 8.4, c, -4.1 + r, BY + y, 0, basement, 12, { metalness: m, roughness: 0.4 }).rotation.x = Math.PI / 2;
+  });
+  for (let s = -3.6; s <= 3.6; s += 1.8) { box(0.03, 0.36, 0.06, 0x6b767c, s, BY + 2.88, -4.17, basement); box(0.06, 0.36, 0.03, 0x6b767c, -4.17, BY + 2.88, s, basement); }
+  // wall-mounted light fittings
+  const fixMat = new THREE.MeshBasicMaterial({ color: 0xf2f8ff });
+  [[-1.6, -4.13, 0], [1.4, -4.13, 0], [-4.13, -0.6, 1], [-4.13, 1.9, 1]].forEach(([x, z, side]) => {
+    const g = new THREE.Group(); g.position.set(x, BY + 2.55, z); if (side) g.rotation.y = Math.PI / 2; basement.add(g);
+    box(1.2, 0.09, 0.12, 0xdfe5e8, 0, 0, 0.02, g); box(1.1, 0.04, 0.02, fixMat, 0, -0.01, 0.085, g);
+  });
+  const bLight = new THREE.PointLight(0xeef6ff, 0.55, 9, 2); bLight.position.set(-0.4, BY + 2.7, -1.2); basement.add(bLight);
+  // floor drain and safety striping in front of the gas cylinders
+  cyl(0.13, 0.13, 0.006, 0x4a5357, 1.2, BY + 0.006, 0.6, basement, 24, { metalness: 0.6, roughness: 0.4 });
+  const stripeTex = tex((g, w, h) => { g.fillStyle = "#f2c230"; g.fillRect(0, 0, w, h); g.fillStyle = "#1f2428"; for (let x = -h; x < w; x += 28) { g.beginPath(); g.moveTo(x, h); g.lineTo(x + 14, h); g.lineTo(x + 14 + h, 0); g.lineTo(x + h, 0); g.fill(); } }, 256, 32);
+  const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.12), new THREE.MeshStandardMaterial({ map: stripeTex, roughness: 0.6 }));
+  stripe.rotation.set(-Math.PI / 2, 0, Math.PI / 2); stripe.position.set(-3.6, BY + 0.007, -1.95); stripe.receiveShadow = true; basement.add(stripe);
+
+  // stair from the ceiling opening down to the basement floor
+  const gUp = hotGroup("upstairs", "Upstairs", new THREE.Vector3(STAIR.x, BY + 2.35, STAIR.z), basement, "down");
+  spiral(gUp, 0, NTREAD - 1, BY, 0.98);
+  cyl(0.16, 0.16, 0.04, stairSteel, STAIR.x, BY + 0.02, STAIR.z, gUp, 20);
+
+  /* SFC bench along the back wall */
+  const SY = BY + 1.31, SZ = -3.8, SF = -3.45;                   // bench top, module centre line, module fronts
+  box(4.8, 1.22, 0.78, C.cab, 0.1, BY + 0.61, -3.81, basement);
+  for (let x = -2.1; x <= 2.3; x += 0.8) { box(0.76, 1.0, 0.014, C.cab, x + 0.4, BY + 0.6, -3.415, basement, { roughness: 0.55 }); box(0.12, 0.014, 0.03, C.steel, x + 0.4, BY + 1.02, -3.395, basement, { metalness: 0.6 }); }
+  box(4.9, 0.06, 0.82, C.epoxy, 0.1, SY - 0.03, -3.8, basement);
+  const gSFC = hotGroup("sfc", "SFC", new THREE.Vector3(-0.35, BY + 2.75, -3.7), basement, "down");
+  const sBody = 0x202427, sDoor = 0x2c3236, sTrim = 0x5d676d;
+  function screenTex(w, h, draw) {
+    const c = document.createElement("canvas"); c.width = w; c.height = h; const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+    const api = { c, t, draw(...a) { draw(c.getContext("2d"), w, h, ...a); t.needsUpdate = true; } }; return api;
+  }
+  function lcdLines(g, W, H, lines) {
+    g.fillStyle = "#0f1a20"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#8fe6ff"; g.font = "bold 13px monospace"; lines.forEach((l, i) => g.fillText(l, 6, 17 + i * 17));
+  }
+  function sModule(cx, y, w, h, o) {
+    o = o || {};
+    box(w, h - 0.012, 0.7, sBody, cx, y + h / 2, SZ, gSFC);
+    const dh = h - 0.06, cy = y + h / 2;
+    if (!o.noDoor) box(w * 0.62, dh, 0.02, o.window ? smoked : sDoor, cx + w * 0.14, cy, SF + 0.01, gSFC);
+    box(0.012, dh * 0.55, 0.012, sTrim, cx - w * 0.2, cy, SF + 0.024, gSFC);
+    let lcd = null;
+    if (o.lcd) { lcd = screenTex(120, 40, lcdLines); lcd.draw(o.lcd); plane(0.15, 0.05, new THREE.MeshBasicMaterial({ map: lcd.t }), cx - w * 0.5 + 0.1, cy + dh * 0.2, SF + 0.002, 0, gSFC); }
+    led(cx - w * 0.5 + 0.05, cy - dh * 0.28, SF + 0.008, o.led || 0x3fd17a, gSFC);
+    return { top: y + h, lcd };
+  }
+  // stack A: CO₂ pump (chilled head) and modifier pump, methanol bottle on top
+  const AX = -1.55, BX2 = -0.91, CX2 = -0.08, DX = 0.69;
+  const pumpCO2 = sModule(AX, SY, 0.5, 0.42, { lcd: ["CO2  2.40", "mL/min"] });
+  const pumpMod = sModule(AX, pumpCO2.top, 0.5, 0.36, { lcd: ["MeOH 0.60", "mL/min"] });
+  box(0.46, 0.02, 0.6, C.steel, AX, pumpMod.top + 0.01, SZ, gSFC, { metalness: 0.5 });
+  cyl(0.085, 0.085, 0.3, glass, AX - 0.08, pumpMod.top + 0.17, SZ + 0.05, gSFC, 20).castShadow = false;
+  cyl(0.078, 0.078, 0.22, 0xe8eef5, AX - 0.08, pumpMod.top + 0.13, SZ + 0.05, gSFC, 20, { transparent: true, opacity: 0.55, roughness: 0.1 });
+  cyl(0.035, 0.035, 0.05, 0xe08a2a, AX - 0.08, pumpMod.top + 0.345, SZ + 0.05, gSFC, 12);
+  const meohTex = tex((g, w, h) => { g.fillStyle = "#fff"; g.fillRect(0, 0, w, h); g.fillStyle = "#c23a3a"; g.fillRect(0, 0, w, 8); g.fillStyle = "#1a2228"; g.font = "bold 15px sans-serif"; g.textAlign = "center"; g.fillText("METHANOL", w / 2, 30); }, 96, 40);
+  const ml = new THREE.Mesh(new THREE.CylinderGeometry(0.087, 0.087, 0.08, 20, 1, true, -0.6, 1.2), new THREE.MeshStandardMaterial({ map: meohTex, roughness: 0.6 })); ml.position.set(AX - 0.08, pumpMod.top + 0.16, SZ + 0.05); gSFC.add(ml);
+  // stack B: autosampler with an open vial tray and a needle gantry on top
+  const sampler = sModule(BX2, SY, 0.62, 0.62, { window: true, lcd: ["VIAL --", "READY"] });
+  const trayY = sampler.top;
+  box(0.56, 0.03, 0.4, 0x3a4248, BX2, trayY + 0.015, SZ + 0.08, gSFC);
+  const VIAL_X = [BX2 - 0.2, BX2 - 0.08, BX2 + 0.04], PORT_X = BX2 + 0.19, VIAL_Z = SZ + 0.12, VIAL_TOP = trayY + 0.03 + 0.075;
+  const vialCaps = ["#2bb3a3", "#8a63d2", "#e8892c"].map((c, i) => {
+    cyl(0.02, 0.02, 0.07, glass, VIAL_X[i], trayY + 0.065, VIAL_Z, gSFC, 14).castShadow = false;
+    cyl(0.017, 0.017, 0.045, i === 0 ? 0xdff3ef : i === 1 ? 0xe9e1f6 : 0xf6dcc0, VIAL_X[i], trayY + 0.055, VIAL_Z, gSFC, 14, { transparent: true, opacity: 0.8 });
+    return cyl(0.022, 0.022, 0.018, new THREE.Color(c).getHex(), VIAL_X[i], VIAL_TOP + 0.004, VIAL_Z, gSFC, 14, { roughness: 0.4 });
+  });
+  cyl(0.026, 0.026, 0.012, C.steel, PORT_X, trayY + 0.036, VIAL_Z, gSFC, 16, { metalness: 0.7 });
+  [-0.27, 0.27].forEach(dx => box(0.025, 0.36, 0.025, 0x6b767c, BX2 + dx, trayY + 0.18, VIAL_Z - 0.06, gSFC));
+  box(0.58, 0.03, 0.04, 0x6b767c, BX2, trayY + 0.36, VIAL_Z - 0.06, gSFC);
+  const carriage = new THREE.Group(); carriage.position.set(PORT_X, trayY + 0.36, VIAL_Z); gSFC.add(carriage);
+  box(0.06, 0.07, 0.07, 0x2c3236, 0, -0.01, -0.02, carriage);
+  const needle = cyl(0.0035, 0.0035, 0.22, C.steel, 0, -0.15, 0, carriage, 6, { metalness: 0.8 });
+  // stack C: column oven with a window onto the column, PDA detector above
+  const ovenH = 0.44, ovenY = SY, colY = ovenY + ovenH / 2, COL_L = 0.62, COL_X0 = CX2 - COL_L / 2, COL_Z = SF - 0.09;
+  box(0.86, ovenH - 0.012, 0.56, sBody, CX2, ovenY + ovenH / 2, SZ - 0.07, gSFC);                    // body behind the window
+  box(0.86, 0.05, 0.16, sBody, CX2, ovenY + 0.025, SF - 0.08, gSFC); box(0.86, 0.05, 0.16, sBody, CX2, ovenY + ovenH - 0.031, SF - 0.08, gSFC);
+  box(0.05, ovenH - 0.012, 0.16, sBody, CX2 - 0.405, ovenY + ovenH / 2, SF - 0.08, gSFC); box(0.05, ovenH - 0.012, 0.16, sBody, CX2 + 0.405, ovenY + ovenH / 2, SF - 0.08, gSFC);
+  box(0.76, ovenH - 0.1, 0.01, 0x141b1f, CX2, colY, SZ + 0.21, gSFC, { roughness: 0.9 });               // dark back panel so bands show
+  const ovenGlass = new THREE.MeshStandardMaterial({ color: 0xdff2ff, roughness: 0.04, transparent: true, opacity: 0.14, depthWrite: false });
+  box(0.76, ovenH - 0.1, 0.008, ovenGlass, CX2, colY, SF - 0.004, gSFC).castShadow = false;
+  const colGlass = new THREE.MeshStandardMaterial({ color: 0xe6f6ff, roughness: 0.05, transparent: true, opacity: 0.1, depthWrite: false });
+  const colTube = cyl(0.032, 0.032, COL_L, colGlass, CX2, colY, COL_Z, gSFC, 20); colTube.rotation.z = Math.PI / 2; colTube.castShadow = false;
+  [-1, 1].forEach(s => { const f = cyl(0.042, 0.042, 0.05, C.steel, CX2 + s * (COL_L / 2 + 0.02), colY, COL_Z, gSFC, 16, { metalness: 0.8, roughness: 0.25 }); f.rotation.z = Math.PI / 2; });
+  const ovenLcd = screenTex(120, 40, lcdLines); ovenLcd.draw(["OVEN 40.0C", "COL 1"]);
+  plane(0.13, 0.044, new THREE.MeshBasicMaterial({ map: ovenLcd.t }), CX2 + 0.33, ovenY + ovenH - 0.03, SF + 0.002, 0, gSFC);
+  const det = sModule(CX2, ovenY + ovenH, 0.86, 0.3, { lcd: ["PDA 254nm", "0.000 AU"] });
+  const cellMat = new THREE.MeshBasicMaterial({ color: 0x24313a }); const cell = box(0.05, 0.05, 0.012, cellMat, CX2 + 0.3, ovenY + ovenH + 0.15, SF + 0.012, gSFC);
+  // stack D: back-pressure regulator; vent line up to an extraction snorkel
+  const bpr = sModule(DX, SY, 0.5, 0.5, { lcd: ["BPR", "150 bar"], noDoor: true });
+  const gauge = cyl(0.07, 0.07, 0.02, 0xe9eef0, DX + 0.12, SY + 0.27, SF + 0.01, gSFC, 28, { roughness: 0.3 }); gauge.rotation.x = Math.PI / 2;
+  const gNeedle = new THREE.Group(); gNeedle.position.set(DX + 0.12, SY + 0.27, SF + 0.024); gSFC.add(gNeedle); box(0.055, 0.006, 0.004, 0xc23a3a, 0.024, 0, 0, gNeedle);
+  const VENT = new THREE.Vector3(DX + 0.05, BY + 2.08, -3.62);
+  const ventPts = [new THREE.Vector3(DX + 0.05, bpr.top, -3.95), new THREE.Vector3(DX + 0.05, BY + 2.02, -3.95), new THREE.Vector3(DX + 0.05, BY + 2.12, -3.85), new THREE.Vector3(DX + 0.05, BY + 2.12, -3.68), VENT];
+  const steelLine = mat(C.steel, { metalness: 0.75, roughness: 0.3 });
+  basement.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ventPts, false, "centripetal"), 40, 0.012, 8, false), steelLine));
+  const cone = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.17, 0.2, 24, 1, true), mat(0x8fa0a8, { side: THREE.DoubleSide, metalness: 0.4, roughness: 0.4 }));
+  cone.position.set(VENT.x, BY + 2.5, VENT.z); basement.add(cone);
+  basement.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(VENT.x, BY + 2.6, VENT.z), new THREE.Vector3(VENT.x, BY + 2.85, -3.75), new THREE.Vector3(VENT.x, BY + 2.95, -4.15)]), 24, 0.05, 12, false), mat(0x9aa8ae, { metalness: 0.4, roughness: 0.45 })));
+  // data system: monitor showing the live chromatogram
+  const MX = 1.72;
+  const gSfcPC = hotGroup("sfcpc", "SFC workstation", new THREE.Vector3(MX, SY + 1.0, -3.6), basement, "down");
+  box(0.08, 0.3, 0.08, 0x2a2f33, MX, SY + 0.15, -3.7, gSfcPC); box(0.26, 0.02, 0.2, 0x2a2f33, MX, SY + 0.01, -3.68, gSfcPC);
+  box(0.76, 0.48, 0.04, 0x1a1f23, MX, SY + 0.52, -3.62, gSfcPC);
+  const sfcScreen = screenTex(512, 304, () => {});
+  const sfcScreenMesh = plane(0.72, 0.43, new THREE.MeshBasicMaterial({ map: sfcScreen.t }), MX, SY + 0.52, -3.597, 0, gSfcPC);
+  box(0.46, 0.02, 0.15, 0x2a2f33, MX - 0.05, SY + 0.012, -3.33, gSfcPC); box(0.06, 0.02, 0.09, 0x2a2f33, MX + 0.3, SY + 0.012, -3.33, gSfcPC);
+  // chiller on the floor at the end of the bench, coolant lines up to the CO₂ pump head
+  box(0.5, 0.62, 0.56, 0xe7ebec, -2.78, BY + 0.31, -3.85, basement);
+  box(0.36, 0.3, 0.012, 0x3a4248, -2.78, BY + 0.3, -3.564, basement);
+  const chillLcd = screenTex(120, 40, lcdLines); chillLcd.draw(["COOL  5.0C", "RUN"]);
+  plane(0.14, 0.047, new THREE.MeshBasicMaterial({ map: chillLcd.t }), -2.78, BY + 0.53, -3.564, 0, basement);
+  const hoseMat2 = mat(0x2a2f33, { roughness: 0.7 });
+  [0, 1].forEach(i => basement.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
+    new THREE.Vector3(-2.68 + i * 0.08, BY + 0.62, -3.95), new THREE.Vector3(-2.55 + i * 0.08, BY + 1.5, -4.05), new THREE.Vector3(AX - 0.2 + i * 0.06, SY + 0.32, -4.12)]), 30, 0.014, 8, false), hoseMat2)));
+  // flammables cabinet
+  box(0.9, 1.1, 0.55, C.yellow, 3.45, BY + 0.55, -3.86, basement, { roughness: 0.5 });
+  box(0.012, 0.9, 0.01, 0xb08a1c, 3.45, BY + 0.58, -3.58, basement);
+  plane(0.36, 0.08, new THREE.MeshBasicMaterial({ map: flamTex }), 3.45, BY + 0.95, -3.582, 0, basement);
+
+  // CO₂ supply: dip-tube cylinders on the left wall, regulators, a header to the pump; a CO₂ monitor on the wall
+  const gCO2 = hotGroup("co2", "CO₂ supply", new THREE.Vector3(-3.95, BY + 2.0, -1.95), basement, "down");
+  const co2Tex = tex((g, w, h) => { g.fillStyle = "#f1f3f4"; g.fillRect(0, 0, w, h); g.fillStyle = "#1a2228"; g.font = "bold 22px sans-serif"; g.textAlign = "center"; g.fillText("CO₂", w / 2, 26); g.font = "bold 10px sans-serif"; g.fillText("LIQUID · DIP TUBE", w / 2, 42); }, 128, 50);
+  [-2.35, -1.95, -1.55].forEach(z => {
+    const cx = -3.93;
+    cyl(0.115, 0.115, 1.3, 0x59656d, cx, BY + 0.67, z, gCO2, 24, { metalness: 0.35, roughness: 0.45 });
+    cyl(0.04, 0.115, 0.14, 0x59656d, cx, BY + 1.39, z, gCO2, 24, { metalness: 0.35, roughness: 0.45 });
+    cyl(0.03, 0.03, 0.09, C.steel, cx, BY + 1.5, z, gCO2, 12, { metalness: 0.8 });
+    box(0.07, 0.05, 0.05, 0x8a959b, cx + 0.05, BY + 1.56, z, gCO2, { metalness: 0.6 });
+    const lab2 = new THREE.Mesh(new THREE.CylinderGeometry(0.117, 0.117, 0.16, 24, 1, true, Math.PI / 2 - 0.8, 1.6), new THREE.MeshStandardMaterial({ map: co2Tex, roughness: 0.5 }));
+    lab2.position.set(cx, BY + 1.05, z); gCO2.add(lab2);
+    gCO2.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(cx + 0.08, BY + 1.57, z), new THREE.Vector3(cx + 0.1, BY + 1.72, z + 0.06), new THREE.Vector3(-4.06, BY + 1.86, z)]), 16, 0.008, 6, false), steelLine));
+    const chain = new THREE.Mesh(new THREE.TorusGeometry(0.125, 0.008, 6, 32), mat(0x9aa4a9, { metalness: 0.7 })); chain.rotation.x = Math.PI / 2; chain.position.set(cx, BY + 1.1, z); gCO2.add(chain);
+  });
+  box(0.04, 0.12, 1.1, 0x6b767c, -4.16, BY + 1.1, -1.95, gCO2);
+  const CO2_LINE = [new THREE.Vector3(-4.06, BY + 1.86, -1.55), new THREE.Vector3(-4.06, BY + 1.86, -4.06), new THREE.Vector3(AX - 0.12, BY + 1.86, -4.06), new THREE.Vector3(AX - 0.12, SY + 0.3, -4.06), new THREE.Vector3(AX - 0.12, SY + 0.3, -4.13)];
+  gCO2.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(CO2_LINE, false, "chordal", 0), 80, 0.014, 8, false), steelLine));
+  const co2Mon = screenTex(128, 64, (g, W, H, ppm) => {
+    g.fillStyle = "#0f1a20"; g.fillRect(0, 0, W, H); g.fillStyle = "#97a9b4"; g.font = "bold 11px monospace"; g.fillText("CO2 MONITOR", 8, 15);
+    g.fillStyle = "#8fffb0"; g.font = "bold 24px monospace"; g.fillText(String(ppm), 8, 44); g.font = "bold 11px monospace"; g.fillText("ppm", 82, 44);
+    g.fillStyle = "#3fd17a"; g.beginPath(); g.arc(W - 12, 10, 4, 0, 7); g.fill();
+  });
+  co2Mon.draw(640);
+  box(0.06, 0.22, 0.3, 0xe7ebec, -4.16, BY + 1.75, -0.75, basement);
+  plane(0.22, 0.11, new THREE.MeshBasicMaterial({ map: co2Mon.t }), -4.128, BY + 1.77, -0.75, Math.PI / 2, basement);
+  const strobe = new THREE.Mesh(new THREE.SphereGeometry(0.04, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xc23a3a, { transparent: true, opacity: 0.85, roughness: 0.2 }));
+  strobe.position.set(-4.12, BY + 1.88, -0.75); basement.add(strobe);
+
+  // tubing on the instrument fronts (the flow path), used by the live run
+  const peekLine = mat(C.peek, { roughness: 0.4 });
+  const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+  const MIX = V3(AX + 0.27, SY + 0.43, SF + 0.04);
+  const FLOW = {
+    co2: new THREE.CatmullRomCurve3([...CO2_LINE.slice(0, 4), V3(AX + 0.22, SY + 0.3, -4.13), V3(AX + 0.27, SY + 0.32, SF + 0.04), MIX], false, "chordal", 0),
+    mod: new THREE.CatmullRomCurve3([V3(AX - 0.08, pumpMod.top + 0.3, SZ + 0.05), V3(AX + 0.05, pumpMod.top + 0.36, SZ + 0.12), V3(AX + 0.2, pumpMod.top + 0.1, SF + 0.04), V3(AX + 0.25, SY + 0.6, SF + 0.04), MIX], false, "centripetal"),
+    mix: new THREE.CatmullRomCurve3([MIX, V3(BX2 - 0.24, SY + 0.43, SF + 0.04), V3(BX2 + 0.26, SY + 0.43, SF + 0.04), V3(BX2 + 0.3, SY + 0.3, SF + 0.03), V3(COL_X0 - 0.06, colY, COL_Z + 0.02), V3(COL_X0 - 0.03, colY, COL_Z)], false, "centripetal"),
+    out: new THREE.CatmullRomCurve3([V3(COL_X0 + COL_L + 0.03, colY, COL_Z), V3(COL_X0 + COL_L + 0.06, colY + 0.06, COL_Z + 0.02), V3(CX2 + 0.3, ovenY + ovenH + 0.15, SF + 0.03), V3(CX2 + 0.43, ovenY + ovenH + 0.05, SF + 0.04), V3(DX - 0.2, SY + 0.35, SF + 0.04), V3(DX + 0.05, SY + 0.35, SF + 0.02), V3(DX + 0.05, bpr.top - 0.02, -3.95)], false, "centripetal"),
+  };
+  ["mod", "mix", "out"].forEach(k => { const m = new THREE.Mesh(new THREE.TubeGeometry(FLOW[k], 80, 0.0065, 6, false), peekLine); m.castShadow = true; gSFC.add(m); });
+  gSFC.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(FLOW.co2.points.slice(3), false, "chordal", 0), 40, 0.009, 6, false), steelLine));
+  hotspots.find(h => h.key === "sfc").focus = { center: new THREE.Vector3(-0.35, SY + 0.45, SZ + 0.1), size: new THREE.Vector3(3.1, 1.25, 0.7) };
 
   /* ---------- Background: slow floating molecules around the diorama ---------- */
   const bgGroup = new THREE.Group(); scene.add(bgGroup);
@@ -2114,6 +2500,7 @@ body.os-mode .bot-tip { display: none; }
     }
     pTarget = on ? 1 : 0;
     particleBtn.textContent = on ? "Back to lab" : "Particles";
+    levelBtn.disabled = on;
     particleBtn.setAttribute("aria-pressed", String(on));
     caption.hidden = !on; hint.hidden = on;
     labelsEl.hidden = on;
@@ -2151,13 +2538,13 @@ body.os-mode .bot-tip { display: none; }
     out.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
   }
   function botHit(ev) {
-    if (pMode || deskOpen || !lab.visible) return false;
+    if (pMode || deskOpen || !lab.visible || level !== "up" || lvl) return false;
     toNDC(ev, ndc); ray.setFromCamera(ndc, camera);
     return ray.intersectObject(bot, true).length > 0;
   }
   // tapping open floor drops a mess for the robot to find
   function floorHit(ev) {
-    if (pMode || deskOpen || !lab.visible || reduce) return;
+    if (pMode || deskOpen || !lab.visible || reduce || level !== "up" || lvl) return;
     toNDC(ev, ndc); ray.setFromCamera(ndc, camera);
     const hit = ray.intersectObject(lab, true).find(h => h.object.isMesh && h.object.visible && !(h.object.material && h.object.material.transparent && h.object.material.opacity < 0.2 && h.object.parent !== spotLayer));
     if (hit && hit.point.y < 0.03) tapFloor(hit.point.x, hit.point.z);
@@ -2166,7 +2553,7 @@ body.os-mode .bot-tip { display: none; }
     if (pMode) return null;
     toNDC(ev, ndc);
     ray.setFromCamera(ndc, camera);
-    const hit = ray.intersectObjects(pickables, true)[0];
+    const hit = ray.intersectObjects(hotspots.filter(h => h.level === level).map(h => h.group), true)[0];
     if (!hit) return null;
     let o = hit.object; while (o && !o.userData.key) o = o.parent;
     return o ? o.userData.key : null;
@@ -2192,25 +2579,29 @@ body.os-mode .bot-tip { display: none; }
   function openSection(key) {
     if (key === "desktop") { openDesktop(); return; }
     if (key === "icpc") { openWorkstation(); return; }
+    if (key === "stairs") { goLevel("down"); return; }
+    if (key === "sfcpc") { openSfcApp(); return; }
+    if (key === "upstairs") { goLevel("up"); return; }
+    if (lvl) return;
     const s = SECTIONS[key]; if (!s) return;
     document.getElementById("sheetKicker").textContent = s.kicker;
     document.getElementById("sheetTitle").textContent = s.title;
     sheetBody.innerHTML = s.html;
-    sheet.classList.remove("closed"); sheet.setAttribute("aria-hidden", "false");
+    sheet.classList.remove("closed"); sheet.setAttribute("aria-hidden", "false"); document.body.classList.add("sheet-open");
     hint.hidden = true;
     focusOn(hotspots.find(x => x.key === key));
     document.getElementById("closeBtn").focus({ preventScroll: true });
   }
   function closeSheet(keepHint) {
-    sheet.classList.add("closed"); sheet.setAttribute("aria-hidden", "true");
+    sheet.classList.add("closed"); sheet.setAttribute("aria-hidden", "true"); document.body.classList.remove("sheet-open");
     if (!keepHint && !pMode) hint.hidden = false;
     unfocus();
   }
-  sheetBody.addEventListener("click", e => { if (e.target.closest("[data-particles]")) setParticleMode(true); });
+  sheetBody.addEventListener("click", e => { if (e.target.closest("[data-particles]")) setParticleMode(true); if (e.target.closest("[data-sfcapp]")) openSfcApp(); });
   document.getElementById("closeBtn").addEventListener("click", () => closeSheet());
   document.addEventListener("keydown", e => {
     if (e.key !== "Escape") return;
-    if (wsOpen) closeWorkstation(); else if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else closeSheet();
+    if (sfcAppOpen) closeSfcApp(); else if (wsOpen) closeWorkstation(); else if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else closeSheet();
   });
 
   /* ---------- Desktop portfolio (opens when the monitor is clicked) ---------- */
@@ -2503,9 +2894,464 @@ body.os-mode .bot-tip { display: none; }
   document.getElementById("wsClose").addEventListener("click", closeWorkstation);
   wsEl.addEventListener("click", (e) => { if (e.target === wsEl) closeWorkstation(); });
 
+  /* ---------- Levels: the ground-floor lab and the basement SFC suite ---------- */
+  let level = "up", lvl = null;
+  const LIFT = 11;
+  const levelBtn = document.getElementById("levelBtn");
+  const HINT_UP = hint.textContent, HINT_DOWN = "Drag to look around · scroll or pinch to zoom · tap the SFC workstation to run a sample";
+  scene.add(sun.target);
+  function goLevel(to) {
+    if (lvl || to === level || deskOpen || pMode) return;
+    sheet.classList.add("closed"); sheet.setAttribute("aria-hidden", "true"); document.body.classList.remove("sheet-open");
+    if (to === "up") sfcAbort();
+    const base = focusHome || { pos: camera.position.clone(), tgt: controls.target.clone() };
+    focusHome = null; tween = null; setHover(null); botHover = false;
+    const dy = to === "down" ? BY : -BY;
+    labelsEl.hidden = true; hint.hidden = true; controls.enabled = false;
+    basement.visible = true; lab.visible = true;
+    if (osFrame) osFrame.style.visibility = "hidden";
+    lvl = { to, t: 0, dur: reduce ? 0.001 : 2.3 };
+    levelBtn.disabled = true; particleBtn.disabled = true;
+    animateCamera(base.pos.clone().add(new THREE.Vector3(0, dy, 0)), base.tgt.clone().add(new THREE.Vector3(0, dy, 0)), lvl.dur, null);
+  }
+  function updateLevel(dt) {
+    if (!lvl) return;
+    lvl.t = Math.min(1, lvl.t + dt / lvl.dur);
+    const k = lvl.to === "down" ? lvl.t : 1 - lvl.t, e = k * k * (3 - 2 * k);
+    // the ground floor lifts away like the top of a dollhouse while the camera drops a storey
+    lab.position.y = Math.pow(e, 1.4) * LIFT;
+    const off = e * BY;
+    sun.position.set(6, 11 + off, 7); sun.target.position.set(0, off, 0); bgGroup.position.y = off;
+    if (lvl.t < 1) return;
+    level = lvl.to; lvl = null;
+    lab.visible = level === "up"; basement.visible = level === "down";
+    controls.enabled = true; controls.minDistance = 8;
+    labelsEl.hidden = false; hint.hidden = false; hint.textContent = level === "up" ? HINT_UP : HINT_DOWN;
+    levelBtn.disabled = false; particleBtn.disabled = level === "down";
+    levelBtn.textContent = level === "up" ? "Go downstairs" : "Go upstairs";
+    levelBtn.setAttribute("aria-label", level === "up" ? "Go downstairs to the SFC suite" : "Go back upstairs to the lab");
+    if (osFrame && level === "up") { osFrame.style.visibility = ""; placeOsFrame(); }
+  }
+  levelBtn.addEventListener("click", () => goLevel(level === "up" ? "down" : "up"));
+
+  /* ---------- SFC: pick a vial, set the conditions, inject, watch the bands separate ---------- */
+  // CO₂ properties: Span–Wagner vapour pressure; density from Peng–Robinson with a small volume shift (within a few % of NIST here)
+  const CO2_TC = 304.1282, CO2_PC = 73.773, CO2_W = 0.22394, RGAS = 8.314462618;
+  function co2Psat(tc) {            // bar
+    const T = tc + 273.15; if (T >= CO2_TC) return CO2_PC; const t = 1 - T / CO2_TC;
+    return CO2_PC * Math.exp((CO2_TC / T) * (-7.0602087 * t + 1.9391218 * Math.pow(t, 1.5) - 1.6463597 * t * t - 3.2995634 * Math.pow(t, 4)));
+  }
+  function co2Density(pbar, tc) {   // kg/m³
+    const T = tc + 273.15, P = pbar * 1e5, Pc = CO2_PC * 1e5, kap = 0.37464 + 1.54226 * CO2_W - 0.26992 * CO2_W * CO2_W;
+    const a = 0.45724 * RGAS * RGAS * CO2_TC * CO2_TC / Pc * Math.pow(1 + kap * (1 - Math.sqrt(T / CO2_TC)), 2), b = 0.0778 * RGAS * CO2_TC / Pc;
+    const A = a * P / (RGAS * RGAS * T * T), B = b * P / (RGAS * T), c2 = B - 1, c1 = A - 3 * B * B - 2 * B, c0 = -(A * B - B * B - B * B * B);
+    const f = z => ((z + c2) * z + c1) * z + c0, roots = [];
+    for (let z = B + 1e-6, s = 0.002; z < 1.6; z += s) if (f(z) * f(z + s) <= 0) { let lo = z, hi = z + s; for (let i = 0; i < 40; i++) { const m = (lo + hi) / 2; if (f(m) * f(lo) <= 0) hi = m; else lo = m; } roots.push((lo + hi) / 2); }
+    let Z = roots[0] || 1;
+    if (roots.length > 1) Z = (T < CO2_TC ? pbar > co2Psat(tc) : pbar > CO2_PC) ? roots[0] : roots[roots.length - 1];
+    return 0.0440098 / (Z * RGAS * T / P - 2.0e-6);
+  }
+  function co2Phase(pbar, tc) {
+    if (tc >= 31.0 && pbar >= CO2_PC) return "sc";
+    if (tc < 31.0 && pbar >= co2Psat(tc)) return "liquid";
+    return "gas";
+  }
+  const EPSA_FIT = { m: 53.991, b: 25.177 };                     // PDA calibration line from the app note
+  const rtEPSA = e => (e - EPSA_FIT.b) / EPSA_FIT.m;
+  const SAMPLES = {
+    epsa: {
+      name: "EPSA standards", short: "EPSA", cap: "#2bb3a3",
+      about: "Five EPSA reference compounds, with ritonavir as the unknown. Retention times at the method settings match the app note behind the Nexera UC EPSA project.",
+      column: "Chirex (S)-Val/(R)-NEA · PDA 254 nm", t0: 0.25, N: 4000, window: 4.5, ref: { mod: 20, P: 204, T: 40 },
+      comps: [
+        { name: "Lidocaine", epsa: 47, h: 0.18, color: "#3fa7d6" }, { name: "Chlorpromazine", epsa: 68, h: 0.95, color: "#59c3a6" },
+        { name: "Ritonavir", epsa: 75, tR: 0.932, h: 0.5, color: "#f0b429", unknown: true }, { name: "Pindolol", epsa: 103, h: 0.28, color: "#9b7bff" },
+        { name: "Diclofenac", epsa: 135, h: 0.25, color: "#ef6f6c" }, { name: "Furosemide", epsa: 230, h: 0.07, color: "#c56ad8" },
+      ],
+    },
+    chiral: {
+      name: "Chiral pair", short: "Chiral", cap: "#8a63d2",
+      about: "Racemic trans-stilbene oxide, a classic SFC test compound: two mirror-image forms that only a chiral column can tell apart.",
+      column: "Amylose-based chiral column · UV 230 nm", t0: 0.5, N: 3000, window: 2.5, ref: { mod: 10, P: 150, T: 35 },
+      comps: [
+        { name: "Enantiomer 1", k: 1.8, S: 1.3, H: 1800, h: 0.75, color: "#4cc2d9" },
+        { name: "Enantiomer 2", k: 2.25, S: 1.38, H: 2600, h: 0.62, color: "#d96fbf" },
+      ],
+    },
+    dyes: {
+      name: "Dye mix", short: "Dyes", cap: "#e8892c",
+      about: "Four coloured dyes, so you can watch the bands with your own eyes. An illustrative mix: the retention values are made up for the demo.",
+      column: "2-Ethylpyridine column · visible, 450 nm", t0: 0.4, N: 5000, window: 3.2, ref: { mod: 15, P: 150, T: 40 },
+      comps: [
+        { name: "Yellow", k: 0.8, S: 1.0, h: 0.8, color: "#f2c230" }, { name: "Orange", k: 1.9, S: 1.2, h: 0.65, color: "#f08a24" },
+        { name: "Red", k: 3.2, S: 1.4, h: 0.55, color: "#e0413a" }, { name: "Violet", k: 5.0, S: 1.6, h: 0.45, color: "#7d4cd6" },
+      ],
+    },
+  };
+  Object.values(SAMPLES).forEach(s => {
+    s.rhoRef = co2Density(s.ref.P, s.ref.T);
+    s.comps.forEach(c => {
+      if (c.epsa != null) { if (c.tR == null) c.tR = rtEPSA(c.epsa); c.k = c.tR / s.t0 - 1; c.S = 1.2 + 0.004 * (c.epsa - 47); }
+      c.D = c.D || 1.0; c.H = c.H == null ? 1500 : c.H;
+      c.sigRef = (s.t0 * (1 + c.k)) / Math.sqrt(s.N) + 0.004; c.area = c.h * c.sigRef * Math.sqrt(2 * Math.PI);
+    });
+  });
+  const sfc = { sample: "epsa", mod: 20, P: 204, T: 40, run: null, last: null, inject: null, dirty: false };
+  function predict(st) {
+    const s = SAMPLES[st.sample], rho = co2Density(st.P, st.T), TK = st.T + 273.15, TR = s.ref.T + 273.15;
+    const peaks = s.comps.map(c => {
+      const k = c.k * Math.pow(st.mod / s.ref.mod, -c.S) * Math.pow(rho / s.rhoRef, -c.D) * Math.exp(c.H * (1 / TK - 1 / TR));
+      const tR = s.t0 * (1 + k), sig = tR / Math.sqrt(s.N) + 0.004;
+      return { ...c, tR, sig, height: c.area / (sig * Math.sqrt(2 * Math.PI)) };
+    });
+    const latest = Math.max(...peaks.map(p => p.tR));
+    const W = Math.min(12, Math.max(s.window, latest * 1.12));
+    return { s, rho, peaks, W };
+  }
+  function signal(peaks, t) { let y = 0; peaks.forEach(p => { if (Math.abs(t - p.tR) < 6 * p.sig) y += p.height * Math.exp(-((t - p.tR) ** 2) / (2 * p.sig * p.sig)); }); return y; }
+
+  // chromatogram, drawn both in the panel and on the instrument PC's screen
+  function drawChrom(g, W, H, run, tNow, dark) {
+    const cs = getComputedStyle(document.documentElement);
+    const ink = dark ? "#e3ecf1" : cs.getPropertyValue("--ink").trim(), soft = dark ? "#8fa1ab" : cs.getPropertyValue("--ink-soft").trim(), line = dark ? "#26343c" : cs.getPropertyValue("--line").trim(), acc = dark ? "#6aa6f0" : cs.getPropertyValue("--accent").trim();
+    g.fillStyle = dark ? "#0f171c" : "rgba(0,0,0,0)"; g.clearRect(0, 0, W, H); if (dark) g.fillRect(0, 0, W, H);
+    const top = dark ? 30 : 12, pl = 34, pr = 12, pb = 26, cw = W - pl - pr, ch = H - top - pb;
+    if (dark) { g.fillStyle = "#18242c"; g.fillRect(0, 0, W, 22); g.fillStyle = "#cfe3ee"; g.font = "bold 12px sans-serif"; g.fillText(run ? (run.done ? "Run complete" : "Acquiring") + " · " + run.s.short : "SFC · idle", 10, 15); }
+    const Wm = run ? run.W : SAMPLES[sfc.sample].window;
+    g.strokeStyle = line; g.lineWidth = 1; g.font = "10px " + (cs.getPropertyValue("--mono") || "monospace"); g.fillStyle = soft; g.textAlign = "center";
+    const step = Wm > 8 ? 2 : Wm > 3.5 ? 1 : 0.5;
+    for (let m = 0; m <= Wm + 1e-6; m += step) { const x = pl + (m / Wm) * cw; g.beginPath(); g.moveTo(x, top); g.lineTo(x, top + ch); g.stroke(); g.fillText(String(+m.toFixed(1)), x, H - 10); }
+    g.textAlign = "left"; g.fillText("min", W - pr - 20, H - 1); g.fillText("AU", 4, top + 8);
+    if (!run) return;
+    const ymax = Math.max(0.3, ...run.peaks.filter(p => p.tR <= run.W).map(p => p.height)) * 1.12;
+    g.strokeStyle = acc; g.lineWidth = dark ? 2 : 1.75; g.beginPath();
+    const n = Math.max(2, Math.round(cw * Math.min(1, tNow / Wm)));
+    for (let i = 0; i <= n; i++) {
+      const t = (i / cw) * Wm, y = signal(run.peaks, t) + 0.006 * Math.sin(t * 37) + 0.004 * Math.sin(t * 91 + 1);
+      const py = top + ch - Math.max(0, Math.min(1.04, y / ymax)) * ch; i ? g.lineTo(pl + i, py) : g.moveTo(pl + i, py);
+    }
+    g.stroke();
+    g.font = "bold 10px " + (cs.getPropertyValue("--mono") || "monospace"); g.textAlign = "center";
+    run.peaks.forEach((p, i) => {
+      if (tNow < p.tR + 2 * p.sig || p.tR > Wm) return;
+      const x = pl + (p.tR / Wm) * cw, y = top + ch - Math.min(1.04, p.height / ymax) * ch - 6;
+      g.fillStyle = p.color; g.beginPath(); g.arc(x, y - 4, 7, 0, 7); g.fill(); g.fillStyle = "#0f171c"; g.fillText(String(i + 1), x, y - 0.5);
+    });
+    if (!run.done) { const x = pl + Math.min(1, tNow / Wm) * cw; g.strokeStyle = soft; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(x, top); g.lineTo(x, top + ch); g.stroke(); g.setLineDash([]); }
+  }
+  // CO₂ phase diagram with the current operating point
+  function drawPhase(g, W, H) {
+    const cs = getComputedStyle(document.documentElement);
+    const ink = cs.getPropertyValue("--ink").trim(), soft = cs.getPropertyValue("--ink-soft").trim(), line = cs.getPropertyValue("--line").trim(), acc = cs.getPropertyValue("--accent").trim();
+    const mono = cs.getPropertyValue("--mono") || "monospace";
+    const pl = 36, pr = 10, pt = 10, pb = 24, cw = W - pl - pr, ch = H - pt - pb, T0 = 0, T1 = 60, P1 = 260;
+    const X = t => pl + (t - T0) / (T1 - T0) * cw, Y = p => pt + ch - p / P1 * ch;
+    g.clearRect(0, 0, W, H);
+    g.globalAlpha = 0.13; g.fillStyle = acc; g.fillRect(X(31), Y(P1), X(T1) - X(31), Y(CO2_PC) - Y(P1)); g.globalAlpha = 1;
+    g.strokeStyle = line; g.lineWidth = 1; g.font = "10px " + mono; g.fillStyle = soft; g.textAlign = "center";
+    for (let t = 0; t <= 60; t += 10) { g.beginPath(); g.moveTo(X(t), pt); g.lineTo(X(t), pt + ch); g.stroke(); g.fillText(t + "", X(t), H - 9); }
+    g.textAlign = "right"; for (let p = 0; p <= 250; p += 50) { g.beginPath(); g.moveTo(pl, Y(p)); g.lineTo(pl + cw, Y(p)); g.stroke(); g.fillText(p + "", pl - 4, Y(p) + 3); }
+    g.textAlign = "left"; g.fillText("°C", W - pr - 16, H - 1); g.save(); g.translate(9, pt + ch / 2); g.rotate(-Math.PI / 2); g.textAlign = "center"; g.fillText("bar", 0, 0); g.restore();
+    g.strokeStyle = ink; g.lineWidth = 2; g.beginPath(); for (let t = 0; t <= 31.0; t += 0.5) { const x = X(t), y = Y(co2Psat(t)); t ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+    g.setLineDash([4, 4]); g.strokeStyle = soft; g.lineWidth = 1; g.beginPath(); g.moveTo(X(31.0), Y(CO2_PC)); g.lineTo(X(31.0), Y(P1)); g.moveTo(X(31.0), Y(CO2_PC)); g.lineTo(X(T1), Y(CO2_PC)); g.stroke(); g.setLineDash([]);
+    g.fillStyle = ink; g.beginPath(); g.arc(X(31.0), Y(CO2_PC), 3.5, 0, 7); g.fill();
+    g.font = "600 11px " + mono; g.fillStyle = soft; g.textAlign = "left";
+    g.fillText("liquid", X(3), Y(200)); g.fillText("gas", X(4), Y(12)); g.fillText("gas", X(44), Y(30)); g.fillStyle = acc; g.fillText("supercritical", X(36), Y(240));
+    g.fillStyle = soft; g.font = "10px " + mono; g.fillText("critical point", X(31.0) + 6, Y(CO2_PC) + 13);
+    const s = SAMPLES[sfc.sample];
+    g.strokeStyle = soft; g.lineWidth = 1.2; g.beginPath(); g.arc(X(s.ref.T), Y(s.ref.P), 6, 0, 7); g.stroke();
+    g.fillStyle = acc; g.strokeStyle = "#fff"; g.lineWidth = 2; g.beginPath(); g.arc(X(sfc.T), Y(Math.min(P1, sfc.P)), 6, 0, 7); g.fill(); g.stroke();
+  }
+  function fitCanvas(cv) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2), W = cv.clientWidth, H = cv.clientHeight; if (!W || !H) return null;
+    if (cv.width !== Math.round(W * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
+    const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); return [g, W, H];
+  }
+
+  // panel
+  const fmt2 = v => v.toFixed(2);
+  function sfcAppHTML() {
+    const vial = (id) => { const s = SAMPLES[id]; return `<button type="button" class="sfc-vial" role="radio" data-sample="${id}" aria-checked="${sfc.sample === id}" style="--cap:${s.cap}"><i aria-hidden="true"></i>${s.name}</button>`; };
+    return `
+      <div class="sfcw-live" id="sfcLive" aria-label="Live view of the column oven"><span class="live-tag">LIVE · column oven</span><span class="live-cap" id="sfcLiveCap">Mobile phase flowing</span></div>
+      <section class="sfcw-panel sfcw-method" aria-labelledby="sfcMethodH">
+        <h3 id="sfcMethodH">Sample and method</h3>
+        <div class="sfc-vials" role="radiogroup" aria-label="Sample vial">${vial("epsa")}${vial("chiral")}${vial("dyes")}</div>
+        <p class="sfc-about" id="sfcAbout"></p>
+        <div class="sfc-ctl" id="sfcCtl">
+          <label for="sfcMod">Methanol modifier <output id="sfcModO"></output><input id="sfcMod" type="range" min="2" max="40" step="1"></label>
+          <label for="sfcP">Back pressure <output id="sfcPO"></output><input id="sfcP" type="range" min="60" max="250" step="2"></label>
+          <label for="sfcT">Column temperature <output id="sfcTO"></output><input id="sfcT" type="range" min="20" max="60" step="1"></label>
+        </div>
+        <div class="sfc-go"><button class="btn primary" type="button" id="sfcInject">Inject</button><button class="btn" type="button" id="sfcReset">Method settings</button></div>
+        <span class="sfc-clock" id="sfcClock" aria-live="polite"></span>
+      </section>
+      <section class="sfcw-panel sfcw-chrom" aria-labelledby="sfcChromH"><h3 id="sfcChromH">Chromatogram</h3><canvas class="sfc-chart" id="sfcChart" role="img" aria-label="Live chromatogram"></canvas></section>
+      <section class="sfcw-panel sfcw-res" aria-labelledby="sfcResH"><h3 id="sfcResH">Results</h3><div class="sfc-res" id="sfcRes" aria-live="polite"><p class="sfc-note">Inject a sample to see its peaks here.</p></div></section>
+      <section class="sfcw-panel sfcw-phase" aria-labelledby="sfcPhaseH"><h3 id="sfcPhaseH">CO₂ phase</h3><div class="sfc-phase"><canvas id="sfcPhase" role="img" aria-label="CO₂ phase diagram with the current pressure and temperature"></canvas><div class="sfc-state" id="sfcState"></div></div>
+        <p class="sfc-note">A teaching model, not instrument software. The app note's EPSA method runs a methanol gradient; here the run is isocratic, tuned so the method settings reproduce its retention times.</p></section>`;
+  }
+  const $s = id => document.getElementById(id);
+  function sfcMounted() { return sfcAppOpen; }
+  function sfcStatus() {
+    const f = 3.0, m = sfc.mod / 100, run = sfc.run;
+    const st = sfc.inject ? "Injecting" : run && !run.done ? `Run ${fmt2(run.t)} min` : sfc.last ? "Run complete" : "Idle";
+    $s("sfcStat").innerHTML = [`CO₂ ${(f * (1 - m)).toFixed(2)} mL/min`, `MeOH ${(f * m).toFixed(2)} mL/min`, `BPR ${sfc.P} bar`, `Oven ${sfc.T.toFixed(1)} °C`, st].map(x => `<span>${x}</span>`).join("");
+  }
+  function sfcSync() {
+    sfcStatus();
+    if (!sfcMounted()) return;
+    const s = SAMPLES[sfc.sample], busy = !!(sfc.inject || (sfc.run && !sfc.run.done));
+    document.querySelectorAll(".sfc-vial").forEach(b => { b.setAttribute("aria-checked", String(b.dataset.sample === sfc.sample)); b.disabled = busy; });
+    $s("sfcAbout").innerHTML = `${s.about}<span>${s.column}</span>`;
+    [["sfcMod", sfc.mod, "%"], ["sfcP", sfc.P, " bar"], ["sfcT", sfc.T, " °C"]].forEach(([id, v, u]) => { const el = $s(id); el.value = v; el.disabled = busy; $s(id + "O").textContent = v + u; });
+    $s("sfcInject").disabled = busy; $s("sfcReset").disabled = busy;
+    $s("sfcInject").textContent = sfc.last ? "Inject again" : "Inject";
+    const ph = co2Phase(sfc.P, sfc.T), rho = co2Density(sfc.P, sfc.T);
+    const st = {
+      sc: ["Supercritical CO₂", "Above 31 °C and 74 bar the liquid–gas boundary disappears: dense like a liquid, quick like a gas."],
+      liquid: ["Liquid CO₂", "Below 31 °C the CO₂ stays liquid. SFC still works here; it is sometimes called subcritical fluid chromatography."],
+      gas: ["Gas-like CO₂", "Not enough pressure: the CO₂ thins out and loses its solvent strength, so peaks crawl. In a real system the CO₂–methanol mix could also split into two phases."],
+    }[ph];
+    $s("sfcState").innerHTML = `<b>${st[0]} · ≈${Math.round(rho / 10) * 10} kg/m³</b><span>${st[1]}</span><small>Filled dot: current settings. Ring: the method's settings.</small><small>Diagram is for pure CO₂. Adding methanol raises the mixture's critical point, so many real SFC runs are a dense single-phase fluid just below it, and separate just as well.</small>`;
+    const c = fitCanvas($s("sfcPhase")); if (c) drawPhase(...c);
+    sfcDrawChart(); sfcResults();
+  }
+  function sfcDrawChart() {
+    if (!sfcMounted()) return;
+    const c = fitCanvas($s("sfcChart")); if (!c) return;
+    const run = sfc.run || sfc.last; drawChrom(c[0], c[1], c[2], run, run ? (run.done ? run.W : run.t) : 0, false); sfcStatus();
+    $s("sfcClock").textContent = sfc.inject ? "Injecting…" : sfc.run && !sfc.run.done ? `Running · ${fmt2(sfc.run.t)} / ${fmt2(sfc.run.W)} min` : sfc.last ? (sfc.dirty ? "Settings changed · inject again" : "Run complete") : "Ready";
+  }
+  function sfcResults() {
+    if (!sfcMounted()) return;
+    const el = $s("sfcRes"), run = sfc.last;
+    if (!run) { el.innerHTML = '<p class="sfc-note">Inject a sample to see its peaks here.</p>'; return; }
+    const rows = run.peaks.map((p, i) => `<li style="--c:${p.color}"><i>${i + 1}</i><span>${p.name}</span><b>${p.tR > run.W ? "not eluted" : fmt2(p.tR) + " min"}</b></li>`).join("");
+    let extra = "";
+    if (run.s === SAMPLES.epsa) {
+      const stds = run.peaks.filter(p => !p.unknown && p.tR <= run.W), unk = run.peaks.find(p => p.unknown);
+      const n = stds.length, mx = stds.reduce((a, p) => a + p.tR, 0) / n, my = stds.reduce((a, p) => a + p.epsa, 0) / n;
+      const sl = stds.reduce((a, p) => a + (p.tR - mx) * (p.epsa - my), 0) / stds.reduce((a, p) => a + (p.tR - mx) ** 2, 0), ic = my - sl * mx;
+      const eNote = unk.tR > run.W ? null : EPSA_FIT.m * unk.tR + EPSA_FIT.b, eRun = n >= 2 && unk.tR <= run.W ? sl * unk.tR + ic : null;
+      const off = eNote == null ? null : eNote - 75;
+      extra = `<div class="sfc-callout"><b>Ritonavir EPSA</b>
+        <div class="sfc-kv"><span>App note's calibration line</span><b>${eNote == null ? "—" : Math.round(eNote) + " Å²"}</b></div>
+        <div class="sfc-kv"><span>Line from this run's standards</span><b>${eRun == null ? "—" : Math.round(eRun) + " Å²"}</b></div>
+        <div class="sfc-kv"><span>Published value</span><b>75 Å²</b></div>
+        <p>${off == null ? "Ritonavir hasn't come off the column yet." : Math.abs(off) < 2.5 ? "At the method settings the retention time lands right on the calibration line." : `The settings moved retention, so the fixed calibration line is off by ${Math.round(Math.abs(off))} Å². Calibrating against standards run under the same conditions pulls the answer back, which is why the method checks the system every day.`}</p>
+        <a href="https://kogason2010.github.io/nexera-uc-epsa/" target="_blank" rel="noopener" data-launch="nexera-uc-epsa">Open the EPSA project</a></div>`;
+    } else if (run.s === SAMPLES.chiral) {
+      const [a, b] = run.peaks, rs = (b.tR - a.tR) / (2 * (a.sig + b.sig)), alpha = (b.tR - run.s.t0) / (a.tR - run.s.t0);
+      const v = rs >= 1.5 ? "Baseline resolved" : rs >= 1 ? "Partly resolved" : "Co-eluting";
+      extra = `<div class="sfc-callout"><b>${v}</b><div class="sfc-kv"><span>Resolution, Rs</span><b>${rs.toFixed(2)}</b></div><div class="sfc-kv"><span>Selectivity, α</span><b>${alpha.toFixed(2)}</b></div>
+        <p>${rs >= 1.5 ? "Two clean peaks: the column tells the mirror images apart." : "Try less methanol or a cooler column. Both pull the pair apart, at the cost of a longer run."}</p></div>`;
+    } else {
+      const last = run.peaks[run.peaks.length - 1];
+      extra = `<div class="sfc-callout"><b>${last.tR > run.W ? "Violet is still on the column" : "All four dyes out in " + fmt2(last.tR) + " min"}</b><p>More methanol speeds everything up. More pressure makes the CO₂ denser, which does the same more gently.</p></div>`;
+    }
+    el.innerHTML = `<ol class="sfc-peaks">${rows}</ol>${extra}`;
+  }
+  function sfcSetSample(id) { sfc.sample = id; const r = SAMPLES[id].ref; sfc.mod = r.mod; sfc.P = r.P; sfc.T = r.T; sfc.last = null; sfc.run = null; sfc.dirty = false; sfcLcds(); sfcSync(); }
+  function mountSfc() {
+    const body = $s("sfcAppBody"); body.innerHTML = sfcAppHTML();
+    body.querySelector(".sfc-vials").addEventListener("click", e => { const b = e.target.closest("[data-sample]"); if (b && !b.disabled) sfcSetSample(b.dataset.sample); });
+    body.querySelector(".sfc-vials").addEventListener("keydown", e => {
+      if (!/Arrow(Left|Right|Up|Down)/.test(e.key)) return; e.preventDefault();
+      const ids = Object.keys(SAMPLES), i = ids.indexOf(sfc.sample), n = ids[(i + (/Right|Down/.test(e.key) ? 1 : ids.length - 1)) % ids.length];
+      sfcSetSample(n); body.querySelector(`[data-sample="${n}"]`).focus();
+    });
+    $s("sfcCtl").addEventListener("input", e => {
+      const v = +e.target.value; if (e.target.id === "sfcMod") sfc.mod = v; else if (e.target.id === "sfcP") sfc.P = v; else sfc.T = v;
+      if (sfc.last) sfc.dirty = true; sfcLcds(); sfcSync();
+    });
+    $s("sfcInject").addEventListener("click", sfcInject);
+    $s("sfcReset").addEventListener("click", () => { const r = SAMPLES[sfc.sample].ref; sfc.mod = r.mod; sfc.P = r.P; sfc.T = r.T; if (sfc.last) sfc.dirty = true; sfcLcds(); sfcSync(); });
+  }
+  window.addEventListener("resize", () => { if (sfcMounted()) sfcSync(); });
+  function sfcLcds() {
+    const f = 3.0, m = sfc.mod / 100;
+    pumpCO2.lcd.draw(["CO2  " + (f * (1 - m)).toFixed(2), "mL/min"]); pumpMod.lcd.draw(["MeOH " + (f * m).toFixed(2), "mL/min"]);
+    bpr.lcd.draw(["BPR", sfc.P + " bar"]); ovenLcd.draw(["OVEN " + sfc.T.toFixed(1) + "C", "COL 1"]);
+    sampler.lcd.draw([sfc.inject ? "VIAL " + (Object.keys(SAMPLES).indexOf(sfc.sample) + 1) : "VIAL --", sfc.inject ? "INJECT" : "READY"]);
+    gNeedle.rotation.z = Math.PI * 1.15 - Math.min(250, sfc.P) / 250 * Math.PI * 1.3;
+  }
+  function sfcInject() {
+    if (sfc.inject || (sfc.run && !sfc.run.done)) return;
+    sfc.inject = { t: 0, vial: Object.keys(SAMPLES).indexOf(sfc.sample) };
+    sfc.dirty = false; sfcLcds(); sfcSync();
+    const body = $s("sfcAppBody"); if (body && body.scrollTop > 0 && window.innerWidth <= 860) body.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    if (reduce) { sfc.inject = null; sfcStart(); }
+  }
+  function sfcStart() {
+    const p = predict(sfc);
+    sfc.run = { ...p, t: 0, done: false, wall: Math.max(7, Math.min(16, 4 + p.W * 1.5)), seen: new Set() };
+    sfcLcds(); sfcSync();
+    if (reduce) { sfc.run.t = sfc.run.W; sfcFinish(); }
+  }
+  function sfcFinish() { sfc.run.done = true; sfc.last = sfc.run; sfc.run = null; sfcSync(); paintSfcScreen(); }
+  function sfcAbort() { sfc.inject = null; if (sfc.run && !sfc.run.done) { sfc.run = null; } sfcLcds(); }
+  function paintSfcScreen() { const run = sfc.run || sfc.last; sfcScreen.draw(); drawChrom(sfcScreen.c.getContext("2d"), 512, 304, run, run ? (run.done ? run.W : run.t) : 0, true); sfcScreen.t.needsUpdate = true; }
+  paintSfcScreen(); sfcLcds();
+
+  /* SFC workstation app: zoom to the PC, open the app. Its live pane is a hole in the window, and the camera is
+     re-aimed (with a view offset) so the autosampler or the column sits exactly behind that hole. */
+  let sfcAppOpen = false, sfcHome = null, sfcPose = null, liveCam = false, liveCap = "";
+  const sfcAppEl = $s("sfcApp");
+  mountSfc();
+  const LIVE = {
+    col: { c: new THREE.Vector3(CX2 - 0.02, colY + 0.02, COL_Z), w: 0.98, h: 0.4 },
+    inj: { c: new THREE.Vector3(BX2 + 0.02, trayY + 0.17, VIAL_Z - 0.02), w: 0.78, h: 0.42 },
+  };
+  const liveF = { c: LIVE.col.c.clone(), w: LIVE.col.w, h: LIVE.col.h }, liveDir = new THREE.Vector3(0.2, 0.3, 1).normalize();
+  function updateLiveCam(dt) {
+    const el = $s("sfcLive"); if (!el) return;
+    const r = el.getBoundingClientRect(), cr = renderer.domElement.getBoundingClientRect(), W = cr.width, H = cr.height;
+    if (r.width < 10 || r.height < 10 || !W || !H) return;
+    const goal = sfc.inject ? LIVE.inj : LIVE.col, k = reduce ? 1 : Math.min(1, dt * 3);
+    liveF.c.lerp(goal.c, k); liveF.w += (goal.w - liveF.w) * k; liveF.h += (goal.h - liveF.h) * k;
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const d = Math.max(liveF.w / ((r.width / W) * 2 * tv * camera.aspect), liveF.h / ((r.height / H) * 2 * tv));
+    camera.position.copy(liveF.c).addScaledVector(liveDir, d); camera.lookAt(liveF.c);
+    camera.setViewOffset(W, H, W / 2 - (r.left - cr.left + r.width / 2), H / 2 - (r.top - cr.top + r.height / 2), W, H);
+  }
+  function openSfcApp() {
+    if (sfcAppOpen || deskOpen || lvl || level !== "down") return;
+    const home = focusHome ? { pos: focusHome.pos.clone(), tgt: focusHome.tgt.clone() } : { pos: camera.position.clone(), tgt: controls.target.clone() };
+    focusHome = null; sfcHome = home; sfcAppOpen = true; deskOpen = true;
+    document.body.classList.add("os-mode"); closeSheet(true); setHover(null);
+    labelsEl.hidden = true; hint.hidden = true; tween = null; controls.enabled = false;
+    const sb = new THREE.Box3().setFromObject(sfcScreenMesh), c = new THREE.Vector3(), sz = new THREE.Vector3(); sb.getCenter(c); sb.getSize(sz);
+    const tv = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)), d = Math.max((sz.y / 2) / tv, (sz.x / 2) / tv / camera.aspect) * 1.04;
+    sfcPose = { pos: new THREE.Vector3(c.x, c.y, c.z + d), tgt: c.clone() };
+    animateCamera(sfcPose.pos.clone(), sfcPose.tgt.clone(), 1.0, () => {
+      sfcAppEl.hidden = false; liveCam = true; liveF.c.copy(LIVE.col.c); liveF.w = LIVE.col.w; liveF.h = LIVE.col.h;
+      requestAnimationFrame(() => { sfcAppEl.classList.add("show"); sfcSync(); });
+      $s("sfcClose").focus({ preventScroll: true });
+    });
+  }
+  function closeSfcApp() {
+    if (!sfcAppOpen || !sfcPose) return;
+    sfcAppEl.classList.remove("show");
+    setTimeout(() => {
+      sfcAppEl.hidden = true; liveCam = false; camera.clearViewOffset();
+      camera.position.copy(sfcPose.pos); controls.target.copy(sfcPose.tgt); camera.lookAt(sfcPose.tgt);
+      animateCamera(sfcHome.pos, sfcHome.tgt, 0.9, () => {
+        sfcAppOpen = false; deskOpen = false; controls.enabled = true; controls.minDistance = 8;
+        document.body.classList.remove("os-mode");
+        labelsEl.hidden = pMode; if (!pMode) hint.hidden = false;
+      });
+    }, reduce ? 0 : 250);
+  }
+  $s("sfcClose").addEventListener("click", closeSfcApp);
+  function updateLiveCaption() {
+    if (!sfcAppOpen) return;
+    let t;
+    const run = sfc.run;
+    if (sfc.inject) t = "Autosampler · drawing the sample";
+    else if (run && !run.done) {
+      const inCol = run.peaks.filter(p => run.t > 0 && run.t < p.tR - 2 * p.sig).map(p => p.name), atDet = run.peaks.find(p => Math.abs(run.t - p.tR) < 2.5 * p.sig);
+      t = atDet ? `Detector: ${atDet.name}` : inCol.length ? `In the column: ${inCol.slice(0, 3).join(", ")}${inCol.length > 3 ? " +" + (inCol.length - 3) : ""}` : "Column clear";
+    } else t = sfc.last && !sfc.dirty ? "Run complete" : "Mobile phase flowing · ready to inject";
+    if (t !== liveCap) { liveCap = t; const el = $s("sfcLiveCap"); if (el) el.textContent = t; }
+  }
+
+  // 3D: mobile phase streaming through the lines, bands in the column, CO₂ flashing to gas at the vent
+  const FLOW_N = { co2: 46, mod: 18, mix: 34, out: 34 }, flowDots = [];
+  Object.entries(FLOW_N).forEach(([k, n]) => { const len = FLOW[k].getLength(); for (let i = 0; i < n; i++) flowDots.push({ k, u: i / n, len }); });
+  const COLN = 26;
+  for (let i = 0; i < COLN; i++) flowDots.push({ k: "col", u: i / COLN, r: Math.random() * 0.02, a: Math.random() * 6.283 });
+  const flowGeo = new THREE.BufferGeometry(), flowPos = new Float32Array(flowDots.length * 3), flowCol = new Float32Array(flowDots.length * 3);
+  flowGeo.setAttribute("position", new THREE.BufferAttribute(flowPos, 3)); flowGeo.setAttribute("color", new THREE.BufferAttribute(flowCol, 3));
+  const flowPts = new THREE.Points(flowGeo, new THREE.PointsMaterial({ size: 0.024, map: dotTex, vertexColors: true, transparent: true, depthWrite: false })); flowPts.frustumCulled = false; basement.add(flowPts);
+  const CO2C = new THREE.Color(0x9fe3ff), MODC = new THREE.Color(0xc9a6ff), tmpC = new THREE.Color(), tmpV = new THREE.Vector3();
+  const BAND_N = 90, bandDots = [];
+  for (let c = 0; c < 6; c++) for (let i = 0; i < BAND_N; i++) { let n = 0; for (let k = 0; k < 4; k++) n += Math.random(); bandDots.push({ c, n: (n - 2) * 1.2, r: Math.sqrt(Math.random()) * 0.022, a: Math.random() * 6.283 }); }
+  const bandGeo = new THREE.BufferGeometry(), bandPos = new Float32Array(bandDots.length * 3), bandCol = new Float32Array(bandDots.length * 3);
+  bandGeo.setAttribute("position", new THREE.BufferAttribute(bandPos, 3)); bandGeo.setAttribute("color", new THREE.BufferAttribute(bandCol, 3));
+  const bandPts = new THREE.Points(bandGeo, new THREE.PointsMaterial({ size: 0.036, map: dotTex, vertexColors: true, transparent: true, depthWrite: false })); bandPts.frustumCulled = false; bandPts.renderOrder = 3; basement.add(bandPts);
+  const puffs = [];
+  for (let i = 0; i < 26; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex, color: 0xf2f8ff, transparent: true, opacity: 0, depthWrite: false })); sp.visible = false; basement.add(sp); puffs.push({ sp, life: 0 }); }
+  let puffNext = 0, puffI = 0, puffTint = null, puffTintT = 0, flowClock = 0, screenClock = 0;
+  const cellBase = new THREE.Color(0x24313a);
+  function updateSfc(dt, time) {
+    const s = SAMPLES[sfc.sample], live = sfc.run && !sfc.run.done;
+    // injection: needle travels to the vial, draws sample, then injects at the port
+    if (sfc.inject) {
+      const ij = sfc.inject; ij.t += dt;
+      const vx = VIAL_X[ij.vial], T = ij.t;
+      let x = PORT_X, dip = 0;
+      if (T < 0.5) x = PORT_X + (vx - PORT_X) * (T / 0.5);
+      else if (T < 1.1) { x = vx; dip = Math.sin((T - 0.5) / 0.6 * Math.PI) * 0.075; }
+      else if (T < 1.6) x = vx + (PORT_X - vx) * ((T - 1.1) / 0.5);
+      else { x = PORT_X; dip = Math.sin(Math.min(1, (T - 1.6) / 0.5) * Math.PI) * 0.06; }
+      carriage.position.x = x; carriage.position.y = trayY + 0.36 - dip;
+      if (T >= 2.1) { sfc.inject = null; carriage.position.set(PORT_X, trayY + 0.36, VIAL_Z); sfcStart(); }
+    }
+    if (live) {
+      const run = sfc.run; run.t = Math.min(run.W, run.t + dt * run.W / run.wall);
+      if (run.t >= run.W) sfcFinish();
+    }
+    const run = sfc.run || (sfc.last && !sfc.dirty ? sfc.last : null), speed = run ? run.W / run.wall : s.window / Math.max(7, 4 + s.window * 1.5);   // run minutes per second
+    // mobile phase in the lines; colour shifts with the methanol fraction
+    flowClock += dt;
+    const mixC = tmpC.copy(CO2C).lerp(MODC, Math.min(1, sfc.mod / 40));
+    flowDots.forEach((d, i) => {
+      let p;
+      if (d.k === "col") {
+        d.u = (d.u + dt * speed / s.t0) % 1;
+        p = tmpV.set(COL_X0 + d.u * COL_L, colY + Math.sin(d.a) * d.r, COL_Z + Math.cos(d.a) * d.r);
+        flowCol.set([mixC.r * 0.8, mixC.g * 0.8, mixC.b * 0.8], i * 3);
+      } else {
+        d.u = (d.u + dt * 0.32 / d.len) % 1; p = FLOW[d.k].getPointAt(d.u, tmpV);
+        const c = d.k === "co2" ? CO2C : d.k === "mod" ? MODC : mixC; flowCol.set([c.r, c.g, c.b], i * 3);
+      }
+      flowPos.set([p.x, p.y, p.z], i * 3);
+    });
+    flowGeo.attributes.position.needsUpdate = true; flowGeo.attributes.color.needsUpdate = true;
+    // sample bands: each compound moves at L / tR and spreads as it goes
+    const peaks = run ? run.peaks : null;
+    bandDots.forEach((d, i) => {
+      const pk = peaks && peaks[d.c];
+      if (!pk) { bandPos[i * 3 + 1] = -99; return; }
+      const f = run.t / pk.tR, spread = 0.012 + 0.034 * Math.min(1, f), x = f + d.n * spread;
+      if (x < 0 || x > 1 || f > 1.15) { bandPos[i * 3 + 1] = -99; return; }
+      bandPos.set([COL_X0 + x * COL_L, colY + Math.sin(d.a) * d.r, COL_Z + Math.cos(d.a) * d.r], i * 3);
+      tmpC.set(pk.color); bandCol.set([tmpC.r, tmpC.g, tmpC.b], i * 3);
+    });
+    bandGeo.attributes.position.needsUpdate = true; bandGeo.attributes.color.needsUpdate = true;
+    // detector flow cell lights up in each compound's colour as it passes; the next puffs carry a hint of it
+    let cellHit = null;
+    if (peaks) peaks.forEach(pk => { const dd = Math.abs(run.t - pk.tR) / pk.sig; if (dd < 2.2 && (!cellHit || dd < cellHit.dd)) cellHit = { pk, dd }; if (run.t > pk.tR && !run.seen.has(pk.name)) { run.seen.add(pk.name); puffTint = new THREE.Color(pk.color); puffTintT = 1.2; } });
+    if (cellHit) cellMat.color.set(cellHit.pk.color).lerp(cellBase, Math.min(1, cellHit.dd / 2.2)); else cellMat.color.copy(cellBase);
+    // the regulator vents the CO₂ as gas
+    puffNext -= dt; puffTintT -= dt;
+    if (puffNext <= 0) {
+      puffNext = 0.085;
+      const pf = puffs[puffI = (puffI + 1) % puffs.length]; pf.life = 1; pf.vx = (Math.random() - 0.5) * 0.05; pf.vz = (Math.random() - 0.5) * 0.05; pf.vy = 0.22 + Math.random() * 0.08;
+      pf.sp.position.copy(VENT); pf.sp.visible = true; pf.sp.material.color.set(0xf2f8ff); if (puffTint && puffTintT > 0) pf.sp.material.color.lerp(puffTint, 0.55);
+    }
+    puffs.forEach(pf => {
+      if (pf.life <= 0) return;
+      pf.life -= dt / 1.15; if (pf.life <= 0) { pf.sp.visible = false; return; }
+      pf.sp.position.x += pf.vx * dt; pf.sp.position.z += pf.vz * dt; pf.sp.position.y += pf.vy * dt; pf.vy *= 1 - dt * 0.6;
+      const e = 1 - pf.life; pf.sp.scale.setScalar(0.03 + e * 0.13); pf.sp.material.opacity = Math.sin(Math.min(1, pf.life * 1.4) * Math.PI / 2) * 0.55;
+    });
+    // detector readout, PC screen, room lights, CO₂ monitor
+    screenClock -= dt;
+    if (live && screenClock <= 0) {
+      screenClock = 0.08; paintSfcScreen();
+      det.lcd.draw(["PDA 254nm", (signal(run.peaks, run.t) * 0.08).toFixed(3) + " AU"]);
+      if (sfcAppOpen) sfcDrawChart();
+    }
+    if (sfcAppOpen) updateLiveCaption();
+    bLight.intensity = night ? 1.25 : 0.55; fixMat.color.set(night ? 0xffffff : 0xf2f8ff);
+    strobe.material.emissive.setHex(Math.sin(time * 2) > 0.92 ? 0x661010 : 0x000000);
+  }
+
   /* ---------- Focus camera: clicked item becomes the centre of the view ---------- */
   let focusHome = null;
-  const FRONT = { about: [1, 0, 0], ic: [1, 0, 0], hplc: [0, 0, 1], contact: [0, 0, 1], toc: [0, 0, 1], desktop: [0, 0, 1] };
+  const FRONT = { about: [1, 0, 0], ic: [1, 0, 0], hplc: [0, 0, 1], contact: [0, 0, 1], toc: [0, 0, 1], desktop: [0, 0, 1], sfc: [0, 0, 1], co2: [1, 0, 0] };
   const fBox = new THREE.Box3(), fC = new THREE.Vector3(), fS = new THREE.Vector3();
   function focusOn(h) {
     if (!focusHome) focusHome = { pos: camera.position.clone(), tgt: controls.target.clone() };
@@ -2534,7 +3380,7 @@ body.os-mode .bot-tip { display: none; }
     if (!focusHome) return;
     const fh = focusHome; focusHome = null;
     animateCamera(fh.pos, fh.tgt, 0.8, () => { controls.minDistance = 8; });
-    if (!pMode && !deskOpen) labelsEl.hidden = false;
+    if (!pMode && !deskOpen && !lvl) labelsEl.hidden = false;
   }
 
   /* ---------- Camera easing ---------- */
@@ -2546,9 +3392,11 @@ body.os-mode .bot-tip { display: none; }
     if (reduce) { controls.target.copy(t); tween = null; }
   }
   document.getElementById("resetBtn").addEventListener("click", () => {
+    if (lvl) return;
     closeSheet();
     camTween = null; focusHome = null; controls.minDistance = 8; if (!pMode) labelsEl.hidden = false;
-    camera.position.copy(HOME); controls.target.copy(TARGET); fitDistance(); tween = null;
+    const dy = level === "down" ? BY : 0;
+    camera.position.copy(HOME).y += dy; controls.target.copy(TARGET).y += dy; fitDistance(); tween = null;
   });
 
   /* ---------- Resize ---------- */
@@ -2594,6 +3442,8 @@ body.os-mode .bot-tip { display: none; }
       controls.update();
     }
 
+    updateLevel(dt);
+    if (basement.visible && !reduce) updateSfc(dt, time);
     if (lab.visible) {
       if (!reduce) {
         leds.forEach((l, i) => { l.visible = i % 3 !== 1 || Math.sin(time * 3 + i) > -0.3; });
@@ -2623,6 +3473,7 @@ body.os-mode .bot-tip { display: none; }
       if (!pMode && u.uMix.value <= 0 && P.points.visible) { P.points.visible = false; lab.visible = true; }
     }
 
+    if (liveCam && sfcAppOpen && !camTween) updateLiveCam(dt);
     if (!osFull) { renderer.render(scene, camera); if (cssRenderer) cssRenderer.render(cssScene, camera); }
 
     if (!pMode) {
@@ -2630,7 +3481,7 @@ body.os-mode .bot-tip { display: none; }
       hotspots.forEach(hs => {
         v.copy(hs.anchor).project(camera);
         hs.el.style.transform = `translate(${(v.x * 0.5 + 0.5) * w}px, ${(-v.y * 0.5 + 0.5) * h}px) translate(-50%, -50%)`;
-        hs.el.hidden = v.z > 1;
+        hs.el.hidden = v.z > 1 || hs.level !== level;
       });
     }
     requestAnimationFrame(frame);
