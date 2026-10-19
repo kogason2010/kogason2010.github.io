@@ -95,6 +95,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   border: 1px solid var(--line); border-radius: 999px; padding: 9px 13px; cursor: pointer;
 }
 .btn:hover { border-color: var(--accent); }
+.tools .btn:not(.primary) { background: color-mix(in srgb, var(--sheet) 84%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .btn:focus-visible, .hot:focus-visible, .close:focus-visible, .sheet a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -177,6 +178,11 @@ body.os-mode .bot-tip { display: none; }
 .sfcw-chrom { grid-area: chrom; } .sfcw-chrom .sfc-chart { height: 220px; }
 .sfcw-res { grid-area: res; } .sfcw-phase { grid-area: phase; }
 .sfcw-res .sfc-callout a { color: var(--accent); }
+@media (max-width: 640px) {
+  .ws-bar, .sfcw-bar { padding: 8px 8px 8px 14px; row-gap: 8px; }
+  .ws-bar .ws-title, .sfcw-bar .ws-title { flex: 1; }
+  .ws-bar .ws-tabs, .sfcw-bar .sfcw-stat { order: 3; flex: 1 1 100%; }
+}
 @media (max-width: 860px) {
   .sfcw { padding: 0; }
   .sfcw-win { height: 100%; border-radius: 0; border: 0; }
@@ -198,6 +204,8 @@ body.os-mode .bot-tip { display: none; }
 .hot::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--glow); box-shadow: 0 0 0 3px color-mix(in srgb, var(--glow) 35%, transparent); }
 .hot:hover, .hot.on { border-color: var(--accent); }
 .hot[hidden] { display: none; }
+.hot { transition: border-color .15s, opacity .2s; }
+.hot.tucked { opacity: 0; pointer-events: none; }
 
 .sheet {
   position: fixed; z-index: 3;
@@ -223,7 +231,9 @@ body.os-mode .bot-tip { display: none; }
 .row .v { font-weight: 600; overflow-wrap: anywhere; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font: 400 12px/1 var(--mono); padding: 6px 9px; border-radius: 6px; background: var(--bg-2); color: var(--ink); }
-.cta { display: inline-flex; align-self: start; justify-self: start; text-decoration: none; background: var(--accent); color: var(--accent-ink) !important; font-weight: 600; padding: 10px 16px; border-radius: 10px; }
+.cta { display: inline-flex; align-self: start; justify-self: start; text-decoration: none; background: var(--accent); color: var(--accent-ink) !important; font: 600 15px/1.4 var(--body); padding: 10px 16px; border-radius: 10px; border: 0; cursor: pointer; }
+.cta:hover { filter: brightness(1.08); }
+.cta:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .sheet .btn { justify-self: start; }
 
 /* Desktop portfolio overlay: its own fixed look (wallpaper + light taskbar); windows use the theme tokens. */
@@ -292,7 +302,7 @@ body.os-mode .bot-tip { display: none; }
 .tag .intro-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; pointer-events: auto; }
 .tag .intro-actions .btn { text-decoration: none; display: inline-flex; align-items: center; }
 .tag .featured { margin-top: 8px; font: 400 12px/1.5 var(--mono); color: var(--ink-soft); pointer-events: auto; max-width: 42ch; }
-.tag .featured a { color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+.tag .featured a { white-space: nowrap; color: var(--accent); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
 .tag .featured a:hover { border-bottom-color: var(--accent); }
 .tag a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 900px) { .tag .featured { display: none; } }
@@ -374,8 +384,9 @@ body.os-mode .bot-tip { display: none; }
   .tools::-webkit-scrollbar { display: none; }
   .tools .btn { flex: none; padding: 8px 11px; }
   .tag { top: calc(60px + env(safe-area-inset-top, 0px)); }
-  body.sheet-open .tag { opacity: 0; pointer-events: none; }
 }
+body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-8px); }
+.tag { transition: opacity .3s, transform .3s; }
 @media (max-width: 640px) { .hint { border-radius: 14px; } .bot-tip { white-space: normal; max-width: min(280px, calc(100vw - 16px)); } }
 @media (prefers-reduced-motion: reduce) { .sheet, .hot { transition: none; } }
 </style>
@@ -386,7 +397,7 @@ body.os-mode .bot-tip { display: none; }
 <div id="labels"></div>
 
 <div class="tag">
-  <span class="eyebrow">Portfolio · lab 01</span>
+  <span class="eyebrow" id="eyebrow">Portfolio · lab 01</span>
   <h1>kogason2010</h1>
   <p>Interactive 3D sites about analytical science. Explore the lab, or jump straight to the projects.</p>
   <div class="intro-actions">
@@ -579,7 +590,7 @@ body.os-mode .bot-tip { display: none; }
         <p>SFC uses supercritical carbon dioxide as the main mobile phase, usually with some methanol mixed in. The CO₂ is dense enough to dissolve compounds but flows almost like a gas, so runs are fast and use far less organic solvent than HPLC.</p>
         <div class="row"><span class="k">Flow path</span><span class="v">CO₂ pump and modifier pump · mixer · autosampler · column oven · PDA detector · back-pressure regulator</span></div>
         <div class="row"><span class="k">Good at</span><span class="v">Chiral separations, fast screening, and polarity measurements such as EPSA</span></div>
-        <button class="btn primary" type="button" data-sfcapp>Open the SFC workstation</button>
+        <button class="cta" type="button" data-sfcapp>Open the SFC workstation</button>
         <p class="also">Related project: <a href="https://kogason2010.github.io/nexera-uc-epsa/" target="_blank" rel="noopener" data-launch="nexera-uc-epsa">Nexera UC EPSA</a></p>`
     },
     contact: {
@@ -785,6 +796,34 @@ body.os-mode .bot-tip { display: none; }
   // yellow floor marking in front of the instrument bench
   box(0.07, 0.006, 2.8, C.yellow, -2.72, 0.014, 1.45).castShadow = false;
   box(1.45, 0.006, 0.07, C.yellow, -3.42, 0.014, 0.08).castShadow = false;
+
+  // soft drop shadow beneath the diorama
+  const dropTex = tex((g, w, h) => {
+    g.shadowColor = "rgba(16,26,34,0.55)"; g.shadowBlur = 70; g.shadowOffsetX = w;
+    g.fillStyle = "#000"; g.fillRect(-w + 110, 110, w - 220, h - 220);
+  }, 512, 512);
+  const dropMat = new THREE.MeshBasicMaterial({ map: dropTex, transparent: true, depthWrite: false, opacity: 0.8 });
+  function dropShadow(parent, y) { const m = new THREE.Mesh(new THREE.PlaneGeometry(12.5, 12.5), dropMat); m.rotation.x = -Math.PI / 2; m.position.set(0.25, y, 0.25); m.renderOrder = -1; m.userData.noNav = m.userData.noSample = true; parent.add(m); return m; }
+  dropShadow(lab, -0.7);
+
+  // a wall clock that keeps the visitor's local time
+  const clocks = [];
+  let basementClock = null;
+  function wallClock(parent, x, y, z, r) {
+    const g = new THREE.Group(); g.position.set(x, y, z); parent.add(g);
+    const face = cyl(r, r, 0.03, 0xf6f7f5, 0, 0, 0, g, 48, { roughness: 0.4 }); face.rotation.x = Math.PI / 2;
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(r, 0.016, 8, 56), mat(0x2b3136, { roughness: 0.4 })); rim.position.z = 0.012; g.add(rim);
+    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, t = box(i % 3 ? 0.008 : 0.014, r * (i % 3 ? 0.1 : 0.16), 0.004, 0x2b3136, Math.sin(a) * r * 0.8, Math.cos(a) * r * 0.8, 0.017, g); t.rotation.z = -a; t.castShadow = false; }
+    const hand = (len, w, c, z) => { const p = new THREE.Group(); p.position.z = z; g.add(p); const b = box(w, len, 0.004, c, 0, len * 0.4, 0, p); b.castShadow = false; return p; };
+    const c = { h: hand(r * 0.5, 0.016, 0x1f2428, 0.02), m: hand(r * 0.74, 0.011, 0x1f2428, 0.024), s: hand(r * 0.82, 0.005, 0xd23c3c, 0.028) };
+    const hub = cyl(0.012, 0.012, 0.01, 0xd23c3c, 0, 0, 0.032, g, 12); hub.rotation.x = Math.PI / 2;
+    clocks.push(c); return c;
+  }
+  function updateClocks() {
+    const d = new Date(), s = d.getSeconds() + d.getMilliseconds() / 1000, m = d.getMinutes() + s / 60, h = (d.getHours() % 12) + m / 60;
+    clocks.forEach(c => { c.s.rotation.z = -Math.floor(s) / 60 * Math.PI * 2; c.m.rotation.z = -m / 60 * Math.PI * 2; c.h.rotation.z = -h / 12 * Math.PI * 2; });
+  }
+  wallClock(lab, 0.2, 3.7, -4.16, 0.26);
 
   /* ---------- Interactive groups ---------- */
   const hotspots = [];
@@ -1943,16 +1982,27 @@ body.os-mode .bot-tip { display: none; }
   })();
   // angles run counter-clockwise seen from above; direction of angle a on the floor is (cos a, -sin a)
   const treadTop = i => -(i + 1) * RISE;
-  function spiral(parent, i0, i1, poleBottom, poleTop) {
+  // clip: nothing is built below this height (upstairs, the flight vanishes into the dark well)
+  function spiral(parent, i0, i1, poleBottom, poleTop, clip) {
+    clip = clip == null ? -1e9 : clip;
     for (let i = i0; i <= i1; i++) {
-      const t = new THREE.Mesh(treadGeo, treadMat); t.rotation.y = i * DTH; t.position.set(STAIR.x, treadTop(i) - 0.035, STAIR.z);
-      t.castShadow = t.receiveShadow = true; parent.add(t);
+      if (treadTop(i) - 0.035 > clip) {
+        const t = new THREE.Mesh(treadGeo, treadMat); t.rotation.y = i * DTH; t.position.set(STAIR.x, treadTop(i) - 0.035, STAIR.z);
+        t.castShadow = t.receiveShadow = true; parent.add(t);
+      }
       const a = i * DTH + DTH * 0.35, bx = STAIR.x + Math.cos(a) * 0.71, bz = STAIR.z - Math.sin(a) * 0.71;
-      cyl(0.009, 0.009, 0.9, railMat, bx, treadTop(i) + 0.45, bz, parent, 6);
+      const b0 = Math.max(treadTop(i), clip), b1 = treadTop(i) + 0.9;
+      if (b1 - b0 > 0.05) cyl(0.009, 0.009, b1 - b0, railMat, bx, (b0 + b1) / 2, bz, parent, 6);
     }
     const pts = [];
-    for (let a = i0 * DTH - DTH * 0.5; a <= i1 * DTH + DTH * 0.5 + 1e-6; a += DTH / 4) pts.push(new THREE.Vector3(STAIR.x + Math.cos(a) * 0.71, -(1 + a / DTH) * RISE + 0.9, STAIR.z - Math.sin(a) * 0.71));
+    for (let a = i0 * DTH - DTH * 0.5; a <= i1 * DTH + DTH * 0.5 + 1e-6; a += DTH / 4) {
+      const y = -(1 + a / DTH) * RISE + 0.9; if (y < clip) break;
+      pts.push(new THREE.Vector3(STAIR.x + Math.cos(a) * 0.71, y, STAIR.z - Math.sin(a) * 0.71));
+    }
     const rail = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), pts.length * 4, 0.02, 8, false), railMat); rail.castShadow = true; parent.add(rail);
+    // newel post where the handrail starts, standing on the top tread
+    const p0 = pts[0]; cyl(0.024, 0.024, p0.y - treadTop(i0) + 0.02, railMat, p0.x, (p0.y + treadTop(i0)) / 2, p0.z, parent, 10);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(0.032, 12, 8), railMat); knob.position.copy(p0); parent.add(knob);
     cyl(0.055, 0.055, poleTop - poleBottom, stairSteel, STAIR.x, (poleTop + poleBottom) / 2, STAIR.z, parent, 16);
     const cap = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 10), stairSteel); cap.position.set(STAIR.x, poleTop, STAIR.z); parent.add(cap);
   }
@@ -1974,7 +2024,7 @@ body.os-mode .bot-tip { display: none; }
     well.position.set(STAIR.x, -0.15, STAIR.z); gStairs.add(well);
     const dark = new THREE.Mesh(new THREE.CircleGeometry(STAIR.r, 64), new THREE.MeshBasicMaterial({ color: 0x0b1115 }));
     dark.rotation.x = -Math.PI / 2; dark.position.set(STAIR.x, -0.29, STAIR.z); gStairs.add(dark);
-    spiral(gStairs, 0, 0, -0.29, 0.98);
+    spiral(gStairs, 0, 5, -0.29, 0.98, -0.27);
   })();
 
   /* ---------- Basement: SFC suite (hidden until you take the stairs) ---------- */
@@ -1988,6 +2038,7 @@ body.os-mode .bot-tip { display: none; }
   }, 512, 512);
   concreteTex.wrapS = concreteTex.wrapT = THREE.RepeatWrapping; concreteTex.repeat.set(4, 4); concreteTex.anisotropy = 8;
   box(8.4, 0.3, 8.4, 0x5d666b, 0, BY - 0.15, 0, basement);
+  dropShadow(basement, BY - 0.7);
   const bFloor = new THREE.Mesh(new THREE.PlaneGeometry(8.4, 8.4), new THREE.MeshStandardMaterial({ map: concreteTex, roughness: 0.8, metalness: 0.02 }));
   bFloor.rotation.x = -Math.PI / 2; bFloor.position.y = BY + 0.002; bFloor.receiveShadow = true; basement.add(bFloor);
   // painted block walls
@@ -2024,13 +2075,15 @@ body.os-mode .bot-tip { display: none; }
   });
   const bLight = new THREE.PointLight(0xeef6ff, 0.55, 9, 2); bLight.position.set(-0.4, BY + 2.7, -1.2); basement.add(bLight);
   // floor drain and safety striping in front of the gas cylinders
-  cyl(0.13, 0.13, 0.006, 0x4a5357, 1.2, BY + 0.006, 0.6, basement, 24, { metalness: 0.6, roughness: 0.4 });
+  const drainTex = tex((g, w, h) => { g.fillStyle = "#59636a"; g.beginPath(); g.arc(w / 2, h / 2, w / 2, 0, 7); g.fill(); g.fillStyle = "#1c2226"; for (let x = 18; x < w - 12; x += 12) g.fillRect(x, 22, 5, h - 44); g.strokeStyle = "#3d464c"; g.lineWidth = 6; g.beginPath(); g.arc(w / 2, h / 2, w / 2 - 4, 0, 7); g.stroke(); }, 128, 128);
+  const drain = new THREE.Mesh(new THREE.CircleGeometry(0.13, 32), new THREE.MeshStandardMaterial({ map: drainTex, transparent: true, roughness: 0.85, metalness: 0.1 }));
+  drain.rotation.x = -Math.PI / 2; drain.position.set(1.2, BY + 0.006, 0.6); drain.receiveShadow = true; basement.add(drain);
   const stripeTex = tex((g, w, h) => { g.fillStyle = "#f2c230"; g.fillRect(0, 0, w, h); g.fillStyle = "#1f2428"; for (let x = -h; x < w; x += 28) { g.beginPath(); g.moveTo(x, h); g.lineTo(x + 14, h); g.lineTo(x + 14 + h, 0); g.lineTo(x + h, 0); g.fill(); } }, 256, 32);
   const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.12), new THREE.MeshStandardMaterial({ map: stripeTex, roughness: 0.6 }));
   stripe.rotation.set(-Math.PI / 2, 0, Math.PI / 2); stripe.position.set(-3.6, BY + 0.007, -1.95); stripe.receiveShadow = true; basement.add(stripe);
 
   // stair from the ceiling opening down to the basement floor
-  const gUp = hotGroup("upstairs", "Upstairs", new THREE.Vector3(STAIR.x, BY + 2.35, STAIR.z), basement, "down");
+  const gUp = hotGroup("upstairs", "Upstairs", new THREE.Vector3(STAIR.x + 0.2, BY + 1.35, STAIR.z + 0.3), basement, "down");
   spiral(gUp, 0, NTREAD - 1, BY, 0.98);
   cyl(0.16, 0.16, 0.04, stairSteel, STAIR.x, BY + 0.02, STAIR.z, gUp, 20);
 
@@ -2160,6 +2213,26 @@ body.os-mode .bot-tip { display: none; }
   plane(0.22, 0.11, new THREE.MeshBasicMaterial({ map: co2Mon.t }), -4.128, BY + 1.77, -0.75, Math.PI / 2, basement);
   const strobe = new THREE.Mesh(new THREE.SphereGeometry(0.04, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xc23a3a, { transparent: true, opacity: 0.85, roughness: 0.2 }));
   strobe.position.set(-4.12, BY + 1.88, -0.75); basement.add(strobe);
+  // anti-fatigue mat in front of the instrument bench
+  const matTex = tex((g, w, h) => { g.fillStyle = "#23292d"; g.fillRect(0, 0, w, h); g.fillStyle = "#2e353a"; for (let y = 4; y < h; y += 10) for (let x = 4 + ((y / 10) % 2) * 5; x < w; x += 10) { g.beginPath(); g.arc(x, y, 2.4, 0, 7); g.fill(); } g.strokeStyle = "#f2c230"; g.lineWidth = 4; g.strokeRect(2, 2, w - 4, h - 4); }, 256, 80);
+  const bmat = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 0.75), new THREE.MeshStandardMaterial({ map: matTex, roughness: 0.95 }));
+  bmat.rotation.x = -Math.PI / 2; bmat.position.set(-0.25, BY + 0.008, -2.98); bmat.receiveShadow = true; basement.add(bmat);
+  // a steel cart with spare solvent
+  (function () {
+    const cx = 2.35, cz = -1.75, steelM = { metalness: 0.6, roughness: 0.35 };
+    [0.18, 0.62, 0.95].forEach(y => box(0.9, 0.025, 0.55, C.steel, cx, BY + y, cz, basement, steelM));
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => {
+      cyl(0.014, 0.014, 0.88, C.steel, cx + sx * 0.43, BY + 0.53, cz + sz * 0.255, basement, 8, steelM);
+      cyl(0.035, 0.035, 0.03, 0x2a2f33, cx + sx * 0.4, BY + 0.05, cz + sz * 0.23, basement, 12).rotation.x = Math.PI / 2;
+    });
+    box(0.03, 0.03, 0.5, 0x2a2f33, cx + 0.47, BY + 0.98, cz, basement);
+    [[-0.28, 0x8a4b1d], [-0.05, 0x8a4b1d], [0.2, 0xe9eef0]].forEach(([dx, c], i) => {
+      cyl(0.075, 0.075, 0.3, c, cx + dx, BY + 0.97 + 0.15, cz + (i % 2 ? 0.06 : -0.05), basement, 18, { roughness: 0.3, transparent: c !== 0xe9eef0, opacity: 0.92 });
+      cyl(0.03, 0.03, 0.05, 0x1f2428, cx + dx, BY + 0.97 + 0.325, cz + (i % 2 ? 0.06 : -0.05), basement, 12);
+    });
+    box(0.32, 0.18, 0.26, 0xc9a77a, cx - 0.1, BY + 0.72, cz, basement, { roughness: 0.9 });
+  })();
+  basementClock = wallClock(basement, 2.75, BY + 2.05, -4.16, 0.24);
 
   // tubing on the instrument fronts (the flow path), used by the live run
   const peekLine = mat(C.peek, { roughness: 0.4 });
@@ -2508,7 +2581,7 @@ body.os-mode .bot-tip { display: none; }
   particleBtn.addEventListener("click", () => setParticleMode(!pMode));
 
   /* ---------- Labels, hover, picking ---------- */
-  const labelsEl = document.getElementById("labels");
+  const labelsEl = document.getElementById("labels"), tagEl = document.querySelector(".tag"), toolsEl = document.querySelector(".tools");
   hotspots.forEach(h => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "hot"; b.textContent = h.label;
@@ -2717,7 +2790,7 @@ body.os-mode .bot-tip { display: none; }
     });
   }
   function closeDesktop(after) {
-    if (!deskOpen) return;
+    if (!deskOpen || !savedView || wsOpen || sfcAppOpen) return;
     desk.classList.remove("show");
     setTimeout(() => {
       desk.hidden = true;
@@ -2879,13 +2952,15 @@ body.os-mode .bot-tip { display: none; }
       document.getElementById("wsClose").focus({ preventScroll: true });
     });
   }
+  let wsClosing = false;
   function closeWorkstation() {
-    if (!wsOpen) return;
+    if (!wsOpen || wsClosing) return;
+    wsClosing = true;
     wsEl.classList.remove("show");
     setTimeout(() => {
       wsEl.hidden = true;
       animateCamera(wsHome.pos, wsHome.tgt, 0.9, () => {
-        wsOpen = false; deskOpen = false; controls.enabled = true; controls.minDistance = 8;
+        wsOpen = false; wsClosing = false; deskOpen = false; controls.enabled = true; controls.minDistance = 8;
         document.body.classList.remove("os-mode");
         labelsEl.hidden = pMode; if (!pMode) hint.hidden = false;
       });
@@ -2929,6 +3004,7 @@ body.os-mode .bot-tip { display: none; }
     labelsEl.hidden = false; hint.hidden = false; hint.textContent = level === "up" ? HINT_UP : HINT_DOWN;
     levelBtn.disabled = false; particleBtn.disabled = level === "down";
     levelBtn.textContent = level === "up" ? "Go downstairs" : "Go upstairs";
+    document.getElementById("eyebrow").textContent = level === "up" ? "Portfolio · lab 01" : "Portfolio · basement · SFC suite";
     levelBtn.setAttribute("aria-label", level === "up" ? "Go downstairs to the SFC suite" : "Go back upstairs to the lab");
     if (osFrame && level === "up") { osFrame.style.visibility = ""; placeOsFrame(); }
   }
@@ -3022,7 +3098,11 @@ body.os-mode .bot-tip { display: none; }
     const step = Wm > 8 ? 2 : Wm > 3.5 ? 1 : 0.5;
     for (let m = 0; m <= Wm + 1e-6; m += step) { const x = pl + (m / Wm) * cw; g.beginPath(); g.moveTo(x, top); g.lineTo(x, top + ch); g.stroke(); g.fillText(String(+m.toFixed(1)), x, H - 10); }
     g.textAlign = "left"; g.fillText("min", W - pr - 20, H - 1); g.fillText("AU", 4, top + 8);
-    if (!run) return;
+    if (!run) {
+      g.textAlign = "center"; g.fillStyle = soft; g.font = "12px " + (cs.getPropertyValue("--mono") || "monospace");
+      g.fillText(sfc.inject ? "Injecting…" : "Press Inject to start a run", pl + cw / 2, top + ch / 2);
+      return;
+    }
     const ymax = Math.max(0.3, ...run.peaks.filter(p => p.tR <= run.W).map(p => p.height)) * 1.12;
     g.strokeStyle = acc; g.lineWidth = dark ? 2 : 1.75; g.beginPath();
     const n = Math.max(2, Math.round(cw * Math.min(1, tNow / Wm)));
@@ -3230,14 +3310,16 @@ body.os-mode .bot-tip { display: none; }
       $s("sfcClose").focus({ preventScroll: true });
     });
   }
+  let sfcClosing = false;
   function closeSfcApp() {
-    if (!sfcAppOpen || !sfcPose) return;
+    if (!sfcAppOpen || !sfcPose || sfcClosing) return;
+    sfcClosing = true;
     sfcAppEl.classList.remove("show");
     setTimeout(() => {
       sfcAppEl.hidden = true; liveCam = false; camera.clearViewOffset();
       camera.position.copy(sfcPose.pos); controls.target.copy(sfcPose.tgt); camera.lookAt(sfcPose.tgt);
       animateCamera(sfcHome.pos, sfcHome.tgt, 0.9, () => {
-        sfcAppOpen = false; deskOpen = false; controls.enabled = true; controls.minDistance = 8;
+        sfcAppOpen = false; sfcClosing = false; deskOpen = false; controls.enabled = true; controls.minDistance = 8;
         document.body.classList.remove("os-mode");
         labelsEl.hidden = pMode; if (!pMode) hint.hidden = false;
       });
@@ -3367,7 +3449,7 @@ body.os-mode .bot-tip { display: none; }
     const across = f[0] ? fS.z : fS.x, depth = f[0] ? fS.x : fS.z;
     const dH = (fS.y / 2) / (tanV * (freeH / H));
     const dW = (across / 2) / (tanV * camera.aspect * (freeW / W));
-    const d = Math.max(dH, dW) * 1.3 + depth / 2;
+    const d = Math.max(dH, dW) * 1.5 + depth / 2;
     const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
     const up = new THREE.Vector3().crossVectors(right, fwd).normalize();
     const visW = 2 * d * tanV * camera.aspect, visH = 2 * d * tanV;
@@ -3443,6 +3525,7 @@ body.os-mode .bot-tip { display: none; }
     }
 
     updateLevel(dt);
+    updateClocks();
     if (basement.visible && !reduce) updateSfc(dt, time);
     if (lab.visible) {
       if (!reduce) {
@@ -3478,9 +3561,13 @@ body.os-mode .bot-tip { display: none; }
 
     if (!pMode) {
       const w = stage.clientWidth, h = stage.clientHeight;
+      // tags that slide under the intro panel or the toolbar fade out instead of overlapping them
+      const cover = [tagEl, toolsEl].filter(el => getComputedStyle(el).opacity > 0.5).map(el => el.getBoundingClientRect());
       hotspots.forEach(hs => {
         v.copy(hs.anchor).project(camera);
-        hs.el.style.transform = `translate(${(v.x * 0.5 + 0.5) * w}px, ${(-v.y * 0.5 + 0.5) * h}px) translate(-50%, -50%)`;
+        const lx = (v.x * 0.5 + 0.5) * w, ly = (-v.y * 0.5 + 0.5) * h;
+        hs.el.style.transform = `translate(${lx}px, ${ly}px) translate(-50%, -50%)`;
+        hs.el.classList.toggle("tucked", cover.some(r => lx > r.left - 50 && lx < r.right + 50 && ly > r.top - 14 && ly < r.bottom + 14));
         hs.el.hidden = v.z > 1 || hs.level !== level;
       });
     }
