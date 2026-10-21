@@ -5857,9 +5857,14 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
     flat(new THREE.CircleGeometry(8.9, 64), mat(0xc9b88f, { roughness: 1 }), -30, 0.014, 30);
     flat(new THREE.RingGeometry(9.6, 11.2, 72), new THREE.MeshStandardMaterial({ ...setRepeat(pathSet, 6, 1), roughness: 0.9 }), -30, 0.016, 30);
     if (THREE.Water && !COARSE) {
-      FX.pond = new THREE.Water(new THREE.CircleGeometry(8.1, 64), { textureWidth: 512, textureHeight: 512, waterNormals: waterN, sunDirection: SUN_DIR.clone(), sunColor: 0xffffff, waterColor: 0x1e4c58, distortionScale: 1.4, fog: true, alpha: 1.0 });
+      FX.pond = new THREE.Water(new THREE.CircleGeometry(8.1, 64), { textureWidth: 256, textureHeight: 256, waterNormals: waterN, sunDirection: SUN_DIR.clone(), sunColor: 0xffffff, waterColor: 0x1e4c58, distortionScale: 1.4, fog: true, alpha: 1.0 });
       FX.pond.material.uniforms.size.value = 5.5; FX.pond.rotation.x = -Math.PI / 2; FX.pond.position.set(-30, 0.05, 30); world.add(FX.pond);
-      const reflect = FX.pond.onBeforeRender; FX.pond.onBeforeRender = function (...a) { const gv = FX.grass.visible; FX.grass.visible = false; reflect.apply(this, a); FX.grass.visible = gv; };
+      const reflect = FX.pond.onBeforeRender; FX.pond.onBeforeRender = function (...a) {
+        const gv = FX.grass.visible, saved = FX.chunks.map(ch => ch.meshes[0].visible), cast = FX.chunks.map(ch => ch.meshes[0].castShadow);
+        FX.grass.visible = false; FX.chunks.forEach(ch => { const v = !ch.far && Math.hypot(ch.sphere.center.x + 30, ch.sphere.center.z - 30) < 30 + ch.sphere.radius; ch.meshes.forEach(m => { m.visible = v; }); });
+        reflect.apply(this, a);
+        FX.grass.visible = gv; FX.chunks.forEach((ch, i) => ch.meshes.forEach(m => { m.visible = saved[i]; m.castShadow = cast[i]; }));
+      };
     } else {
       const pw = waterN.clone(); pw.needsUpdate = true; pw.repeat.set(3, 3);
       flat(new THREE.CircleGeometry(8.1, 64), new THREE.MeshStandardMaterial({ color: 0x2a6476, roughness: 0.05, metalness: 0.2, normalMap: pw, normalScale: new THREE.Vector2(0.5, 0.5) }), -30, 0.05, 30);
@@ -6088,10 +6093,11 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
     }
     function ezTree(o, height, lod) {
       const R = ezRng(o.seed), E = THREE.Euler, Q = THREE.Quaternion, V3 = THREE.Vector3, UP = new V3(0, 1, 0), XA = new V3(1, 0, 0);
-      const br = { v: [], n: [], uv: [], ix: [] }, lf = { v: [], uv: [], ix: [] }, queue = [], lv = o.levels;
+      const br = { v: [], n: [], uv: [], ix: [] }, lf = { v: [], uv: [], ix: [] }, queue = [];
       const qForce = new Q().setFromUnitVectors(UP, new V3(0, 1, 0));
+      if (lod) o = { ...o, levels: o.type === "deciduous" ? Math.max(1, o.levels - 1) : o.levels, children: o.type === "evergreen" ? [Math.round(o.children[0] * 0.55), ...o.children.slice(1)] : o.children };
       const segs = l => lod ? 3 : o.segments[l], secs = l => Math.max(1, Math.round(o.sections[l] * (lod ? 0.34 : 1)));
-      const thin = (lod ? 0.5 : 1) * (COARSE ? 0.7 : 1), leafCount = Math.max(2, Math.round(o.leafCount * thin)), leafSize = o.leafSize / Math.pow(thin, 0.6);
+      const lv = o.levels, thin = (lod ? (o.type === "evergreen" ? 0.55 : 0.6) : 1) * (COARSE ? 0.7 : 1), leafCount = Math.max(2, Math.round(o.leafCount * thin)), leafSize = o.leafSize / Math.pow(thin, 0.6) * (lod ? (o.type === "deciduous" ? 1.6 : 1.45) : 1);
       const at = (sections, t) => {
         const n = sections.length - 1, si = Math.min(n, Math.floor(t * n)), A = sections[si], B = sections[Math.min(si + 1, n)], al = n ? (t - si / n) * n : 0;
         return { origin: new V3().lerpVectors(A.origin, B.origin, al), radius: (1 - al) * A.radius + al * B.radius, orient: new E().setFromQuaternion(new Q().setFromEuler(B.orient).slerp(new Q().setFromEuler(A.orient), al)) };
@@ -6099,7 +6105,7 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
       const turn = (parent, deg, radial) => new E().setFromQuaternion(new Q().setFromEuler(parent).multiply(new Q().setFromAxisAngle(UP, radial).multiply(new Q().setFromAxisAngle(XA, deg * Math.PI / 180))));
       const leaf = (origin, orient) => {
         const s = leafSize * (1 + R(o.leafVar, -o.leafVar));
-        [0, Math.PI / 2].forEach(rot => {
+        (lod ? [R() * Math.PI] : [0, Math.PI / 2]).forEach(rot => {
           const i0 = lf.v.length / 3, e = new E(0, rot, 0);
           [[-s / 2, s, 0, 1], [-s / 2, 0, 0, 0], [s / 2, 0, 1, 0], [s / 2, s, 1, 1]].forEach(([x, y, u, v]) => { const p = new V3(x, y, 0).applyEuler(e).applyEuler(orient).add(origin); lf.v.push(p.x, p.y, p.z); lf.uv.push(u, v); });
           lf.ix.push(i0, i0 + 1, i0 + 2, i0, i0 + 2, i0 + 3);
@@ -6181,7 +6187,7 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
     rows.forEach(t => { if (!blocked(t[0], t[1], 1.0)) treePts.push(t); });
     for (let n = 0; n < 1200 && treePts.length < 120; n++) { const x = (rnd() * 2 - 1) * (WB - 4), z = (rnd() * 2 - 1) * (WB - 4); if (!blocked(x, z, 2.6) && !treePts.some(t => Math.hypot(t[0] - x, t[1] - z) < 5.2)) treePts.push([x, z, rnd() < 0.45 ? 0 : rnd() < 0.55 ? 1 : 2]); }
     const nearN = treePts.length;
-    for (let n = 0; n < 900 && treePts.length < nearN + (COARSE ? 180 : 320); n++) { const a = rnd() * 6.283, r = WB + 5 + Math.pow(rnd(), 0.8) * 140, x = Math.cos(a) * r, z = Math.sin(a) * r; if (Math.max(Math.abs(x), Math.abs(z)) < WB + 4) continue; treePts.push([x, z, rnd() < 0.5 ? 1 : rnd() < 0.7 ? 0 : 2, hillH(x, z) + 0.01]); }
+    for (let n = 0; n < 900 && treePts.length < nearN + (COARSE ? 160 : 280); n++) { const a = rnd() * 6.283, r = WB + 5 + Math.pow(rnd(), 0.8) * 140, x = Math.cos(a) * r, z = Math.sin(a) * r; if (Math.max(Math.abs(x), Math.abs(z)) < WB + 4) continue; treePts.push([x, z, rnd() < 0.5 ? 1 : rnd() < 0.7 ? 0 : 2, hillH(x, z) + 0.01]); }
     treePts.forEach(t => { t[4] = Math.floor(rnd() * KINDS[t[2]].length); });
     const SWAY = [[0.035, 2.0], [0.02, 1.2], [0.05, 2.4]];
     const barkMats = {}, leafMats = {}, depthMats = {};
@@ -6190,20 +6196,29 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
     const depthMat = tex => depthMats[tex.uuid] || (depthMats[tex.uuid] = new THREE.MeshDepthMaterial({ depthPacking: THREE.RGBADepthPacking, map: tex, alphaTest: 0.5, side: THREE.DoubleSide }));
     const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), sc4 = new THREE.Vector3(), col4 = new THREE.Color();
     FX.treeTris = 0;
+    FX.chunks = [];
+    const NEAR_CELL = WB / 2, cellOf = (t, lod) => lod ? "s" + Math.floor((Math.atan2(t[1], t[0]) + Math.PI) / (Math.PI / 4)) : Math.floor((t[0] + WB) / NEAR_CELL) + "_" + Math.floor((t[1] + WB) / NEAR_CELL);
     KINDS.forEach((variants, si) => variants.forEach(([preset, seed, h, tex, barkName], vi) => {
-      [[treePts.slice(0, nearN), false], [treePts.slice(nearN), true]].forEach(([all, lod]) => {
-        const pts = all.filter(t => t[2] === si && t[4] === vi); if (!pts.length) return;
-        const tr = ezTree({ ...preset, seed }, h, lod);
-        const bm = new THREE.InstancedMesh(tr.bark, barkMat(si, barkName), pts.length), lm = new THREE.InstancedMesh(tr.leaves, leafMat(si, tex), pts.length);
-        bm.castShadow = lm.castShadow = !lod; bm.receiveShadow = lm.receiveShadow = true; lm.customDepthMaterial = depthMat(tex);
-        FX.treeTris += (tr.bark.index.count + tr.leaves.index.count) / 3 * pts.length;
-        pts.forEach((t, i) => {
-          const s = 0.82 + rnd() * 0.4; q4.setFromEuler(new THREE.Euler(0, rnd() * 6.283, 0)); m4.compose(V(t[0], t[3] || 0, t[1]), q4, sc4.set(s, s * (0.92 + rnd() * 0.16), s));
-          const v = 0.88 + rnd() * 0.24; col4.setRGB(v * (0.94 + rnd() * 0.12), v, v * (0.88 + rnd() * 0.2));
-          bm.setMatrixAt(i, m4); lm.setMatrixAt(i, m4); lm.setColorAt(i, col4);
-          if (!t[3]) { CAMPUS.circles.push([t[0], t[1], 0.3 * s, "tree"]); blobs.push([t[0], t[1], 4.2 * s, 4.2 * s, 0]); }
+      // far trees on the hills use only each species' first variant, at low detail
+      [[treePts.slice(0, nearN).filter(t => t[2] === si && t[4] === vi), false], [vi ? [] : treePts.slice(nearN).filter(t => t[2] === si), true]].forEach(([pts, lod]) => {
+        if (!pts.length) return;
+        const tr = ezTree({ ...preset, seed }, h, lod), groups = {};
+        pts.forEach(t => (groups[cellOf(t, lod)] = groups[cellOf(t, lod)] || []).push(t));
+        Object.values(groups).forEach(g => {
+          const bm = new THREE.InstancedMesh(tr.bark, barkMat(si, barkName), g.length), lm = new THREE.InstancedMesh(tr.leaves, leafMat(si, tex), g.length);
+          bm.castShadow = lm.castShadow = false; bm.receiveShadow = lm.receiveShadow = true; lm.customDepthMaterial = depthMat(tex);
+          FX.treeTris += (tr.bark.index.count + tr.leaves.index.count) / 3 * g.length;
+          const c = new THREE.Vector3(); let rad = 0;
+          g.forEach((t, i) => {
+            const s = 0.82 + rnd() * 0.4; q4.setFromEuler(new THREE.Euler(0, rnd() * 6.283, 0)); m4.compose(V(t[0], t[3] || 0, t[1]), q4, sc4.set(s, s * (0.92 + rnd() * 0.16), s));
+            const v = 0.88 + rnd() * 0.24; col4.setRGB(v * (0.94 + rnd() * 0.12), v, v * (0.88 + rnd() * 0.2));
+            bm.setMatrixAt(i, m4); lm.setMatrixAt(i, m4); lm.setColorAt(i, col4); c.x += t[0]; c.y += (t[3] || 0) + h * 0.5; c.z += t[1];
+            if (!t[3]) { CAMPUS.circles.push([t[0], t[1], 0.3 * s, "tree"]); blobs.push([t[0], t[1], 4.2 * s, 4.2 * s, 0]); }
+          });
+          c.divideScalar(g.length); g.forEach(t => { rad = Math.max(rad, Math.hypot(t[0] - c.x, t[1] - c.z)); });
+          FX.chunks.push({ meshes: [bm, lm], sphere: new THREE.Sphere(c, rad + h * 0.9), far: lod });
+          world.add(bm, lm);
         });
-        world.add(bm, lm);
       });
     }));
 
@@ -6272,7 +6287,7 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
       [0, 0.5, 1].forEach(v => [-0.5, 0.5].forEach(u => { const lean = v * v * (k % 2 ? 1 : -1); tp.push(u * cx + lx * lean, v, u * cz + lz * lean); tuv.push(u + 0.5, v); }));
       tix.push(i0, i0 + 1, i0 + 2, i0 + 1, i0 + 3, i0 + 2, i0 + 2, i0 + 3, i0 + 4, i0 + 3, i0 + 5, i0 + 4);
     }
-    const GN = COARSE ? 18000 : 46000, GH = 20, gg = new THREE.InstancedBufferGeometry();
+    const GN = COARSE ? 15000 : 36000, GH = 18, gg = new THREE.InstancedBufferGeometry();
     gg.setAttribute("position", new THREE.Float32BufferAttribute(tp, 3)); gg.setAttribute("uv", new THREE.Float32BufferAttribute(tuv, 2)); gg.setIndex(tix);
     gg.setAttribute("normal", new THREE.Float32BufferAttribute(new Array(tp.length).fill(0).map((_, i) => (i % 3 === 1 ? 1 : 0)), 3));
     const goff = new Float32Array(GN * 2), grnd = new Float32Array(GN * 4);
@@ -6361,6 +6376,37 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
     wLightMat = new THREE.MeshBasicMaterial({ color: 0x3fe0d0 }); wbot.traverse(o => { if (o.material === botLight) o.material = wLightMat; });
     headlight = new THREE.SpotLight(0xfff1d6, 0, 18, 0.55, 0.6, 1.4); headlight.position.set(0.2, 0.14, 0); wbot.add(headlight);
     const hlT = new THREE.Object3D(); hlT.position.set(4, -0.2, 0); wbot.add(hlT); headlight.target = hlT;
+    mergeStatic(FX.dna, new Set()); mergeStatic(world, new Set([FX.dna, wbot, burstRing, FX.pond, FX.sky, FX.nightDome, FX.grass, wSpotLayer, ...finds.map(f => f.g), ...finds.map(f => f.ring), ...FX.birds, ...FX.butterflies]));
+  }
+  // hundreds of small static meshes (benches, car parts, steps, poles) become a handful of merged ones: far fewer draw calls
+  function mergeStatic(root, keep) {
+    const live = new Set([...FX.windowMats, ...FX.carLights, ...FX.carLamps, FX.lampLens, FX.basinMat]);
+    const id = t => (t ? t.uuid : "");
+    const key = (o, m) => live.has(m) ? m.uuid : [m.type, m.color && m.color.getHex(), m.roughness, m.metalness, id(m.map), id(m.normalMap), id(m.roughnessMap), id(m.metalnessMap), id(m.emissiveMap), m.emissive && m.emissive.getHex(),
+      m.transparent, m.opacity, m.side, m.vertexColors, m.flatShading, m.envMapIntensity, m.alphaTest, m.depthWrite, m.clearcoat, m.toneMapped, o.castShadow, o.receiveShadow, o.renderOrder].join("|");
+    const groups = new Map(), victims = [];
+    const walk = o => {
+      if (keep.has(o)) return;
+      if (o.isMesh && !o.isInstancedMesh && !o.onBeforeRender.toString().includes("reflect") && !Array.isArray(o.material) && !o.material.onBeforeCompile.toString().includes("uWind")) {
+        const names = Object.keys(o.geometry.attributes);
+        if (names.every(n => n === "position" || n === "normal" || n === "uv") && names.includes("normal") && !o.material.isShaderMaterial) {
+          const k = key(o, o.material); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(o); victims.push(o);
+        }
+      }
+      o.children.slice().forEach(walk);
+    };
+    root.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(); root.children.slice().forEach(walk);
+    let merged = 0;
+    groups.forEach(list => {
+      if (list.length < 2) return;
+      let n = 0; const parts = list.map(o => { const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld)); n += g.attributes.position.count; return g; });
+      const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = new Float32Array(n * 2); let off = 0;
+      parts.forEach(g => { const c = g.attributes.position.count; pos.set(g.attributes.position.array, off * 3); nor.set(g.attributes.normal.array, off * 3); if (g.attributes.uv) uv.set(g.attributes.uv.array, off * 2); off += c; g.dispose(); });
+      const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("normal", new THREE.BufferAttribute(nor, 3)); geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2)); geo.computeBoundingSphere();
+      const m = new THREE.Mesh(geo, list[0].material); m.castShadow = list[0].castShadow; m.receiveShadow = list[0].receiveShadow; m.renderOrder = list[0].renderOrder; root.add(m);
+      list.forEach(o => o.parent.remove(o)); merged += list.length;
+    });
+    FX.merged = (FX.merged || 0) + merged;
   }
   function segDist(x, z, p) { const dx = p[2] - p[0], dz = p[3] - p[1], L2 = dx * dx + dz * dz, t = Math.max(0, Math.min(1, ((x - p[0]) * dx + (z - p[1]) * dz) / L2)); return Math.hypot(x - p[0] - dx * t, z - p[1] - dz * t); }
   function hitAt(x, z, r) { return CAMPUS.circles.some(c => Math.hypot(x - c[0], z - c[1]) < c[2] + r) || CAMPUS.boxes.some(b => x > b[0] - r && x < b[2] + r && z > b[1] - r && z < b[3] + r); }
@@ -6390,7 +6436,29 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
     hemi.color.copy(LAB_HEMI.sky); hemi.groundColor.copy(LAB_HEMI.ground); scene.environment = null; renderer.toneMappingExposure = 0.95; setNight(night);
   }
   // per-frame campus effects
+  const _frustum = new THREE.Frustum(), _pv = new THREE.Matrix4();
+  const SHADOW_R = 20;
+  function cullTrees() {
+    camera.updateMatrixWorld(); _pv.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); _frustum.setFromProjectionMatrix(_pv);
+    FX.chunks.forEach(ch => {
+      const inView = _frustum.intersectsSphere(ch.sphere), caster = !ch.far && Math.hypot(ch.sphere.center.x - DRV.x, ch.sphere.center.z - DRV.z) < SHADOW_R + ch.sphere.radius;
+      ch.meshes.forEach(m => { m.visible = inView || caster; m.castShadow = caster; });
+    });
+  }
+  // keep the frame rate up: lower the render resolution when frames run long, raise it again when there's headroom
+  const DPR_MAX = Math.min(window.devicePixelRatio || 1, 1.5), PERF = { t: 0, n: 0, sum: 0, good: 0, last: 0 };
+  function adaptResolution() {
+    const now = performance.now(), ms = PERF.last ? now - PERF.last : 16; PERF.last = now;
+    if (ms > 250) return;   // tab was hidden or paused
+    PERF.sum += ms; PERF.n++;
+    if (PERF.n < 45) return;
+    const avg = PERF.sum / PERF.n, pr = renderer.getPixelRatio(); PERF.sum = PERF.n = 0;
+    if (avg > 24 && pr > 0.7) { renderer.setPixelRatio(Math.max(0.7, pr - 0.2)); PERF.good = 0; }
+    else if (avg < 17.5 && pr < DPR_MAX) { if (++PERF.good >= 3) { renderer.setPixelRatio(Math.min(DPR_MAX, pr + 0.1)); PERF.good = 0; } }
+    else PERF.good = 0;
+  }
   function updateWorldFx(dt, time) {
+    cullTrees(); adaptResolution();
     FX.wind.value = time;
     FX.sunV.value.copy(FX.night ? MOON_DIR : SUN_DIR).transformDirection(camera.matrixWorldInverse); FX.sunCol.value.setRGB(...(FX.night ? [0.03, 0.04, 0.07] : [0.95, 0.85, 0.55]));
     FX.grassU.uCenter.value.set(DRV.x, DRV.z); FX.grassU.uPush.value.set(DRV.x, DRV.z, 0.42);
@@ -6587,8 +6655,8 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
     worldOn = true; lab.visible = false; world.visible = true; bgGroup.visible = false; botTip.classList.remove("on");
     scene.fog = new THREE.FogExp2(0xc9dbe8, 0.0052); updateWorld.night = null;
     camera.fov = 58; camera.far = 2400; camera.updateProjectionMatrix();
-    shadowRes(COARSE ? 2048 : 4096); sun.shadow.normalBias = 0.03;
-    Object.assign(sun.shadow.camera, { left: -22, right: 22, top: 22, bottom: -22, near: 1, far: 110 }); sun.shadow.camera.updateProjectionMatrix();
+    shadowRes(2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
+    Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 }); sun.shadow.camera.updateProjectionMatrix();
     applyWorldNight(night); updateWorld.night = night;
     Object.assign(DRV, { x: SPAWN.x, z: SPAWN.z, h: SPAWN.h, v: 0, w: 0 }); CAM.yaw = 0; CAM.idle = 9; chase(0, true);
     document.body.classList.add("world-mode"); hudEl.hidden = false; mmEl.hidden = false; joyEl.hidden = !COARSE; boostEl.hidden = !COARSE;
@@ -6604,7 +6672,7 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
       worldOn = false; world.visible = false; lab.visible = true; bgGroup.visible = true; scene.fog = null;
       camera.fov = 32; camera.far = 100; camera.updateProjectionMatrix();
       Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 30 }); sun.shadow.camera.updateProjectionMatrix();
-      sun.position.set(6, 11, 7); sun.target.position.set(0, 0, 0); shadowRes(2048); sun.shadow.normalBias = 0; restoreLabLighting();
+      sun.position.set(6, 11, 7); sun.target.position.set(0, 0, 0); shadowRes(2048); sun.shadow.normalBias = 0; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); restoreLabLighting();
       document.body.classList.remove("world-mode"); hudEl.hidden = true; mmEl.hidden = true; joyEl.hidden = true; boostEl.hidden = true; toastEl.classList.remove("on");
       hint.textContent = HINT_UP; levelBtn.hidden = false; particleBtn.hidden = false;
       for (const k in keys) keys[k] = false; joy.active = false; boostHeld = false;
