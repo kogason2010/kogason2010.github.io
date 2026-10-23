@@ -29,7 +29,9 @@ function buildWater() {
   for (let i = 0; i < 18; i++) { const a = rnd() * 6.28, r = 1.8 + rnd() * 5.4, x = -30 + Math.cos(a) * r, z = 30 + Math.sin(a) * r; flat(new THREE.CircleGeometry(0.26 + rnd() * 0.2, 14, 0.35, 5.7), padMat, x, 0.07, z).rotation.z = rnd() * 6.28; if (i % 4 === 0) { const f = new THREE.Mesh(new THREE.ConeGeometry(0.07, 0.08, 7), flowerPad); f.position.set(x, 0.1, z); world.add(f); } }
   const reedGeo = new THREE.ConeGeometry(0.02, 1, 4); reedGeo.translate(0, 0.5, 0); paint(reedGeo, (x, y, z, c) => c.setRGB(0.06 + y * 0.14, 0.1 + y * 0.14, 0.03 + y * 0.03));
   const reeds = new THREE.InstancedMesh(reedGeo, windy(new THREE.MeshLambertMaterial({ vertexColors: true }), 0.06, 0.2), 420), rm = new THREE.Matrix4();
-  for (let i = 0; i < 420; i++) { const a = rnd() * 6.283 * (0.9) + 0.4, r = 7.5 + rnd() * 1.1, s = 0.35 + rnd() * 0.6; rm.compose(V(-30 + Math.cos(a) * r, 0, 30 + Math.sin(a) * r), new THREE.Quaternion().setFromEuler(new THREE.Euler((rnd() - 0.5) * 0.25, 0, (rnd() - 0.5) * 0.25)), V(1, s, 1)); reeds.setMatrixAt(i, rm); }
+  // reeds grow in clumps round the edge, not an even fence: 16 clumps of varied size, gaps between them
+  const clumps = Array.from({ length: 16 }, (_, k) => ({ a: (k + rnd() * 0.6) / 16 * 6.283, n: 0.4 + rnd() * 1.2, h: 0.6 + rnd() * 0.7 }));
+  for (let i = 0; i < 420; i++) { const cl = clumps[i % 16], a = cl.a + (rnd() - 0.5) * 0.26 * cl.n, r = 7.55 + Math.pow(rnd(), 1.5) * 1.0, s = (0.3 + rnd() * 0.75) * cl.h * (1 - Math.abs(a - cl.a) * 1.6); rm.compose(V(-30 + Math.cos(a) * r, 0, 30 + Math.sin(a) * r), new THREE.Quaternion().setFromEuler(new THREE.Euler((rnd() - 0.5) * 0.25, 0, (rnd() - 0.5) * 0.25)), V(1, s, 1)); reeds.setMatrixAt(i, rm); }
   reeds.castShadow = true; world.add(reeds);
   const stone = new THREE.MeshStandardMaterial({ color: 0xe1dbcf, roughness: 0.7 });
   const basin = new THREE.Mesh(new THREE.LatheGeometry([[3.86, 0], [3.86, 0.06], [3.74, 0.12], [3.72, 0.52], [3.28, 0.52], [3.28, 0.12]].map(p => new THREE.Vector2(p[0], p[1])), 96), new THREE.MeshStandardMaterial({ color: 0xe1dbcf, roughness: 0.7, side: THREE.DoubleSide }));

@@ -14,6 +14,7 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const seeded = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const LAB_DOOR = { x: 0, z: -18 }, SPAWN = { x: 0, z: -14.2, h: -Math.PI / 2 };
 const CHEM_DOOR = { x: 31.6, z: 0, hinted: false }, CHEM_SPAWN = { x: 30.0, z: 0, h: Math.PI, msg: "Back outside, by NCA" };
+const FLY_CEIL = 32;   // how high the robot can fly, in metres
 const LIB_DOOR = { x: 0, z: 35.6, hinted: false }, LIB_SPAWN = { x: 0, z: 33.3, h: Math.PI / 2, msg: "Back outside, by the Library" };
 const wSpots = [], wSpotLayer = new THREE.Group(), finds = [];
 let wMessTotal = 0, wMessDone = 0, wFound = 0;
@@ -21,7 +22,7 @@ let wMessTotal = 0, wMessDone = 0, wFound = 0;
 const FX = { wind: { value: 0 }, sunV: { value: new THREE.Vector3(0, 1, 0) }, sunCol: { value: new THREE.Color(0, 0, 0) }, grass: null, grassU: null, sky: null, envDay: null, envNight: null, pond: null, basinMat: null, basinN: null,
   jets: null, jetSeeds: null, dna: null, lampGlow: null, lampPools: null, windowMats: [], carLights: [], stars: null, fireflies: null, flySeeds: null,
   motes: null, birds: [], butterflies: [], clouds: [], night: null };
-let wbot = null, wBrush = null, wTurret = null, wLightMat = null, headlight = null, burstRing = null;
+let wbot = null, wJet = null, wSpotShadow = null, wBrush = null, wTurret = null, wLightMat = null, headlight = null, burstRing = null;
 const SUN_DIR = new THREE.Vector3().setFromSphericalCoords(1, THREE.MathUtils.degToRad(56), THREE.MathUtils.degToRad(118)), MOON_DIR = new THREE.Vector3(-300, 230, -380).normalize();
 
 /* small procedural toolkit: value noise, canvas textures, normal maps from height */

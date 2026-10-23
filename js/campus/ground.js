@@ -31,7 +31,14 @@ function buildPaths() {
     const dx = x2 - x1, dz = z2 - z1, L = Math.hypot(dx, dz), set = setRepeat(pathSet, w / 3, L / 3), ang = Math.atan2(-dx, -dz);
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, L), new THREE.MeshStandardMaterial({ ...set, roughness: 0.9 }));
     m.rotation.set(-Math.PI / 2, 0, ang); m.position.set((x1 + x2) / 2, pathY += 0.0004, (z1 + z2) / 2); m.receiveShadow = true; world.add(m);
-    [-1, 1].forEach(sd => { const c = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, L), curbMat); c.position.set((x1 + x2) / 2 + (-dz / L) * sd * (w / 2 + 0.08), 0.016, (z1 + z2) / 2 + (dx / L) * sd * (w / 2 + 0.07)); c.rotation.y = Math.atan2(dx, dz); c.receiveShadow = true; world.add(c); });
+    // curbs stop at the plaza's edge ring instead of running across its paving
+    [-1, 1].forEach(sd => {
+      const ox = (-dz / L) * sd * (w / 2 + 0.08), oz = (dx / L) * sd * (w / 2 + 0.08), ux = dx / L, uz = dz / L, PR = 11.72;
+      let s0 = 0; const ax = x1 + ox, az = z1 + oz, bq = ax * ux + az * uz, cq = ax * ax + az * az - PR * PR;
+      if (cq < 0) s0 = -bq + Math.sqrt(bq * bq - cq);
+      const len = L - s0; if (len <= 0.05) return;
+      const c = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.03, len), curbMat); c.position.set(ax + ux * (s0 + len / 2), 0.016, az + uz * (s0 + len / 2)); c.rotation.y = Math.atan2(dx, dz); c.receiveShadow = true; world.add(c);
+    });
     CAMPUS.paths.push([x1, z1, x2, z2, w]);
   }
   path(0, -18, 0, -11.2, 3.2); path(11.2, 0, 32, 0, 3.4); path(-11.2, 0, -32, 0, 3.4); path(0, 11.2, 0, 36, 3.6);

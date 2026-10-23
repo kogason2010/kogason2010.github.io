@@ -1,4 +1,5 @@
 /* Layout: full-bleed 3D lab; a floating name tag top-left, hotspot pills on instruments, a side sheet (bottom sheet on phones) per section, and a particle mode that turns the lab into a point cloud. */
+[hidden] { display: none !important; }   /* the site wrapper sets this too; keep it so the preview matches */
 :root {
   --bg: #e9eef2;
   --bg-2: #d2dce3;
@@ -154,6 +155,8 @@ body.world-mode .tag, body.world-mode #labels, body.world-mode .bot-tip { displa
 .boost { position: fixed; z-index: 4; right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(40px + env(safe-area-inset-bottom, 0px)); width: 92px; height: 92px; border-radius: 50%;
   border: 1px solid var(--line); background: color-mix(in srgb, var(--sheet) 70%, transparent); color: var(--ink); font: 600 13px/1 var(--mono); touch-action: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 .boost.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.boost.fly { width: 72px; height: 72px; bottom: calc(146px + env(safe-area-inset-bottom, 0px)); right: max(30px, env(safe-area-inset-right, 0px)); }
+.hud-alt { margin: 0; font: 500 12px/1.3 var(--mono); color: var(--accent); }
 body.world-mode::after { content: ""; position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 58%, rgba(8, 18, 28, 0.32) 100%); }
 .fade { position: fixed; inset: 0; z-index: 9; pointer-events: none; opacity: 0; transition: opacity .4s; background: #f4fbff; }
 .fade.on { opacity: 1; }
@@ -432,3 +435,40 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
 @media (max-width: 760px) { .lib-reader-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .lib-card { border-right: 0; border-bottom: 1px solid var(--line); max-height: 34vh; } .lib-cover { height: 90px; } }
 .lib-reader a.btn, .lib-card a.btn { text-decoration: none; text-align: center; }
 .lib-note[hidden], .lib-shelf[hidden], .lib-notes[hidden] { display: none; }
+
+/* intro panel: folds down to the name after a few seconds (js/ui/intro.js) */
+.tag-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tag-toggle { pointer-events: auto; flex: none; display: grid; place-items: center; width: 28px; height: 28px; margin: -4px -6px -4px 0; padding: 0; border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, transparent); background: transparent; color: var(--ink-soft); cursor: pointer; transition: color .2s, border-color .2s, background .2s; }
+.tag-toggle:hover { color: var(--ink); border-color: var(--accent); }
+.tag-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tag-toggle svg { width: 14px; height: 14px; transition: transform .3s; }
+.tag-more { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .35s ease, opacity .25s; }
+.tag-more > div { min-height: 0; overflow: hidden; display: grid; gap: 4px; }
+.tag h1 { transition: font-size .3s ease; }
+.tag.collapsed { pointer-events: auto; cursor: pointer; gap: 2px; padding-bottom: 12px; }
+.tag.collapsed h1 { font-size: clamp(20px, 2.4vw, 24px); }
+.tag.collapsed .tag-more { grid-template-rows: 0fr; opacity: 0; visibility: hidden; transition: grid-template-rows .35s ease, opacity .2s, visibility 0s .35s; }
+.tag.collapsed .tag-toggle svg { transform: rotate(180deg); }
+.tag.collapsed:hover { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+@media (prefers-reduced-motion: reduce) { .tag-more, .tag h1, .tag-toggle svg { transition: none; } }
+
+/* campus HUD: shortcuts into the buildings */
+.hud-go { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; }
+.hud-go > span { flex-basis: 100%; font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.hud .hud-go .btn { margin-top: 0; padding: 7px 12px; }
+@media (max-width: 640px) { .hud-go { margin-top: 2px; gap: 4px; } .hud-go > span { display: none; } .hud .hud-go .btn { padding: 6px 10px; } }
+
+/* space: the HUD swaps its campus rows for space ones; the Space shortcut shows a lock until it's earned */
+.hud:not(.space) .hud-space, .hud.space .hud-campus { display: none; }
+.hud .go-space { display: inline-flex; align-items: center; gap: 5px; }
+.hud .go-space .lock { width: 11px; height: 11px; display: none; }
+.hud .go-space.locked { opacity: 0.62; border-style: dashed; }
+.hud .go-space.locked .lock { display: block; }
+.hud.space { background: color-mix(in srgb, #0b1020 70%, transparent); color: #e8eefc; border-color: rgba(140,170,255,.25); }
+.hud.space .eyebrow, .hud.space .hud-row span { color: #a9b6d6; }
+.hud.space .hud-alt { color: #7fe9da; }
+.hud.space .btn { background: rgba(255,255,255,.08); color: #e8eefc; border-color: rgba(160,185,255,.3); }
+
+/* phones: the campus panel stops short of the minimap instead of running under it */
+@media (max-width: 640px) { .hud { width: auto; max-width: calc(100% - 152px - env(safe-area-inset-right, 0px)); } .hud-go { gap: 4px; } }

@@ -11,6 +11,8 @@ function buildParking() {
   const asMap = new THREE.CanvasTexture(asc); asMap.encoding = THREE.sRGBEncoding; asMap.wrapS = asMap.wrapT = THREE.RepeatWrapping; asMap.repeat.set(10, 7.5); const asN = normalFrom(ash, 2); asN.repeat.set(10, 7.5);
   flat(new THREE.PlaneGeometry(24, 18), new THREE.MeshStandardMaterial({ map: asMap, normalMap: asN, roughness: 0.88 }), 32, 0.016, 32);
   CAMPUS.lots.push([20, 23, 44, 41]);
+  // a low concrete curb round the lot so the asphalt doesn't just stop in the grass
+  { const cm = mat(0xd8d4cb, { roughness: 0.85 }); [[32, 23.04, 24.16, 0.16], [32, 40.96, 24.16, 0.16], [20.04, 32, 0.16, 18], [43.96, 32, 0.16, 18]].forEach(([x, z, w, d]) => wbox(w, 0.08, d, cm, x, 0.04, z, { roughness: 0.85 })); }
   const lineMat = new THREE.MeshStandardMaterial({ color: 0xf2f2ee, roughness: 0.7 });
   for (let i = 0; i <= 8; i++) { const lx = 21.6 + i * 2.6; flat(new THREE.PlaneGeometry(0.1, 5.2), lineMat, lx, 0.02, 26.6); flat(new THREE.PlaneGeometry(0.1, 5.2), lineMat, lx, 0.02, 37.4); }
   const bodyShape = new THREE.Shape(); bodyShape.moveTo(-2.15, 0.3); bodyShape.lineTo(-1.76, 0.3); bodyShape.absarc(-1.35, 0.32, 0.41, Math.PI, 0, true); bodyShape.lineTo(0.94, 0.3); bodyShape.absarc(1.35, 0.32, 0.41, Math.PI, 0, true);
@@ -31,6 +33,6 @@ function buildParking() {
     [[-0.84, 1.35], [0.84, 1.35], [-0.84, -1.35], [0.84, -1.35]].forEach(([wx, wz]) => { const t = new THREE.Mesh(tireGeo, rubber), r = new THREE.Mesh(rimGeo, alloy); t.position.set(wx, 0.36, wz); r.position.set(wx, 0.36, wz); t.castShadow = true; g.add(t, r); });
     [-0.55, 0.55].forEach(lx => { box(0.36, 0.1, 0.06, headM, lx, 0.72, 2.27, g); box(0.38, 0.1, 0.06, tailM, lx, 0.74, -2.25, g); });
     box(1.2, 0.18, 0.08, 0x2a3034, 0, 0.42, 2.3, g, { roughness: 0.5 });
-    CAMPUS.boxes.push([x - 0.95, z - 2.25, x + 0.95, z + 2.25, "car"]); blobs.push([x, z, 2.4, 5.0, ry]);
+    CAMPUS.boxes.push([x - 0.95, z - 2.25, x + 0.95, z + 2.25, "car", 1.45]); blobs.push([x, z, 2.4, 5.0, ry]);
   }
 }

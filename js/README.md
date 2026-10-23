@@ -32,7 +32,9 @@
 | Messes and lost items outside | `campus/gameplay.js` |
 | Build order and mesh merging | `campus/build.js` |
 | Day/night outside, culling, adaptive resolution | `campus/atmosphere.js` |
-| Driving, camera, HUD, minimap, going in and out | `campus/drive.js` |
+| Driving and flying, camera, HUD, minimap, going in and out | `campus/drive.js` |
+| **Space** (hold Space for 10 s outside): Earth, Moon, rings, satellite, asteroids, free flight | `space/space.js` |
+| Intro panel folding away | `ui/intro.js` |
 | Indoor places you drive into (shared enter/leave) | `core/places.js` |
 | **NCA** (chemistry building) LC lab room | `chemistry/room.js` |
 | Its instruments (UHPLC, LC-MS/MS, prep LC…) | `chemistry/instruments.js` |

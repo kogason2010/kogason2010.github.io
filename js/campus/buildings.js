@@ -48,7 +48,7 @@ function buildBuildings() {
     wbox(w + 0.24, 0.8, d + 0.24, 0x8a8478, x, 0.4, z, { roughness: 0.9 });
     wbox(w + 0.5, 0.32, d + 0.5, trim, x, h - 0.1, z, { roughness: 0.6 });
     wbox(w + 0.2, 0.7, d + 0.2, trim, x, h + 0.35, z, { roughness: 0.7 });
-    wbox(w - 0.4, 0.06, d - 0.4, 0x7c7f7e, x, h + 0.2, z, { roughness: 1 });
+    wbox(w - 0.4, 0.04, d - 0.4, 0x7c7f7e, x, h + 0.72, z, { roughness: 1 });   // roof membrane inside the parapet
     wbox(2.4, 1.2, 1.8, 0xaab3b8, x - w * 0.2, h + 1.1, z + d * 0.1, { metalness: 0.5, roughness: 0.4 }); wbox(1.5, 0.9, 1.5, 0xaab3b8, x + w * 0.22, h + 0.95, z - d * 0.15, { metalness: 0.5, roughness: 0.4 });
     const fh = h - 1.15, fy = 0.8 + fh / 2;
     [[w, 0, d / 2 + 0.03, 0], [w, 0, -d / 2 - 0.03, Math.PI], [d, w / 2 + 0.03, 0, Math.PI / 2], [d, -w / 2 - 0.03, 0, -Math.PI / 2]].forEach(([len, ox, oz, ry]) => {
@@ -91,7 +91,7 @@ function buildBuildings() {
     plane(4.3, 0.54, new THREE.MeshBasicMaterial({ map: signTex }), 0, DY + DH2 + (style !== "stone" ? 1.45 : 1.15), 0.2, 0, ent);
     [-2.0, 2.0].forEach(dx => { box(0.14, 0.32, 0.12, 0x2a3034, dx, DY + 2.1, 0.08, ent); const l = box(0.1, 0.22, 0.02, new THREE.MeshBasicMaterial({ color: 0x8a8f8f }), dx, DY + 2.1, 0.15, ent); FX.carLights.push(l.material); });
     for (let i = -4; i <= 4; i++) { if (Math.abs(i) < 2) continue; shrub(ex + Math.cos(ry) * i * 1.4 + fx * 0.9, ez - Math.sin(ry) * i * 1.4 + fz * 0.9, 0.55); }
-    CAMPUS.boxes.push([x - w / 2 - 0.2, z - d / 2 - 0.2, x + w / 2 + 0.2, z + d / 2 + 0.2, "building"]);
+    CAMPUS.boxes.push([x - w / 2 - 0.2, z - d / 2 - 0.2, x + w / 2 + 0.2, z + d / 2 + 0.2, "building", h + 0.74]);   // last: roof height
     CAMPUS.bldg.push({ x, z, w, d, name, door: [ex + fx * 0.6, ez + fz * 0.6] });
   }
   function shrub(x, z, s) { if (CAMPUS.paths.some(p => segDist(x, z, p) < p[4] / 2 + 0.7)) return; shrubs.push([x, z, s]); CAMPUS.circles.push([x, z, s * 0.75, "shrub"]); }
@@ -116,7 +116,7 @@ function buildCafe() {
   const cafeSign = ctex(512, 128, (g, cw, ch) => { g.fillStyle = "#2b211b"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#f6e7c8"; g.font = "italic 700 76px Georgia, serif"; g.textAlign = "center"; g.fillText("Café", cw / 2, ch * 0.72); });
   plane(2.2, 0.55, new THREE.MeshBasicMaterial({ map: cafeSign }), -17, 3.1, -9.48, 0, world);
   flat(new THREE.PlaneGeometry(11, 6), new THREE.MeshStandardMaterial({ ...setRepeat(pathSet, 11 / 3, 2), roughness: 0.9 }), -17.5, 0.014, -6.5);
-  CAMPUS.boxes.push([-20.5, -14.5, -13.5, -9.0, "building"]); CAMPUS.bldg.push({ x: -17, z: -12, w: 7, d: 5, name: "Café" });
+  CAMPUS.boxes.push([-20.5, -14.5, -13.5, -9.0, "building", 3.73]); CAMPUS.bldg.push({ x: -17, z: -12, w: 7, d: 5, name: "Café" });
   const umbr = new THREE.MeshStandardMaterial({ map: awnTex, side: THREE.DoubleSide, roughness: 0.7 });
   [[-14.3, -5.4], [-18.6, -5.2], [-21.4, -7.6]].forEach(([tx, tz]) => {
     wcyl(0.45, 0.45, 0.04, 0xe9eef0, tx, 0.74, tz, 24, { roughness: 0.4 }); wcyl(0.035, 0.035, 2.5, 0x6b767c, tx, 1.25, tz, 8, { metalness: 0.6, roughness: 0.3 }); wcyl(0.14, 0.32, 0.06, 0x2f3539, tx, 0.03, tz, 14);

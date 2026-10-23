@@ -21,6 +21,7 @@ function applyWorldNight(nightOn) {
   FX.carLights.forEach(m => m.color.setHex(nightOn ? 0xfff2cc : 0x8a8f8f));
   FX.carLamps[0].emissive.setHex(nightOn ? 0x888070 : 0x000000);
   headlight.intensity = nightOn ? 2.4 : 0;
+  mmEl.style.filter = nightOn ? "brightness(0.62) saturate(0.85)" : "";   // the minimap dims with the campus at night
   if (FX.pond) FX.pond.material.uniforms.sunDirection.value.copy(nightOn ? MOON_DIR : SUN_DIR);
 }
 function restoreLabLighting() {
@@ -52,7 +53,7 @@ function updateWorldFx(dt, time) {
   cullTrees(); adaptResolution();
   FX.wind.value = time;
   FX.sunV.value.copy(FX.night ? MOON_DIR : SUN_DIR).transformDirection(camera.matrixWorldInverse); FX.sunCol.value.setRGB(...(FX.night ? [0.03, 0.04, 0.07] : [0.95, 0.85, 0.55]));
-  FX.grassU.uCenter.value.set(DRV.x, DRV.z); FX.grassU.uPush.value.set(DRV.x, DRV.z, 0.42);
+  FX.grassU.uCenter.value.set(DRV.x, DRV.z); FX.grassU.uPush.value.set(DRV.x, DRV.z, (0.42 + 0.9 * Math.min(DRV.y, 1)) * Math.max(0, 1 - DRV.y / 3.5));   // hovering low flattens a wider patch (downwash)
   if (FX.pond) FX.pond.material.uniforms.time.value += dt * 0.45;
   FX.basinN.offset.x += dt * 0.03; FX.basinN.offset.y += dt * 0.02;
   // fountain: central jet, overflow curtain from the bowl, splashes in the basin

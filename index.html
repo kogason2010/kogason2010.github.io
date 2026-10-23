@@ -30,15 +30,20 @@
 <div id="stage"></div>
 <div id="labels"></div>
 
-<div class="tag">
-  <span class="eyebrow" id="eyebrow">Portfolio · lab 01</span>
+<div class="tag" id="tag">
+  <div class="tag-head">
+    <span class="eyebrow" id="eyebrow">Portfolio · lab 01</span>
+    <button class="tag-toggle" id="tagToggle" type="button" aria-expanded="true" aria-controls="tagMore" aria-label="Hide the introduction"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </div>
   <h1>kogason2010</h1>
+  <div class="tag-more" id="tagMore"><div>
   <p>Interactive 3D sites about analytical science. Explore the lab, or jump straight to the projects.</p>
   <div class="intro-actions">
     <a class="btn primary" href="https://kogason2010.github.io/os/" target="_blank" rel="noopener" data-launch="showcase">Explore the desktop</a>
     <a class="btn" href="https://kogason2010.github.io/projects/" target="_blank" rel="noopener" data-same>Browse all projects</a>
   </div>
   <p class="featured">Featured: <a href="https://kogason2010.github.io/HPLC-tools/" target="_blank" rel="noopener" data-launch="hplc-tools">HPLC Tools</a> · <a href="https://kogason2010.github.io/nexera-ic/" target="_blank" rel="noopener" data-launch="nexera-ic">Nexera IC</a> · <a href="https://kogason2010.github.io/lcms-2050-oligos/" target="_blank" rel="noopener" data-launch="lcms-2050-oligos">Strand by Strand</a></p>
+  </div></div>
 </div>
 
 <div class="tools">
@@ -112,18 +117,28 @@
 </div>
 
 <div class="hud" id="hud" hidden>
-  <span class="eyebrow">Campus · drive mode</span>
-  <b class="hud-title">Out for a spin</b>
-  <div class="hud-row"><span>Messes cleaned</span><b id="hudMess">0 / 0</b></div>
-  <div class="hud-row"><span>Lost items found</span><b id="hudFind">0 / 5</b></div>
-  <div class="hud-finds" id="hudFinds"></div>
-  <p class="hud-near" id="hudNear" hidden>Something's nearby…</p>
-  <button class="btn" type="button" id="hudBack">Back to the lab</button>
+  <span class="eyebrow" id="hudEyebrow">Campus · drive mode</span>
+  <b class="hud-title" id="hudTitle">Out for a spin</b>
+  <div class="hud-row hud-campus"><span>Messes cleaned</span><b id="hudMess">0 / 0</b></div>
+  <div class="hud-row hud-campus"><span>Lost items found</span><b id="hudFind">0 / 5</b></div>
+  <div class="hud-finds hud-campus" id="hudFinds"></div>
+  <div class="hud-row hud-space"><span>Rings flown through</span><b id="hudRings">0 / 8</b></div>
+  <p class="hud-near hud-campus" id="hudNear" hidden>Something's nearby…</p>
+  <p class="hud-alt" id="hudAlt" hidden></p>
+  <div class="hud-go" role="group" aria-label="Go to a building">
+    <span>Go to</span>
+    <button class="btn" type="button" id="hudBack" aria-label="Back to the lab">Lab</button>
+    <button class="btn" type="button" data-go="chem">NCA</button>
+    <button class="btn" type="button" data-go="library">Library</button>
+    <button class="btn go-space locked" type="button" id="goSpace"><svg class="lock" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5" fill="currentColor"/><path d="M5.5 7V5.2a2.5 2.5 0 015 0V7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Space</button>
+    <button class="btn" type="button" id="goCampus" hidden>Campus</button>
+  </div>
 </div>
 <canvas class="minimap" id="minimap" hidden role="img" aria-label="Campus map"></canvas>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="joy" id="joy" hidden aria-hidden="true"><div class="joy-knob"></div></div>
 <button class="boost" id="boostBtn" type="button" hidden>Boost</button>
+<button class="boost fly" id="flyBtn" type="button" hidden>Fly</button>
 <div class="fade" id="fade"></div>
 
 <div class="sfcw" id="sfcApp" hidden role="dialog" aria-modal="true" aria-labelledby="sfcAppTitle">
@@ -200,6 +215,7 @@
 <script src="js/core/lights.js"></script>
 <script src="js/lab/effects.js"></script>
 <script src="js/ui/labels.js"></script>
+<script src="js/ui/intro.js"></script>
 <script src="js/lab/desktop.js"></script>
 <script src="js/lab/ic-workstation.js"></script>
 <script src="js/core/levels.js"></script>
@@ -219,6 +235,7 @@
 <script src="js/campus/build.js"></script>
 <script src="js/campus/atmosphere.js"></script>
 <script src="js/campus/drive.js"></script>
+<script src="js/space/space.js"></script>
 <script src="js/core/places.js"></script>
 <script src="js/chemistry/room.js"></script>
 <script src="js/chemistry/instruments.js"></script>

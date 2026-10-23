@@ -144,7 +144,9 @@ function frame() {
     const cover = [tagEl, toolsEl].filter(el => getComputedStyle(el).opacity > 0.5).map(el => el.getBoundingClientRect());
     hotspots.forEach(hs => {
       v.copy(hs.anchor).project(camera);
-      const lx = (v.x * 0.5 + 0.5) * w, ly = (-v.y * 0.5 + 0.5) * h;
+      // keep the whole tag on screen (narrow phones clipped the ones near the edges)
+      if (!hs._w && !hs.el.hidden) hs._w = hs.el.offsetWidth / 2;   // measured once, the first time it shows
+      const hw = hs._w || 0, lx = Math.min(w - hw - 6, Math.max(hw + 6, (v.x * 0.5 + 0.5) * w)), ly = (-v.y * 0.5 + 0.5) * h;
       hs.el.style.transform = `translate(${lx}px, ${ly}px) translate(-50%, -50%)`;
       hs.el.classList.toggle("tucked", cover.some(r => lx > r.left - 50 && lx < r.right + 50 && ly > r.top - 14 && ly < r.bottom + 14));
       hs.el.hidden = v.z > 1 || hs.level !== level;

@@ -33,6 +33,17 @@ function buildGameplay() {
   burstRing = flat(new THREE.RingGeometry(0.3, 0.38, 40), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false }), 0, 0.05, 0); burstRing.visible = false; burstRing.userData.t = 0;
 }
 
+// the jet under the robot when it flies: a soft cyan glow and a short plume fading downward (also used in space)
+function makeJet() {
+  const glowT = ctex(128, 128, (g, cw) => { const r = g.createRadialGradient(cw / 2, cw / 2, 0, cw / 2, cw / 2, cw / 2); r.addColorStop(0, "rgba(190,255,248,1)"); r.addColorStop(0.35, "rgba(90,230,215,0.55)"); r.addColorStop(1, "rgba(60,200,190,0)"); g.fillStyle = r; g.fillRect(0, 0, cw, cw); });
+  const plumeT = ctex(16, 128, (g, cw, ch) => { const l = g.createLinearGradient(0, 0, 0, ch); l.addColorStop(0, "rgba(120,240,228,0)"); l.addColorStop(1, "rgba(170,255,245,0.9)"); g.fillStyle = l; g.fillRect(0, 0, cw, ch); });
+  const addM = map => new THREE.MeshBasicMaterial({ map, color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
+  const jet = new THREE.Group(); jet.visible = false;
+  const disc = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.5).rotateX(Math.PI / 2), addM(glowT)); disc.position.y = 0.01; jet.add(disc);
+  const plume = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.02, 0.32, 16, 1, true).translate(0, -0.16, 0), addM(plumeT)); jet.add(plume);
+  jet.material = { set opacity(o) { disc.material.opacity = Math.min(1, o * 1.6); plume.material.opacity = o; } };
+  return jet;
+}
 // the robot, borrowed from the lab
 function buildRobot() {
   /* ---- the robot, borrowed from the lab ---- */
@@ -41,4 +52,9 @@ function buildRobot() {
   wLightMat = new THREE.MeshBasicMaterial({ color: 0x3fe0d0 }); wbot.traverse(o => { if (o.material === botLight) o.material = wLightMat; });
   headlight = new THREE.SpotLight(0xfff1d6, 0, 18, 0.55, 0.6, 1.4); headlight.position.set(0.2, 0.14, 0); wbot.add(headlight);
   const hlT = new THREE.Object3D(); hlT.position.set(4, -0.2, 0); wbot.add(hlT); headlight.target = hlT;
+  // flying: a glowing jet under the robot, and a soft shadow on whatever is below it
+  wJet = makeJet(); wbot.add(wJet);
+  const shTex = ctex(128, 128, (g, cw) => { const r = g.createRadialGradient(cw / 2, cw / 2, 0, cw / 2, cw / 2, cw / 2); r.addColorStop(0, "rgba(0,0,0,1)"); r.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = r; g.fillRect(0, 0, cw, cw); });
+  wSpotShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: shTex, transparent: true, opacity: 0, depthWrite: false }));
+  wSpotShadow.visible = false; world.add(wSpotShadow);
 }

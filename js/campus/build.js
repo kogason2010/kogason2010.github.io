@@ -13,7 +13,7 @@ function buildWorld() {
   buildGrass(); buildLife(); buildGameplay();
   world.traverse(o => { if (o.isInstancedMesh) o.frustumCulled = false; if (o.material && o.material.isMeshStandardMaterial && !FX.windowMats.includes(o.material)) o.material.envMapIntensity = 0.55; });
   buildRobot();
-  mergeStatic(FX.dna, new Set()); mergeStatic(world, new Set([FX.dna, wbot, burstRing, FX.pond, FX.sky, FX.nightDome, FX.grass, wSpotLayer, ...finds.map(f => f.g), ...finds.map(f => f.ring), ...FX.birds, ...FX.butterflies]));
+  mergeStatic(FX.dna, new Set()); mergeStatic(world, new Set([FX.dna, wbot, wSpotShadow, burstRing, FX.pond, FX.sky, FX.nightDome, FX.grass, wSpotLayer, ...finds.map(f => f.g), ...finds.map(f => f.ring), ...FX.birds, ...FX.butterflies]));
 }
 // hundreds of small static meshes (benches, car parts, steps, poles) become a handful of merged ones: far fewer draw calls
 function mergeStatic(root, keep) {
