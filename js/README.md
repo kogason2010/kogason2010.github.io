@@ -35,6 +35,10 @@
 | Driving and flying, camera, HUD, minimap, going in and out | `campus/drive.js` |
 | **Space** (hold Space for 10 s outside): Earth, Moon, rings, satellite, asteroids, free flight | `space/space.js` |
 | Intro panel folding away | `ui/intro.js` |
+| **Mathematics** hall: the Yang–Mills exhibits | `math/room.js` |
+| Its live SU(2) lattice simulation | `math/lattice.js` |
+| Its panels (problem, evidence, prize rules) | `math/content.js` |
+| Entering it, camera and lattice controls | `math/visit.js` |
 | Indoor places you drive into (shared enter/leave) | `core/places.js` |
 | **NCA** (chemistry building) LC lab room | `chemistry/room.js` |
 | Its instruments (UHPLC, LC-MS/MS, prep LC…) | `chemistry/instruments.js` |

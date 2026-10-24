@@ -14,6 +14,7 @@ const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const seeded = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const LAB_DOOR = { x: 0, z: -18 }, SPAWN = { x: 0, z: -14.2, h: -Math.PI / 2 };
 const CHEM_DOOR = { x: 31.6, z: 0, hinted: false }, CHEM_SPAWN = { x: 30.0, z: 0, h: Math.PI, msg: "Back outside, by NCA" };
+const MATH_DOOR = { x: -31.6, z: 0, hinted: false }, MATH_SPAWN = { x: -30.0, z: 0, h: 0, msg: "Back outside, by Mathematics" };
 const FLY_CEIL = 32;   // how high the robot can fly, in metres
 const LIB_DOOR = { x: 0, z: 35.6, hinted: false }, LIB_SPAWN = { x: 0, z: 33.3, h: Math.PI / 2, msg: "Back outside, by the Library" };
 const wSpots = [], wSpotLayer = new THREE.Group(), finds = [];

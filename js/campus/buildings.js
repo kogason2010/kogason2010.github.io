@@ -2,7 +2,7 @@
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
-// Kogason Lab, NCA (the chemistry building with the LC lab), Physics and the Library
+// Kogason Lab, NCA (the chemistry building with the LC lab), Mathematics and the Library
 function buildBuildings() {
   /* ---- buildings: PBR facades whose glass reflects the sky ---- */
   function facade(style) {
@@ -97,7 +97,7 @@ function buildBuildings() {
   function shrub(x, z, s) { if (CAMPUS.paths.some(p => segDist(x, z, p) < p[4] / 2 + 0.7)) return; shrubs.push([x, z, s]); CAMPUS.circles.push([x, z, s * 0.75, "shrub"]); }
   building({ x: 0, z: -24, w: 16, d: 12, h: 7.4, style: "lab", name: "Kogason Lab", door: "s", wall: 0xe6e9ea, trim: 0xf4f6f6 });
   building({ x: 40, z: -2, w: 16, d: 20, h: 10.6, style: "brick", name: "NCA", door: "w", doorZ: 0, wall: 0xa86a52, trim: 0xe4ddd0 });
-  building({ x: -40, z: -4, w: 16, d: 18, h: 9.4, style: "concrete", name: "Physics", door: "e", doorZ: 0, wall: 0xa9afb3, trim: 0xc8cdd0 });
+  building({ x: -40, z: -4, w: 16, d: 18, h: 9.4, style: "concrete", name: "Mathematics", door: "e", doorZ: 0, wall: 0xa9afb3, trim: 0xc8cdd0 });
   building({ x: 0, z: 42, w: 32, d: 12, h: 9.4, style: "stone", name: "Library", door: "n", wall: 0xd6cab0, trim: 0xece4d2 });
   for (let i = 0; i < 6; i++) { const cx = -5 + i * 2, col = new THREE.Mesh(new THREE.LatheGeometry([[0.48, 0], [0.48, 0.25], [0.36, 0.35], [0.33, 5.8], [0.44, 5.95], [0.44, 6.2]].map(p => new THREE.Vector2(p[0], p[1])), 24), mat(0xf1ece2, { roughness: 0.6 })); col.position.set(cx, 0, 34.7); col.castShadow = col.receiveShadow = true; world.add(col); CAMPUS.circles.push([cx, 34.7, 0.45, "column"]); }
   const ped2 = new THREE.Shape([V(-7, 0, 0), V(7, 0, 0), V(0, 1.6, 0)].map(p => new THREE.Vector2(p.x, p.y)));

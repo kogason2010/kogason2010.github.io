@@ -472,3 +472,32 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
 
 /* phones: the campus panel stops short of the minimap instead of running under it */
 @media (max-width: 640px) { .hud { width: auto; max-width: calc(100% - 152px - env(safe-area-inset-right, 0px)); } .hud-go { gap: 4px; } }
+
+/* mathematics: problem statement, steps, the live lattice readouts, the glueball chart, the seven problems */
+.m-state { margin: 10px 0; padding: 12px 14px; border-radius: 12px; border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.m-open { padding: 10px 12px; border-left: 3px solid #e0a43a; background: color-mix(in srgb, #e0a43a 10%, transparent); border-radius: 0 10px 10px 0; }
+.m-h { margin: 14px 0 6px; font: 600 12px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.m-steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.m-src { font: 400 11px/1.5 var(--mono); color: var(--ink-soft); }
+.m-slider { display: grid; gap: 6px; margin: 10px 0; font: 600 12px/1 var(--mono); }
+.m-slider span { display: flex; justify-content: space-between; }
+.m-slider input { width: 100%; accent-color: var(--accent); }
+.m-read { display: grid; gap: 6px; margin: 6px 0 10px; padding: 10px 12px; border-radius: 10px; background: var(--bg-2); }
+.m-read div { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.m-read b { font: 600 13px/1.4 var(--mono); font-variant-numeric: tabular-nums; }
+.m-chart { display: block; width: 100%; height: auto; max-width: 100%; margin: 8px 0 2px; overflow: visible; }
+.m-chart .m-gap { fill: color-mix(in srgb, #e0a43a 16%, transparent); }
+.m-chart .m-gaplab { font: italic 600 11px var(--display); fill: #b07a00; }
+.m-chart .m-grid { stroke: var(--line); stroke-width: 1; }
+.m-chart .m-ax, .m-chart .m-v { font: 400 10px var(--mono); fill: var(--ink-soft); }
+.m-chart .m-j { font: 600 11px var(--mono); fill: var(--ink); }
+.m-chart .m-err { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; opacity: .45; }
+.m-chart .m-dot { fill: var(--accent); stroke: var(--sheet); stroke-width: 2; }
+.m-chart .m-row:hover .m-dot { r: 6; }
+.m-chart .m-row:hover .m-err { opacity: .9; }
+.m-cap { font-size: 12px; color: var(--ink-soft); }
+.m-seven { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 8px; }
+.m-seven li { padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; color: var(--ink-soft); }
+.m-seven li b { color: var(--ink); }
+.m-seven .m-tag { float: right; font: 600 10px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .06em; padding: 1px 7px; border-radius: 999px; background: var(--bg-2); }
+.m-seven li.solved { border-color: #d9b45a; } .m-seven li.solved .m-tag { background: color-mix(in srgb, #d9b45a 30%, transparent); }

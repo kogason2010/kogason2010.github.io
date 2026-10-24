@@ -83,7 +83,7 @@ function openSection(key) {
   if (key === "sfcpc") { openSfcApp(); return; }
   if (key === "upstairs") { goLevel("up"); return; }
   if (key === "lcpc") { openLcApp(); return; }
-  if (key === "chemExit" || key === "libExit") { leavePlace(); return; }
+  if (key === "chemExit" || key === "libExit" || key === "mathExit") { leavePlace(); return; }
   if (lvl) return;
   const s = SECTIONS[key]; if (!s) return;
   document.getElementById("sheetKicker").textContent = s.kicker;

@@ -4,7 +4,7 @@
 
 /* ---------- Focus camera: clicked item becomes the centre of the view ---------- */
 let focusHome = null;
-const viewMinDist = () => level === "library" ? LIB_VIEW.minD : 8;
+const viewMinDist = () => (PLACES[level] && PLACES[level].minD) || 8;
 const FRONT = { about: [1, 0, 0], ic: [1, 0, 0], hplc: [0, 0, 1], contact: [0, 0, 1], toc: [0, 0, 1], desktop: [0, 0, 1], sfc: [0, 0, 1], co2: [1, 0, 0] };
 const fBox = new THREE.Box3(), fC = new THREE.Vector3(), fS = new THREE.Vector3();
 function focusOn(h) {
@@ -48,7 +48,7 @@ function focusTo(point) {
 document.getElementById("resetBtn").addEventListener("click", () => {
   if (worldOn) { CAM.yaw = 0; CAM.pitch = 0.36; CAM.dist = 3.8; return; }
   if (lvl || worldBusy) return;
-  if (level === "library") { closeSheet(); camTween = null; focusHome = null; labelsEl.hidden = false; libHomeView(); return; }
+  if (PLACES[level] && PLACES[level].home) { closeSheet(); camTween = null; focusHome = null; labelsEl.hidden = false; PLACES[level].home(); return; }
   closeSheet();
   camTween = null; focusHome = null; controls.minDistance = 8; if (!pMode) labelsEl.hidden = false;
   const dy = level === "down" ? BY : 0;
@@ -105,6 +105,7 @@ function frame() {
   if (basement.visible && !reduce) updateSfc(dt, time);
   if (chem.visible) updateLc(dt, time);
   if (library.visible) updateLibrary(dt, time);
+  if (mathRoom.visible) updateMath(dt, time);
   if (lab.visible) {
     if (!reduce) {
       leds.forEach((l, i) => { l.visible = i % 3 !== 1 || Math.sin(time * 3 + i) > -0.3; });

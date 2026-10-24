@@ -68,6 +68,7 @@ function driveCampus(dt) {
   const fwd = (thr > 0 || DRV.v > 0.15) && DRV.y < 0.2;
   if (fwd && nx > CHEM_DOOR.x - 0.4 && Math.abs(nz - CHEM_DOOR.z) < 1.3 && Math.cos(DRV.h) > 0.4) { DRV.v = 0; enterPlace("chem"); return; }
   if (fwd && nz > LIB_DOOR.z - 0.4 && Math.abs(nx - LIB_DOOR.x) < 0.9 && Math.sin(DRV.h) < -0.4) { DRV.v = 0; enterPlace("library"); return; }
+  if (fwd && nx < MATH_DOOR.x + 0.4 && Math.abs(nz - MATH_DOOR.z) < 1.3 && Math.cos(DRV.h) < -0.4) { DRV.v = 0; enterPlace("math"); return; }
   if (res.hit) {
     if (Math.abs(DRV.v) > 1.4 && DRV.bumpT <= 0) { DRV.v *= -0.3; DRV.bumpT = 0.6; R.flash = 0.6; camShake = 0.25; if (DRV.msgT <= 0) { toast(BUMP_LINES[res.hit] || "Bonk!"); DRV.msgT = 2.5; } }
     else DRV.v *= 0.92;
@@ -76,6 +77,8 @@ function driveCampus(dt) {
   if (DRV.z < LAB_DOOR.z + 0.55 && Math.abs(DRV.x - LAB_DOOR.x) < 1.25 && DRV.v > 0.15 && Math.sin(DRV.h) > 0.4) exitWorld();
   const dChem = Math.hypot(DRV.x - CHEM_DOOR.x, DRV.z - CHEM_DOOR.z);
   if (dChem < 6 && !CHEM_DOOR.hinted) { CHEM_DOOR.hinted = true; toast("NCA · drive through the doors to visit the LC lab"); } else if (dChem > 12) CHEM_DOOR.hinted = false;
+  const dMath = Math.hypot(DRV.x - MATH_DOOR.x, DRV.z - MATH_DOOR.z);
+  if (dMath < 6 && !MATH_DOOR.hinted) { MATH_DOOR.hinted = true; toast("Mathematics · drive through the doors to see the Yang–Mills problem"); } else if (dMath > 12) MATH_DOOR.hinted = false;
   const dLib = Math.hypot(DRV.x - LIB_DOOR.x, DRV.z - LIB_DOOR.z);
   if (dLib < 7 && !LIB_DOOR.hinted) { LIB_DOOR.hinted = true; toast("Library · drive between the columns and through the doors to browse the app notes"); } else if (dLib > 13) LIB_DOOR.hinted = false;
   return boost;
@@ -219,7 +222,7 @@ function enterWorld() {
 function setupWorld(spawn) {
   spawn = spawn || SPAWN;
   if (!worldBuilt) buildWorld();
-  worldOn = true; lab.visible = false; chem.visible = false; library.visible = false; world.visible = true; bgGroup.visible = false; botTip.classList.remove("on");
+  worldOn = true; lab.visible = false; chem.visible = false; library.visible = false; mathRoom.visible = false; world.visible = true; bgGroup.visible = false; botTip.classList.remove("on");
   scene.fog = new THREE.FogExp2(0xc9dbe8, 0.0052); updateWorld.night = null;
   camera.fov = 58; camera.far = 2400; camera.updateProjectionMatrix();
   shadowRes(2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
