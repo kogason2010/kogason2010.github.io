@@ -37,8 +37,6 @@
 | Intro panel folding away | `ui/intro.js` |
 | The Places menu and travelling between rooms | `ui/places-menu.js` |
 | Merging the lab's static meshes (fewer draw calls) | `lab/merge.js` |
-| The robot HPLC assembly line in NCA | `chemistry/assembly.js` |
-| Instrument studio (`index.html?studio`) | `ui/studio.js` |
 | **Mathematics** hall: the Yang–Mills exhibits | `math/room.js` |
 | Its live SU(2) lattice simulation | `math/lattice.js` |
 | Its panels (problem, evidence, prize rules) | `math/content.js` |
@@ -58,9 +56,3 @@ Styles are in `css/style.css`; textures for trees and grass are in `assets/` (cr
 ## Adding an app note to the library
 
 Copy one entry in `APP_NOTES` in `library/catalog.js` and change its fields: `id` (unique), `shelf` (one of the `LIB_SHELVES` ids), `cover` (book colour), `title`, `subtitle`, `summary`, `sources` (the application-note numbers it is based on) and `url`. The note appears on its alcove's lectern, in that alcove's panel, in the catalogue at the central desk, and in the reader. A shelf with no notes shows "Coming soon". To add a shelf, add it to `LIB_SHELVES` (seven fit; the eighth arch is the entrance).
-
-## Working on the instrument models
-
-Open the site with `?studio` on the end of the address, for example `http://127.0.0.1:5500/index.html?studio` when you use VS Code's Live Server. Every instrument appears on its own on a turntable, with its size, mesh and triangle counts, and the file that builds it. Edit that file and save: Live Server reloads the page and the studio opens the same model again (`?studio=hplc`, `?studio=uhplc` and so on). Use ← and → to step through the models, and the Wireframe and Dark toggles to check shapes.
-
-Sizes are in metres, and each model is built from the helpers in `core/scene.js`: `box(w, h, d, colour, x, y, z, parent)`, `cyl(rTop, rBottom, h, colour, x, y, z, parent)`, `plane(w, h, material, x, y, z, rotationY, parent)` and `mat(colour, { roughness, metalness })`.
