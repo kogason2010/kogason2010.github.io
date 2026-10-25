@@ -18,7 +18,7 @@ function buildChem() {
 }
 PLACES.chem = {
   group: chem, build: buildChem, spawn: CHEM_SPAWN, door: CHEM_DOOR, hint: HINT_CHEM, eyebrow: "Portfolio · NCA · LC lab",
-  enter() { camera.position.copy(HOME); controls.target.copy(TARGET); camera.lookAt(TARGET); controls.minDistance = 8; },
+  enter() { camera.position.copy(HOME); controls.target.copy(TARGET); fitDistance(); camera.lookAt(TARGET); controls.minDistance = 8; },
   leave(done) { lcAbort(); FX_CHEM.doorGoal = 1; animateCamera(DOOR_POSE.pos.clone(), DOOR_POSE.tgt.clone(), 1.5, done); },
   exit() { FX_CHEM.doorGoal = 0; FX_CHEM.doorOpen = 0; if (FX_CHEM.doorPivot) FX_CHEM.doorPivot.rotation.y = 0; },
 };

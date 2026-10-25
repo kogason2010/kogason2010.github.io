@@ -47,11 +47,14 @@
 </div>
 
 <div class="tools">
+  <button class="btn places-btn" id="placesBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="placesMenu"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5c-2.5 0-4.5 2-4.5 4.4 0 3.3 4.5 8.6 4.5 8.6s4.5-5.3 4.5-8.6C12.5 3.5 10.5 1.5 8 1.5z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="6" r="1.7" fill="currentColor"/></svg>Places</button>
   <button class="btn primary" id="particleBtn" type="button" aria-pressed="false">Particles</button>
   <button class="btn" id="levelBtn" type="button" aria-label="Go downstairs to the SFC suite">Go downstairs</button>
   <button class="btn" id="lightsBtn" type="button" aria-pressed="false">Lights off</button>
   <button class="btn" id="resetBtn" type="button">Reset view</button>
 </div>
+
+<div class="places-menu" id="placesMenu" role="menu" aria-label="Places" hidden></div>
 
 <div class="hint" id="hint">Drag to look around · scroll or pinch to zoom · tap a glowing tag · tap the floor to make a mess</div>
 <div class="caption" id="caption" hidden><b>Caffeine · C₈H₁₀N₄O₂</b><span id="capCount"></span> points · move your cursor through it to push them aside</div>
@@ -210,6 +213,7 @@
 <script src="js/lab/ic.js"></script>
 <script src="js/lab/island-toc.js"></script>
 <script src="js/lab/robot.js"></script>
+<script src="js/lab/merge.js"></script>
 <script src="js/basement/basement.js"></script>
 <script src="js/core/background.js"></script>
 <script src="js/lab/os-monitor.js"></script>
@@ -251,6 +255,7 @@
 <script src="js/math/room.js"></script>
 <script src="js/math/content.js"></script>
 <script src="js/math/visit.js"></script>
+<script src="js/ui/places-menu.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
