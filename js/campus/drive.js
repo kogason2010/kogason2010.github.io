@@ -157,7 +157,11 @@ function drawMinimap(time) {
   g.fillStyle = "#5b6266"; CAMPUS.lots.forEach(l => g.fillRect(X(l[0]), Y(l[1]), (l[2] - l[0]) * s, (l[3] - l[1]) * s));
   g.fillStyle = "#4f95c8"; CAMPUS.ponds.forEach(p => { g.beginPath(); g.arc(X(p[0]), Y(p[1]), p[2] * s, 0, 7); g.fill(); });
   g.beginPath(); g.arc(X(0), Y(0), 3.6 * s, 0, 7); g.fill();
-  CAMPUS.bldg.forEach(b => { g.fillStyle = b.name === "Kogason Lab" ? "#0a5fb4" : "#d9dde0"; g.fillRect(X(b.x - b.w / 2), Y(b.z - b.d / 2), b.w * s, b.d * s); });
+  // buildings you can go into are blue; each carries a short name
+  const MM_NAMES = { "Kogason Lab": "Lab", NCA: "NCA", Mathematics: "Math", Library: "Library", "Café": "Café" }, MM_IN = { "Kogason Lab": 1, NCA: 1, Mathematics: 1, Library: 1 };
+  CAMPUS.bldg.forEach(b => { g.fillStyle = MM_IN[b.name] ? "#0a5fb4" : "#d9dde0"; g.fillRect(X(b.x - b.w / 2), Y(b.z - b.d / 2), b.w * s, b.d * s); });
+  g.font = `600 ${Wc < 140 ? 8 : 9.5}px 'IBM Plex Mono', monospace`; g.textAlign = "center"; g.textBaseline = "middle";
+  CAMPUS.bldg.forEach(b => { const t = MM_NAMES[b.name]; if (!t) return; const x = X(b.x), y = Y(b.z); g.lineWidth = 3; g.strokeStyle = MM_IN[b.name] ? "#0a3f7a" : "#ffffff"; g.strokeText(t, x, y); g.fillStyle = MM_IN[b.name] ? "#ffffff" : "#3a4248"; g.fillText(t, x, y); });
   g.fillStyle = "#c8692b"; wSpots.forEach(sp => { if (sp.fade < 0) { g.beginPath(); g.arc(X(sp.x), Y(sp.z), 2.2, 0, 7); g.fill(); } });
   finds.forEach(f => { if (!f.found && Math.hypot(f.x - DRV.x, f.z - DRV.z) < 11) { g.strokeStyle = `rgba(255,211,107,${0.5 + 0.4 * Math.sin(time * 4)})`; g.lineWidth = 2; g.beginPath(); g.arc(X(f.hint[0]), Y(f.hint[1]), 7 * s, 0, 7); g.stroke(); } });
   g.save(); g.translate(X(DRV.x), Y(DRV.z)); g.rotate(-DRV.h); g.fillStyle = "#ffffff"; g.strokeStyle = "#0a5fb4"; g.lineWidth = 2; g.beginPath(); g.moveTo(7, 0); g.lineTo(-5, 4.5); g.lineTo(-2.5, 0); g.lineTo(-5, -4.5); g.closePath(); g.fill(); g.stroke(); g.restore();

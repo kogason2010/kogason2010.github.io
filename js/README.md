@@ -35,6 +35,8 @@
 | Driving and flying, camera, HUD, minimap, going in and out | `campus/drive.js` |
 | **Space** (hold Space for 10 s outside): Earth, Moon, rings, satellite, asteroids, free flight | `space/space.js` |
 | Intro panel folding away | `ui/intro.js` |
+| The Places menu and travelling between rooms | `ui/places-menu.js` |
+| Merging the lab's static meshes (fewer draw calls) | `lab/merge.js` |
 | **Mathematics** hall: the Yang–Mills exhibits | `math/room.js` |
 | Its live SU(2) lattice simulation | `math/lattice.js` |
 | Its panels (problem, evidence, prize rules) | `math/content.js` |

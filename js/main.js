@@ -59,7 +59,7 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 function fitDistance() {
   const aspect = stage.clientWidth / stage.clientHeight;
   const dir = camera.position.clone().sub(controls.target).normalize();
-  const dist = aspect < 0.8 ? 23 : aspect < 1.2 ? 19.8 : 18.2;
+  const dist = aspect < 0.6 ? 27 : aspect < 0.8 ? 24 : aspect < 1.2 ? 19.8 : 18.2;   // tall phones step back so the room fits across
   camera.position.copy(controls.target).add(dir.multiplyScalar(dist));
 }
 function resize() {
@@ -107,6 +107,7 @@ function frame() {
   if (library.visible) updateLibrary(dt, time);
   if (mathRoom.visible) updateMath(dt, time);
   if (lab.visible) {
+    if (!labMerged && nav) mergeLab();
     if (!reduce) {
       leds.forEach((l, i) => { l.visible = i % 3 !== 1 || Math.sin(time * 3 + i) > -0.3; });
       updateDistill(dt, time);
@@ -143,14 +144,25 @@ function frame() {
     const w = stage.clientWidth, h = stage.clientHeight;
     // tags that slide under the intro panel or the toolbar fade out instead of overlapping them
     const cover = [tagEl, toolsEl].filter(el => getComputedStyle(el).opacity > 0.5).map(el => el.getBoundingClientRect());
+    const placed = [];
     hotspots.forEach(hs => {
       v.copy(hs.anchor).project(camera);
-      // keep the whole tag on screen (narrow phones clipped the ones near the edges)
-      if (!hs._w && !hs.el.hidden) hs._w = hs.el.offsetWidth / 2;   // measured once, the first time it shows
-      const hw = hs._w || 0, lx = Math.min(w - hw - 6, Math.max(hw + 6, (v.x * 0.5 + 0.5) * w)), ly = (-v.y * 0.5 + 0.5) * h;
-      hs.el.style.transform = `translate(${lx}px, ${ly}px) translate(-50%, -50%)`;
-      hs.el.classList.toggle("tucked", cover.some(r => lx > r.left - 50 && lx < r.right + 50 && ly > r.top - 14 && ly < r.bottom + 14));
       hs.el.hidden = v.z > 1 || hs.level !== level;
+      if (hs.el.hidden) return;
+      // keep the whole tag on screen (narrow phones clipped the ones near the edges)
+      if (!hs._w && !labelsEl.hidden) { const ow = hs.el.offsetWidth; if (ow) { hs._w = ow / 2; hs._h = hs.el.offsetHeight || 26; } }   // measured once, the first time it shows
+      const hw = hs._w || 0;
+      placed.push({ hs, hw, hh: hs._h || 26, lx: Math.min(w - hw - 6, Math.max(hw + 6, (v.x * 0.5 + 0.5) * w)), ly: (-v.y * 0.5 + 0.5) * h });
+    });
+    // tags that would land on top of each other are nudged apart vertically, top to bottom
+    placed.sort((a, b) => a.ly - b.ly);
+    placed.forEach((p, i) => {
+      for (let pass = 0; pass < 4; pass++) {
+        const hit = placed.slice(0, i).find(q => Math.abs(q.lx - p.lx) < q.hw + p.hw + 4 && Math.abs(q.ly - p.ly) < (q.hh + p.hh) / 2 + 3);
+        if (!hit) break; p.ly = hit.ly + (hit.hh + p.hh) / 2 + 4;
+      }
+      p.hs.el.style.transform = `translate(${p.lx}px, ${p.ly}px) translate(-50%, -50%)`;
+      p.hs.el.classList.toggle("tucked", cover.some(r => p.lx > r.left - 50 && p.lx < r.right + 50 && p.ly > r.top - 14 && p.ly < r.bottom + 14));
     });
   }
   requestAnimationFrame(frame);
