@@ -51,18 +51,6 @@ function normalFrom(hc, strength) {
 }
 const canvasOf = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; };
 function setRepeat(set, rx, ry) { const o = {}; for (const k in set) { const t = set[k].clone(); t.needsUpdate = true; t.repeat.set(rx, ry); o[k] = t; } return o; }
-// merge a list of non-indexed-able geometries (position/normal/color) into one
-function mergeGeos(list) {
-  const parts = list.map(g => (g.index ? g.toNonIndexed() : g)), n = parts.reduce((a, g) => a + g.attributes.position.count, 0);
-  const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), col = new Float32Array(n * 3); let o = 0;
-  parts.forEach(g => {
-    const c = g.attributes.position.count; pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3);
-    if (g.attributes.color) col.set(g.attributes.color.array, o * 3); else col.fill(1, o * 3, (o + c) * 3); o += c;
-  });
-  const m = new THREE.BufferGeometry(); m.setAttribute("position", new THREE.BufferAttribute(pos, 3)); m.setAttribute("normal", new THREE.BufferAttribute(nor, 3)); m.setAttribute("color", new THREE.BufferAttribute(col, 3));
-  return m;
-}
-function paint(geo, fn) { const p = geo.attributes.position, c = new Float32Array(p.count * 3), col = new THREE.Color(); for (let i = 0; i < p.count; i++) { fn(p.getX(i), p.getY(i), p.getZ(i), col); c[i * 3] = col.r; c[i * 3 + 1] = col.g; c[i * 3 + 2] = col.b; } geo.setAttribute("color", new THREE.BufferAttribute(c, 3)); return geo; }
 const windy = (m, amount, from, oneSided) => {   // leaves sway with the shared wind clock; cards light the same from both sides
   m.customProgramCacheKey = () => "windy" + amount + "_" + from + (oneSided ? "_1" : "");
   m.onBeforeCompile = sh => {

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instruments · kogason2010</title>
+<style>
+  :root {
+    --bg: #eef2f4; --card: #ffffff; --line: rgba(20, 34, 44, 0.12); --fg: #16212a; --fg2: #4f5d68; --fg3: #7c8994;
+    --accent: #0b6fb5; --accent-soft: rgba(11, 111, 181, 0.08); --pic: linear-gradient(160deg, #eef2f4, #d9e1e6);
+    --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, Menlo, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #11161a; --card: #1a2026; --line: rgba(255, 255, 255, 0.1); --fg: #eef2f5; --fg2: #aab6c0; --fg3: #7f8b95;
+      --accent: #63c3ff; --accent-soft: rgba(99, 195, 255, 0.1); --pic: linear-gradient(160deg, #e6ecef, #cfd8de); }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 var(--sans); }
+  main { max-width: 1180px; margin: 0 auto; padding: 40px 20px 64px; }
+  .eyebrow { font: 600 12px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg3); }
+  h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.1; margin: 10px 0 12px; letter-spacing: -0.02em; }
+  .lede { color: var(--fg2); max-width: 70ch; margin: 0 0 22px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 0 0 40px; padding: 0; list-style: none; counter-reset: s; }
+  .steps li { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px 14px 48px; position: relative; font-size: 14px; color: var(--fg2); }
+  .steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 14px; top: 13px; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent); font: 700 13px/24px var(--sans); text-align: center; }
+  .steps b { color: var(--fg); }
+  code { font-family: var(--mono); font-size: 0.88em; background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; }
+  h2 { font-size: 18px; margin: 34px 0 12px; display: flex; align-items: baseline; gap: 10px; }
+  h2 span { font: 500 12px var(--mono); color: var(--fg3); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .card { display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+    text-decoration: none; color: inherit; transition: border-color 0.15s, transform 0.15s; }
+  .card:hover, .card:focus-visible { border-color: var(--accent); transform: translateY(-2px); outline: none; }
+  .pic { aspect-ratio: 16 / 10; background: var(--pic); display: block; width: 100%; object-fit: cover; }
+  .txt { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .name { font-weight: 650; font-size: 15.5px; }
+  .blurb { color: var(--fg2); font-size: 13px; flex: 1; }
+  .folder { font: 12px var(--mono); color: var(--fg3); margin-top: 6px; }
+  footer { margin-top: 48px; color: var(--fg3); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">kogason2010 · instruments</div>
+  <h1>The instruments</h1>
+  <p class="lede">Every instrument in the lab, each in its own folder with its own <code>model.js</code>. The site loads those
+    files as they are, so you can change one instrument on its own: look at it here, offline, then upload the file to GitHub.</p>
+  <ol class="steps">
+    <li><b>Open an instrument</b> below. It opens from your disk in this browser; no internet needed.</li>
+    <li><b>Edit its <code>model.js</code></b> in VS Code (<code>instruments/&lt;name&gt;/model.js</code>) and save.</li>
+    <li><b>Refresh</b> its page (F5) to see the change. Click any part to find the line that makes it.</li>
+    <li><b>Upload</b> the changed <code>model.js</code> to the same folder on GitHub. The live site updates a minute or two later.</li>
+  </ol>
+  <div id="rooms"></div>
+  <footer>See <code>instruments/README.md</code> for the details. The viewer uses three.js r128 (MIT licence, in <code>viewer/</code>).</footer>
+</main>
+<script src="viewer/list.js"></script>
+<script>
+  "use strict";
+  (function () {
+    const list = window.WORKSHOP_LIST || [], rooms = [], el = document.getElementById("rooms");
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    list.forEach(i => { if (!rooms.includes(i.room)) rooms.push(i.room); });
+    el.innerHTML = rooms.map(r => {
+      const items = list.filter(i => i.room === r);
+      return `<h2>${esc(r)} <span>${items.length}</span></h2><div class="grid">` + items.map(i => `
+        <a class="card" href="${esc(i.id)}/index.html">
+          <img class="pic" src="viewer/pictures/${esc(i.id)}.jpg" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+          <span class="txt"><span class="name">${esc(i.name)}</span><span class="blurb">${esc(i.blurb)}</span>
+          <span class="folder">instruments/${esc(i.id)}/model.js</span></span></a>`).join("") + `</div>`;
+    }).join("");
+  })();
+</script>
+</body>
+</html>

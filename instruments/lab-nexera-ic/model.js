@@ -1,5 +1,11 @@
-/* js/lab/ic.js — Shimadzu Nexera IC model and its bench.
-   Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
+/* instruments/lab-nexera-ic/model.js — Nexera IC (ion chromatograph) on the left-wall bench.
+   Compact autosampler unit, eluent tray and the tall column / suppressor tower; faces +x. The bench is part of the group.
+   The site loads this file as it is. To work on it offline, open index.html in this folder (see instruments/README.md).
+   Built from the shared building blocks in js/core/helpers.js (box, cyl, plane, mat, tex, led, …). Sizes are in metres;
+   +x points right, +y up and +z toward the front of the room.
+   Other files use these names, so keep them as they are:
+     BX, BT, pcZ (js/core/background.js)
+     icUnit (js/lab/merge.js) */
 "use strict";
 
 // ============================================================
@@ -890,32 +896,8 @@ scaleAbout(
 // END SHIMADZU NEXERA IC
 // ============================================================
 
-// a simple desktop computer next to the IC, running the instrument software
+// under the bench: the workstation's PC tower, a waste carboy and a box of consumables
 const pcZ = BZ - 0.72;
-const icSoft = tex((g, W, H) => {
-  g.fillStyle = "#e9eef2"; g.fillRect(0, 0, W, H);
-  g.fillStyle = "#1d2c36"; g.fillRect(0, 0, W, 22);
-  g.fillStyle = "#e9eef2"; g.font = "bold 12px sans-serif"; g.fillText("IC Data Acquisition  ·  Anions_std_03", 10, 15);
-  g.fillStyle = "#ffffff"; g.fillRect(8, 30, W * 0.64, H - 62); g.strokeStyle = "#c7d0d6"; g.strokeRect(8, 30, W * 0.64, H - 62);
-  const cw = W * 0.64, peaks = [[0.16, 0.45, "F"], [0.31, 0.85, "Cl"], [0.46, 0.25, "NO2"], [0.56, 0.3, "Br"], [0.66, 0.55, "NO3"], [0.78, 0.35, "PO4"], [0.9, 0.75, "SO4"]];
-  g.strokeStyle = "#0b6f9a"; g.lineWidth = 1.6; g.beginPath();
-  for (let x = 0; x <= cw - 8; x++) { const t = x / (cw - 8); let y = 0.03; peaks.forEach(p => { y += p[1] * Math.exp(-Math.pow((t - p[0]) / 0.011, 2)); }); const py = H - 40 - y * (H - 90); x ? g.lineTo(12 + x, py) : g.moveTo(12 + x, py); }
-  g.stroke();
-  g.fillStyle = "#4f5965"; g.font = "10px sans-serif"; peaks.forEach(p => g.fillText(p[2], 12 + p[0] * (cw - 8) - 6, H - 44 - p[1] * (H - 90) - 4));
-  g.fillText("µS/cm", 14, 44); g.fillText("min", cw - 18, H - 36);
-  const tx = W * 0.68; g.fillStyle = "#ffffff"; g.fillRect(tx, 30, W - tx - 8, H - 62); g.strokeStyle = "#c7d0d6"; g.strokeRect(tx, 30, W - tx - 8, H - 62);
-  g.fillStyle = "#15191e"; g.font = "bold 10px sans-serif"; g.fillText("Ion", tx + 6, 44); g.fillText("RT min", tx + 40, 44);
-  g.font = "10px sans-serif"; peaks.forEach((p, i) => { g.fillText(p[2], tx + 6, 60 + i * 14); g.fillText((2 + p[0] * 14).toFixed(2), tx + 40, 60 + i * 14); });
-  g.fillStyle = "#1d2c36"; g.fillRect(0, H - 24, W, 24); g.fillStyle = "#3fd17a"; g.fillRect(10, H - 16, 8, 8);
-  g.fillStyle = "#cfe3ee"; g.fillText("Ready  ·  run 4 of 12", 24, H - 8);
-}, 320, 190);
-const gPC = hotGroup("icpc", "IC workstation", new THREE.Vector3(BX, BT + 1.0, pcZ));
-box(0.04, 0.5, 0.84, C.metal, BX - 0.2, BT + 0.44, pcZ, gPC);
-const icScreen = plane(0.78, 0.44, new THREE.MeshBasicMaterial({ map: icSoft }), BX - 0.178, BT + 0.44, pcZ, Math.PI / 2, gPC);
-box(0.06, 0.2, 0.06, C.metal, BX - 0.24, BT + 0.1, pcZ, gPC);
-box(0.22, 0.02, 0.28, C.metal, BX - 0.22, BT + 0.01, pcZ, gPC);
-box(0.2, 0.025, 0.56, 0x3a4047, BX + 0.18, BT + 0.013, pcZ, gPC);
-box(0.11, 0.02, 0.07, 0x3a4047, BX + 0.2, BT + 0.012, pcZ - 0.4, gPC);
 box(0.42, 0.48, 0.2, 0x2a3036, BX, 0.61, pcZ + 0.3, gInst);
 led(BX + 0.215, 0.78, pcZ + 0.3, 0x63d3ff, gInst);
 // lower shelf: waste carboy + consumables

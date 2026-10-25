@@ -133,14 +133,6 @@ function updateClocks() {
 }
 wallClock(lab, 0.2, 3.7, -4.16, 0.26);
 
-/* ---------- Interactive groups ---------- */
-const hotspots = [];
-function hotGroup(key, label, anchor, parent, level) {
-  const g = new THREE.Group(); g.userData.key = key; (parent || lab).add(g);
-  hotspots.push({ key, label, group: g, anchor: new THREE.Vector3().copy(anchor), level: level || "up" });
-  return g;
-}
-
 /* ---------- Exit door: back wall, past the robot dock. Opens onto the campus. ---------- */
 const gDoor = hotGroup("exit", "Exit", new THREE.Vector3(DOOR.x, 2.95, -4.05));
 // what you see through the open door: sky, distant trees, lawn and the path

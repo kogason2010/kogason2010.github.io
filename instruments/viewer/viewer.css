@@ -1,0 +1,75 @@
+/* shared/viewer.css — look of the instrument viewer pages. Works offline: system fonts only. */
+:root {
+  --bg-a: #eef2f4; --bg-b: #d9e1e6; --panel: rgba(255, 255, 255, 0.9); --line: rgba(20, 34, 44, 0.12);
+  --fg: #16212a; --fg2: #4f5d68; --fg3: #7c8994; --accent: #0b6fb5; --accent-soft: rgba(11, 111, 181, 0.1);
+  --err: #b4232a; --err-bg: #fff1f1; --pick: #f2b01e; --shadow: 0 6px 24px rgba(16, 30, 44, 0.12);
+  --mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, Menlo, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg-a: #1a2026; --bg-b: #0d1114; --panel: rgba(24, 30, 36, 0.92); --line: rgba(255, 255, 255, 0.1);
+  --fg: #eef2f5; --fg2: #aab6c0; --fg3: #7f8b95; --accent: #63c3ff; --accent-soft: rgba(99, 195, 255, 0.14);
+  --err: #ff8a8a; --err-bg: #2c1618; --shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body { font: 14px/1.4 var(--sans); color: var(--fg); background: radial-gradient(120% 90% at 60% 30%, var(--bg-a), var(--bg-b)); }
+#stage { position: fixed; inset: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+#stage canvas:active { cursor: grabbing; }
+button, input { font: inherit; color: inherit; }
+a { color: var(--accent); }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+
+.ws-panel { position: fixed; top: 16px; left: 16px; width: 300px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: auto;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); backdrop-filter: blur(10px); padding: 14px 16px; }
+.ws-nav { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; font-size: 13px; }
+.ws-nav a { text-decoration: none; }
+.ws-nav .sp { flex: 1; }
+.ws-nav button { border: 1px solid var(--line); background: transparent; border-radius: 8px; width: 30px; height: 28px; cursor: pointer; }
+.ws-nav button:hover { background: var(--accent-soft); }
+.ws-room { font: 600 11px/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3); }
+.ws-title { font-size: 21px; font-weight: 700; margin: 3px 0 8px; letter-spacing: -0.01em; }
+.ws-from { font-size: 12.5px; color: var(--fg2); margin-bottom: 10px; }
+.ws-from code { background: var(--accent-soft); padding: 1px 5px; border-radius: 5px; }
+.ws-stats { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.ws-stats dt { color: var(--fg3); }
+.ws-stats dd { margin: 0; font-family: var(--mono); font-size: 12.5px; text-align: right; }
+.ws-toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; padding: 10px 0 4px; }
+.ws-toggles label { display: flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13px; }
+.ws-toggles input { accent-color: var(--accent); margin: 0; }
+.ws-views { display: flex; gap: 6px; padding-top: 8px; flex-wrap: wrap; }
+.ws-views button { flex: 1; border: 1px solid var(--line); background: transparent; border-radius: 8px; padding: 5px 0; cursor: pointer; font-size: 12.5px; }
+.ws-views button:hover { background: var(--accent-soft); }
+.ws-keys { margin-top: 10px; font-size: 11.5px; color: var(--fg3); }
+
+.ws-pick { position: fixed; top: 16px; right: 16px; width: 290px; max-width: calc(100vw - 32px); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: var(--shadow); backdrop-filter: blur(10px); padding: 12px 14px; font-size: 13px; }
+.ws-pick[hidden] { display: none; }
+.ws-pick h3 { margin: 0 0 6px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+.ws-pick h3 .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--line); flex: none; }
+.ws-pick h3 .x { margin-left: auto; border: 0; background: transparent; cursor: pointer; font-size: 16px; line-height: 1; color: var(--fg3); }
+.ws-pick dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; margin: 0; }
+.ws-pick dt { color: var(--fg3); }
+.ws-pick dd { margin: 0; font-family: var(--mono); font-size: 12px; word-break: break-word; }
+.ws-pick .open { display: inline-block; margin-top: 8px; font-size: 12.5px; }
+.ws-pick .note { margin-top: 6px; font-size: 11.5px; color: var(--fg3); }
+
+.ws-errors { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); width: min(720px, calc(100vw - 32px)); background: var(--err-bg); color: var(--err);
+  border: 1px solid currentColor; border-radius: 12px; padding: 10px 14px; font-size: 13px; box-shadow: var(--shadow); }
+.ws-errors[hidden] { display: none; }
+.ws-errors b { display: block; margin-bottom: 4px; }
+.ws-errors code { color: inherit; }
+.ws-errors div + div { margin-top: 4px; }
+.ws-hint { position: fixed; bottom: 14px; right: 16px; font-size: 12px; color: var(--fg3); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; }
+
+@media (max-width: 720px) {
+  .ws-panel { width: auto; right: 16px; max-height: 46vh; }
+  .ws-pick { top: auto; bottom: 16px; }
+  .ws-hint { display: none; }
+}
+
+/* gallery pictures (index.html?thumb): just the model */
+.thumb .ws-panel, .thumb .ws-pick, .thumb .ws-hint, .thumb .ws-errors { display: none !important; }
