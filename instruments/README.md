@@ -95,7 +95,7 @@ Upload only the `model.js` files you changed. Everything else in `instruments/` 
 | `lab-about-cabinet` | Reagent cabinet (About) | Kogason Lab, left wall |
 | `lab-contact-board` | Whiteboard (Contact) | Kogason Lab, back wall |
 | `lab-robot-vacuum` | Robot vacuum and dock (its brain is `js/lab/robot.js`) | Kogason Lab, floor |
-| `basement-sfc` | SFC, chiller and tubing | Basement bench |
+| `basement-sfc` | SFC, chiller, tubing and collection station (its live run is `js/basement/sfc.js`) | Basement bench |
 | `basement-sfc-pc` | SFC workstation (`js/basement/sfc.js` draws its screen) | Basement bench |
 | `basement-co2` | CO₂ cylinders, line and monitor | Basement, left wall |
 | `nca-uhplc` | UHPLC | NCA, back bench |

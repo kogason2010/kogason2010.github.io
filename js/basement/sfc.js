@@ -1,4 +1,5 @@
-/* js/basement/sfc.js — SFC chemistry and the SFC workstation app: vials, conditions, injection, live chromatogram.
+/* js/basement/sfc.js — SFC chemistry and the SFC workstation app: vials, conditions, injection, live chromatogram, and the
+   live run on the instrument itself (it uses SFC_PARTS from instruments/basement-sfc/model.js).
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
@@ -241,12 +242,15 @@ function mountSfc() {
   $s("sfcReset").addEventListener("click", () => { const r = SAMPLES[sfc.sample].ref; sfc.mod = r.mod; sfc.P = r.P; sfc.T = r.T; if (sfc.last) sfc.dirty = true; sfcLcds(); sfcSync(); });
 }
 window.addEventListener("resize", () => { if (sfcMounted()) sfcSync(); });
+// the SFC's own displays (SFC_PARTS.lcd in instruments/basement-sfc/model.js): flows, pressure, valve, oven, detector
 function sfcLcds() {
-  const f = 3.0, m = sfc.mod / 100;
-  pumpCO2.lcd.draw(["CO2  " + (f * (1 - m)).toFixed(2), "mL/min"]); pumpMod.lcd.draw(["MeOH " + (f * m).toFixed(2), "mL/min"]);
-  bpr.lcd.draw(["BPR", sfc.P + " bar"]); ovenLcd.draw(["OVEN " + sfc.T.toFixed(1) + "C", "COL 1"]);
-  sampler.lcd.draw([sfc.inject ? "VIAL " + (Object.keys(SAMPLES).indexOf(sfc.sample) + 1) : "VIAL --", sfc.inject ? "INJECT" : "READY"]);
-  gNeedle.rotation.z = Math.PI * 1.15 - Math.min(250, sfc.P) / 250 * Math.PI * 1.3;
+  const L = SFC_PARTS.lcd, f = 3.0, m = sfc.mod / 100, live = sfc.run && !sfc.run.done;
+  const st = (sfc.inject ? "INJECT" : live ? "RUN" : "READY").padEnd(10) + "REMOTE";
+  L.co2.draw(["CO2   " + (f * (1 - m)).toFixed(2) + " mL/min", "BPR   " + (sfc.P / 10).toFixed(1) + " MPa", st]);
+  L.mod.draw(["MeOH  " + (f * m).toFixed(2) + " mL/min", "MOD   " + sfc.mod.toFixed(1) + " %", st]);
+  L.inj.draw(["VALVE  " + (sfc.inject ? (sfc.inject.phase === "inject" ? "INJECT" : "LOAD") : live ? "INJECT" : "LOAD"), "SAMPLE  " + SAMPLES[sfc.sample].short.toUpperCase(), "LOOP  10 uL"]);
+  L.oven.draw(["OVEN  " + sfc.T.toFixed(1) + " C", "COLUMN  1", st]);
+  if (!live) L.det.draw(["PDA   254 nm", "0.000 AU", st]);
 }
 function sfcInject() {
   if (sfc.inject || (sfc.run && !sfc.run.done)) return;
@@ -258,6 +262,7 @@ function sfcInject() {
 function sfcStart() {
   const p = predict(sfc);
   sfc.run = { ...p, t: 0, done: false, wall: Math.max(7, Math.min(16, 4 + p.W * 1.5)), seen: new Set() };
+  sfcFractionsReset(sfc.run);
   sfcLcds(); sfcSync();
   if (reduce) { sfc.run.t = sfc.run.W; sfcFinish(); }
 }
@@ -265,16 +270,15 @@ function sfcFinish() { sfc.run.done = true; sfc.last = sfc.run; sfc.run = null; 
 function sfcAbort() { sfc.inject = null; if (sfc.run && !sfc.run.done) { sfc.run = null; } sfcLcds(); }
 function paintSfcScreen() { const run = sfc.run || sfc.last; sfcScreen.draw(); drawChrom(sfcScreen.c.getContext("2d"), 512, 304, run, run ? (run.done ? run.W : run.t) : 0, true); sfcScreen.t.needsUpdate = true; }
 paintSfcScreen(); sfcLcds();
+// fewer draw calls: the SFC's fixed parts merge by material (the valve knob, the bottles' liquid and the flow cell stay live)
+mergeByMaterial(hotspots.find(h => h.key === "sfc").group, new Set([SFC_PARTS.injKnob]));
 
 /* SFC workstation app: zoom to the PC, open the app. Its live pane is a hole in the window, and the camera is
-   re-aimed (with a view offset) so the autosampler or the column sits exactly behind that hole. */
+   re-aimed (with a view offset) so the injection valve or the column sits exactly behind that hole. */
 let sfcAppOpen = false, sfcHome = null, sfcPose = null, liveCam = false, liveCap = "";
 const sfcAppEl = $s("sfcApp");
 mountSfc();
-const LIVE = {
-  col: { c: new THREE.Vector3(CX2 - 0.02, colY + 0.02, COL_Z), w: 0.98, h: 0.4 },
-  inj: { c: new THREE.Vector3(BX2 + 0.02, trayY + 0.17, VIAL_Z - 0.02), w: 0.78, h: 0.42 },
-};
+const LIVE = SFC_PARTS.views;
 const liveF = { c: LIVE.col.c.clone(), w: LIVE.col.w, h: LIVE.col.h }, liveDir = new THREE.Vector3(0.2, 0.3, 1).normalize();
 function updateLiveCam(dt) {
   const el = $s("sfcLive"); if (!el) return;
@@ -322,7 +326,7 @@ function updateLiveCaption() {
   if (!sfcAppOpen) return;
   let t;
   const run = sfc.run;
-  if (sfc.inject) t = "Autosampler · drawing the sample";
+  if (sfc.inject) t = sfc.inject.phase === "inject" ? "Injector · switching the sample onto the column" : "Injector · filling the sample loop";
   else if (run && !run.done) {
     const inCol = run.peaks.filter(p => run.t > 0 && run.t < p.tR - 2 * p.sig).map(p => p.name), atDet = run.peaks.find(p => Math.abs(run.t - p.tR) < 2.5 * p.sig);
     t = atDet ? `Detector: ${atDet.name}` : inCol.length ? `In the column: ${inCol.slice(0, 3).join(", ")}${inCol.length > 3 ? " +" + (inCol.length - 3) : ""}` : "Column clear";
@@ -330,38 +334,56 @@ function updateLiveCaption() {
   if (t !== liveCap) { liveCap = t; const el = $s("sfcLiveCap"); if (el) el.textContent = t; }
 }
 
-// 3D: mobile phase streaming through the lines, bands in the column, CO₂ flashing to gas at the vent
-const FLOW_N = { co2: 46, mod: 18, mix: 34, out: 34 }, flowDots = [];
-Object.entries(FLOW_N).forEach(([k, n]) => { const len = FLOW[k].getLength(); for (let i = 0; i < n; i++) flowDots.push({ k, u: i / n, len }); });
+// 3D: mobile phase streaming through the lines, bands in the column, fractions filling the bottles, CO₂ flashing to gas
+const SFC_FLOW = SFC_PARTS.flow, COL = SFC_PARTS.column, FRACS = SFC_PARTS.fractions;
+const colAxis = new THREE.Vector3().subVectors(COL.b, COL.a), colP1 = new THREE.Vector3(), colP2 = new THREE.Vector3();
+{ const d = colAxis.clone().normalize(); colP1.crossVectors(d, Math.abs(d.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0)).normalize(); colP2.crossVectors(d, colP1).normalize(); }
+const colPoint = (u, a, r, out) => out.copy(COL.a).addScaledVector(colAxis, u).addScaledVector(colP1, Math.cos(a) * r).addScaledVector(colP2, Math.sin(a) * r);
+const FLOW_N = { co2: 46, mod: 18, mix: 34, out: 40 }, flowDots = [];
+Object.entries(FLOW_N).forEach(([k, n]) => { const len = SFC_FLOW[k].getLength(); for (let i = 0; i < n; i++) flowDots.push({ k, u: i / n, len }); });
 const COLN = 26;
-for (let i = 0; i < COLN; i++) flowDots.push({ k: "col", u: i / COLN, r: Math.random() * 0.02, a: Math.random() * 6.283 });
+for (let i = 0; i < COLN; i++) flowDots.push({ k: "col", u: i / COLN, r: Math.random() * COL.r, a: Math.random() * 6.283 });
+const FRAC_N = 14;
+for (let i = 0; i < FRAC_N; i++) flowDots.push({ k: "frac", u: i / FRAC_N });
 const flowGeo = new THREE.BufferGeometry(), flowPos = new Float32Array(flowDots.length * 3), flowCol = new Float32Array(flowDots.length * 3);
 flowGeo.setAttribute("position", new THREE.BufferAttribute(flowPos, 3)); flowGeo.setAttribute("color", new THREE.BufferAttribute(flowCol, 3));
-const flowPts = new THREE.Points(flowGeo, new THREE.PointsMaterial({ size: 0.024, map: dotTex, vertexColors: true, transparent: true, depthWrite: false })); flowPts.frustumCulled = false; basement.add(flowPts);
-const CO2C = new THREE.Color(0x9fe3ff), MODC = new THREE.Color(0xc9a6ff), tmpC = new THREE.Color(), tmpV = new THREE.Vector3();
+const flowPts = new THREE.Points(flowGeo, new THREE.PointsMaterial({ size: 0.017, map: dotTex, vertexColors: true, transparent: true, depthWrite: false })); flowPts.frustumCulled = false; basement.add(flowPts);
+const CO2C = new THREE.Color(0x9fe3ff), MODC = new THREE.Color(0xc9a6ff), tmpC = new THREE.Color(), tmpV = new THREE.Vector3(), WHITE = new THREE.Color(0xffffff);
 const BAND_N = 90, bandDots = [];
-for (let c = 0; c < 6; c++) for (let i = 0; i < BAND_N; i++) { let n = 0; for (let k = 0; k < 4; k++) n += Math.random(); bandDots.push({ c, n: (n - 2) * 1.2, r: Math.sqrt(Math.random()) * 0.022, a: Math.random() * 6.283 }); }
+for (let c = 0; c < 6; c++) for (let i = 0; i < BAND_N; i++) { let n = 0; for (let k = 0; k < 4; k++) n += Math.random(); bandDots.push({ c, n: (n - 2) * 1.2, r: Math.sqrt(Math.random()) * COL.r, a: Math.random() * 6.283 }); }
 const bandGeo = new THREE.BufferGeometry(), bandPos = new Float32Array(bandDots.length * 3), bandCol = new Float32Array(bandDots.length * 3);
 bandGeo.setAttribute("position", new THREE.BufferAttribute(bandPos, 3)); bandGeo.setAttribute("color", new THREE.BufferAttribute(bandCol, 3));
-const bandPts = new THREE.Points(bandGeo, new THREE.PointsMaterial({ size: 0.036, map: dotTex, vertexColors: true, transparent: true, depthWrite: false })); bandPts.frustumCulled = false; bandPts.renderOrder = 3; basement.add(bandPts);
+const bandPts = new THREE.Points(bandGeo, new THREE.PointsMaterial({ size: 0.026, map: dotTex, vertexColors: true, transparent: true, depthWrite: false })); bandPts.frustumCulled = false; bandPts.renderOrder = 3; basement.add(bandPts);
 const puffs = [];
 for (let i = 0; i < 26; i++) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex, color: 0xf2f8ff, transparent: true, opacity: 0, depthWrite: false })); sp.visible = false; basement.add(sp); puffs.push({ sp, life: 0 }); }
 let puffNext = 0, puffI = 0, puffTint = null, puffTintT = 0, flowClock = 0, screenClock = 0;
 const cellBase = new THREE.Color(0x24313a);
+// fraction collection: compound i goes to bottle i as it leaves the detector, and fills it in its colour
+const FRAC_MAXH = 0.3, FRAC_H0 = 0.183;                  // the fullest a bottle gets, and the liquid mesh's own height
+const normCdf = x => 0.5 * (1 + Math.tanh(0.7978845608 * (x + 0.044715 * x * x * x)));
+function sfcFill(f, v) {
+  const h = Math.max(0.001, v * FRAC_MAXH);
+  f.liquid.visible = v > 0.003; f.liquid.scale.y = h / FRAC_H0; f.liquid.position.y = f.bottom + 0.0065 + h / 2;
+}
+function sfcFractionsReset(run) {
+  const big = Math.max(...run.peaks.map(p => p.area));
+  FRACS.forEach((f, i) => {
+    const pk = run.peaks[i]; f.goal = pk ? 0.25 + 0.6 * pk.area / big : 0; f.pk = pk || null;
+    if (pk) { f.liquid.material.color.set(pk.color).lerp(WHITE, 0.15).convertSRGBToLinear(); f.liquid.material.opacity = 0.72; }
+    sfcFill(f, 0);
+  });
+}
 function updateSfc(dt, time) {
   const s = SAMPLES[sfc.sample], live = sfc.run && !sfc.run.done;
-  // injection: needle travels to the vial, draws sample, then injects at the port
+  // injection: the valve turns to LOAD while the sample loop fills, then to INJECT, which puts it onto the column;
+  // it stays there for the run and turns back when the run is over
+  const knob = SFC_PARTS.injKnob, ease = u => u * u * (3 - 2 * u), LOAD = 0.9, INJ = -0.9;
   if (sfc.inject) {
-    const ij = sfc.inject; ij.t += dt;
-    const vx = VIAL_X[ij.vial], T = ij.t;
-    let x = PORT_X, dip = 0;
-    if (T < 0.5) x = PORT_X + (vx - PORT_X) * (T / 0.5);
-    else if (T < 1.1) { x = vx; dip = Math.sin((T - 0.5) / 0.6 * Math.PI) * 0.075; }
-    else if (T < 1.6) x = vx + (PORT_X - vx) * ((T - 1.1) / 0.5);
-    else { x = PORT_X; dip = Math.sin(Math.min(1, (T - 1.6) / 0.5) * Math.PI) * 0.06; }
-    carriage.position.x = x; carriage.position.y = trayY + 0.36 - dip;
-    if (T >= 2.1) { sfc.inject = null; carriage.position.set(PORT_X, trayY + 0.36, VIAL_Z); sfcStart(); }
-  }
+    const ij = sfc.inject; ij.t += dt; const T = ij.t;
+    knob.rotation.z = T < 0.5 ? LOAD * ease(T / 0.5) : T < 1.4 ? LOAD : LOAD + (INJ - LOAD) * ease(Math.min(1, (T - 1.4) / 0.5));
+    const phase = T < 1.4 ? "load" : "inject"; if (phase !== ij.phase) { ij.phase = phase; sfcLcds(); }
+    if (T >= 2.1) { sfc.inject = null; sfcStart(); }
+  } else knob.rotation.z += ((sfc.run && !sfc.run.done ? INJ : 0) - knob.rotation.z) * Math.min(1, dt * 3);
   if (live) {
     const run = sfc.run; run.t = Math.min(run.W, run.t + dt * run.W / run.wall);
     if (run.t >= run.W) sfcFinish();
@@ -369,15 +391,23 @@ function updateSfc(dt, time) {
   const run = sfc.run || (sfc.last && !sfc.dirty ? sfc.last : null), speed = run ? run.W / run.wall : s.window / Math.max(7, 4 + s.window * 1.5);   // run minutes per second
   // mobile phase in the lines; colour shifts with the methanol fraction
   flowClock += dt;
-  const mixC = tmpC.copy(CO2C).lerp(MODC, Math.min(1, sfc.mod / 40));
+  const mixC = new THREE.Color().copy(CO2C).lerp(MODC, Math.min(1, sfc.mod / 40));
+  // which compound (if any) is reaching its bottle right now
+  let fracNow = null;
+  if (run && !run.done) run.peaks.forEach((pk, i) => { const dd = Math.abs(run.t - pk.tR) / pk.sig; if (dd < 2.2 && i < FRACS.length && (!fracNow || dd < fracNow.dd)) fracNow = { i, pk, dd }; });
   flowDots.forEach((d, i) => {
     let p;
     if (d.k === "col") {
       d.u = (d.u + dt * speed / s.t0) % 1;
-      p = tmpV.set(COL_X0 + d.u * COL_L, colY + Math.sin(d.a) * d.r, COL_Z + Math.cos(d.a) * d.r);
+      p = colPoint(d.u, d.a, d.r, tmpV);
       flowCol.set([mixC.r * 0.8, mixC.g * 0.8, mixC.b * 0.8], i * 3);
+    } else if (d.k === "frac") {
+      d.u = (d.u + dt * 0.5) % 1;
+      const f = fracNow && FRACS[fracNow.i];
+      if (!f) { flowPos[i * 3 + 1] = -99; return; }
+      p = f.line.getPointAt(d.u, tmpV); tmpC.set(fracNow.pk.color); flowCol.set([tmpC.r, tmpC.g, tmpC.b], i * 3);
     } else {
-      d.u = (d.u + dt * 0.32 / d.len) % 1; p = FLOW[d.k].getPointAt(d.u, tmpV);
+      d.u = (d.u + dt * 0.32 / d.len) % 1; p = SFC_FLOW[d.k].getPointAt(d.u, tmpV);
       const c = d.k === "co2" ? CO2C : d.k === "mod" ? MODC : mixC; flowCol.set([c.r, c.g, c.b], i * 3);
     }
     flowPos.set([p.x, p.y, p.z], i * 3);
@@ -390,20 +420,22 @@ function updateSfc(dt, time) {
     if (!pk) { bandPos[i * 3 + 1] = -99; return; }
     const f = run.t / pk.tR, spread = 0.012 + 0.034 * Math.min(1, f), x = f + d.n * spread;
     if (x < 0 || x > 1 || f > 1.15) { bandPos[i * 3 + 1] = -99; return; }
-    bandPos.set([COL_X0 + x * COL_L, colY + Math.sin(d.a) * d.r, COL_Z + Math.cos(d.a) * d.r], i * 3);
+    colPoint(x, d.a, d.r, tmpV); bandPos.set([tmpV.x, tmpV.y, tmpV.z], i * 3);
     tmpC.set(pk.color); bandCol.set([tmpC.r, tmpC.g, tmpC.b], i * 3);
   });
   bandGeo.attributes.position.needsUpdate = true; bandGeo.attributes.color.needsUpdate = true;
   // detector flow cell lights up in each compound's colour as it passes; the next puffs carry a hint of it
   let cellHit = null;
   if (peaks) peaks.forEach(pk => { const dd = Math.abs(run.t - pk.tR) / pk.sig; if (dd < 2.2 && (!cellHit || dd < cellHit.dd)) cellHit = { pk, dd }; if (run.t > pk.tR && !run.seen.has(pk.name)) { run.seen.add(pk.name); puffTint = new THREE.Color(pk.color); puffTintT = 1.2; } });
-  if (cellHit) cellMat.color.set(cellHit.pk.color).lerp(cellBase, Math.min(1, cellHit.dd / 2.2)); else cellMat.color.copy(cellBase);
+  if (cellHit) SFC_PARTS.cell.color.set(cellHit.pk.color).lerp(cellBase, Math.min(1, cellHit.dd / 2.2)); else SFC_PARTS.cell.color.copy(cellBase);
+  // bottles fill as each compound comes through (to a level that follows its peak's area)
+  if (run && run.seen) FRACS.forEach(f => { if (f.pk) sfcFill(f, f.goal * normCdf((run.t - f.pk.tR) / f.pk.sig)); });
   // the regulator vents the CO₂ as gas
   puffNext -= dt; puffTintT -= dt;
   if (puffNext <= 0) {
     puffNext = 0.085;
     const pf = puffs[puffI = (puffI + 1) % puffs.length]; pf.life = 1; pf.vx = (Math.random() - 0.5) * 0.05; pf.vz = (Math.random() - 0.5) * 0.05; pf.vy = 0.22 + Math.random() * 0.08;
-    pf.sp.position.copy(VENT); pf.sp.visible = true; pf.sp.material.color.set(0xf2f8ff); if (puffTint && puffTintT > 0) pf.sp.material.color.lerp(puffTint, 0.55);
+    pf.sp.position.copy(SFC_PARTS.vent); pf.sp.visible = true; pf.sp.material.color.set(0xf2f8ff); if (puffTint && puffTintT > 0) pf.sp.material.color.lerp(puffTint, 0.55);
   }
   puffs.forEach(pf => {
     if (pf.life <= 0) return;
@@ -415,7 +447,7 @@ function updateSfc(dt, time) {
   screenClock -= dt;
   if (live && screenClock <= 0) {
     screenClock = 0.08; paintSfcScreen();
-    det.lcd.draw(["PDA 254nm", (signal(run.peaks, run.t) * 0.08).toFixed(3) + " AU"]);
+    SFC_PARTS.lcd.det.draw(["PDA   254 nm", (signal(run.peaks, run.t) * 0.08).toFixed(3) + " AU", "RUN".padEnd(10) + "REMOTE"]);
     if (sfcAppOpen) sfcDrawChart();
   }
   if (sfcAppOpen) updateLiveCaption();
