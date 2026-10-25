@@ -1,28 +1,27 @@
 # How the lab's code is organised
 
-`index.html` loads these scripts in order. They share one scope, so a name defined in an earlier file can be used by any later one.
+`index.html` loads these scripts, and each instrument's `instruments/<name>/model.js`, in order. They share one scope, so a name defined in an earlier file can be used by any later one.
 
 | To change… | Edit |
 |---|---|
 | Words in the info panels (lab, basement) | `content.js` |
 | Words in NCA's panels | `chemistry/content.js` |
 | **App notes in the library** (add one here) | `library/catalog.js` |
-| Renderer, camera, colours (`C`), modelling helpers (`box`, `cyl`, `mat`, `module`…) | `core/scene.js` |
+| **Instruments**: the look of each one (HPLC, IC, SFC, NCA's instruments, the robot arm…) | `../instruments/<name>/model.js` (see `instruments/README.md`) |
+| Renderer, camera, room size | `core/scene.js` |
+| Colours (`C`), materials and the modelling helpers every instrument uses (`box`, `cyl`, `plane`, `mat`, `tex`, `module`, `lcModule`…) | `core/helpers.js` |
 | Lights and the Lights on/off switch | `core/lights.js` |
 | Floating molecules behind the dioramas | `core/background.js` |
 | Going up and down stairs | `core/levels.js` |
 | **Kogason lab** room, window, exit door | `lab/room.js` |
-| Fume hood and distillation | `lab/fume-hood.js` |
-| Back bench, monitor, balance | `lab/workstation.js` |
-| Nexera HPLC model (shapes and colours) | `lab/hplc.js` |
-| Nexera IC model and bench | `lab/ic.js` |
-| Island bench and TOC analyzer | `lab/island-toc.js` |
-| Whiteboard and reagent cabinet | `lab/wall-items.js` |
-| Robot vacuum (model, mapping, cleaning) | `lab/robot.js` |
+| Back bench, stool, shelf | `lab/workstation.js` |
+| Island bench, glassware, stools | `lab/island.js` |
+| Lab coat and waste bin | `lab/wall-items.js` |
+| Robot vacuum's brain (mapping, cleaning, docking) | `lab/robot.js` |
 | Desktop portfolio, live KogasonOS on the monitor | `lab/desktop.js`, `lab/os-monitor.js` |
 | IC workstation app | `lab/ic-workstation.js` |
 | Particle mode, distillation vapour | `lab/effects.js` |
-| **Basement**: stair, room, SFC instrument | `basement/basement.js` |
+| **Basement**: stair, room, bench | `basement/basement.js` |
 | SFC chemistry and its workstation app | `basement/sfc.js` |
 | Tags, hovering, clicking, the info sheet | `ui/labels.js` |
 | **Campus** constants and toolkit | `campus/setup.js` |
@@ -43,7 +42,8 @@
 | Entering it, camera and lattice controls | `math/visit.js` |
 | Indoor places you drive into (shared enter/leave) | `core/places.js` |
 | **NCA** (chemistry building) LC lab room | `chemistry/room.js` |
-| Its instruments (UHPLC, LC-MS/MS, prep LC…) | `chemistry/instruments.js` |
+| Its benches, and the order its instruments are built in | `chemistry/instruments.js` |
+| The robot assembly line (conveyor, pallets, driving the arms) | `chemistry/assembly.js` |
 | The LC model and LC workstation app | `chemistry/lc.js` |
 | Entering and leaving it | `chemistry/visit.js` |
 | **Library** reading room (rotunda, alcoves, desks, dome) | `library/rotunda.js` |

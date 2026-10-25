@@ -1,5 +1,14 @@
-/* js/lab/fume-hood.js — Fume hood and the simple distillation running inside it.
-   Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
+/* instruments/lab-fume-hood/model.js — Fume hood and the simple distillation running inside it.
+   Casework base, lined interior, framed sash, airflow monitor and duct; heating mantle, flask, condenser and receiver.
+   The site loads this file as it is. To work on it offline, open index.html in this folder (see instruments/README.md).
+   Built from the shared building blocks in js/core/helpers.js (box, cyl, plane, mat, tex, led, …). Sizes are in metres;
+   +x points right, +y up and +z toward the front of the room.
+   Other files use these names, so keep them as they are:
+     flamTex (js/basement/basement.js)
+     hoodLight, mantleMat (js/core/lights.js)
+     bubbles, drip (js/lab/merge.js)
+     vapGeo, vapor (js/lab/effects.js)
+     updateDistill (js/lab/effects.js, js/main.js) */
 "use strict";
 
 // Fume hood: casework base, lined interior with baffle slots, framed sash raised partway, airflow monitor, duct

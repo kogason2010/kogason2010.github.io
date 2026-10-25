@@ -1,5 +1,8 @@
-/* js/lab/hplc.js — Shimadzu Nexera HPLC model: shape, colours, touchscreen and column oven.
-   Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
+/* instruments/lab-hplc/model.js — HPLC (Shimadzu Nexera) on the back bench.
+   Solvent bottles, controller with touchscreen, pumps, autosampler, column oven; modelled full size, then scaled to the bench.
+   The site loads this file as it is. To work on it offline, open index.html in this folder (see instruments/README.md).
+   Built from the shared building blocks in js/core/helpers.js (box, cyl, plane, mat, tex, led, …). Sizes are in metres;
+   +x points right, +y up and +z toward the front of the room. */
 "use strict";
 
 // ============================================================

@@ -1,6 +1,6 @@
 # KogasonOS
 
-> **Layout:** the site's front door (`index.html` at the root) is a 3D analytical chemistry lab built with Three.js. KogasonOS lives in `os/` (kogason2010.github.io/os/) and runs live on the lab's monitor: zoom into the screen to use it, and click **Lab** to zoom back out.
+> **Layout:** the site's front door (`index.html` at the root) is a 3D analytical chemistry lab built with Three.js. KogasonOS lives in `os/` (kogason2010.github.io/os/) and runs live on the lab's monitor: zoom into the screen to use it, and click **Lab** to zoom back out. Each instrument in the lab is its own file in `instruments/`, with an offline viewer for working on it (see `instruments/README.md`).
 
 **Live at [kogason2010.github.io](https://kogason2010.github.io/)**
 

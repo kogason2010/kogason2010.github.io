@@ -7,7 +7,6 @@ const chem = new THREE.Group(); chem.visible = false; scene.add(chem);
 let chemBuilt = false;
 // the hall is much bigger than the Kogason lab: the LC benches stay in the back-left corner, and a robot assembly line runs across the new space to the right
 const CHR = { x0: ROOM0, x1: 15.6, z0: ROOM0, z1: 7.4 }; CHR.w = CHR.x1 - CHR.x0; CHR.d = CHR.z1 - CHR.z0; CHR.cx = (CHR.x0 + CHR.x1) / 2; CHR.cz = (CHR.z0 + CHR.z1) / 2;
-const CH = { top: 1.28, wallA: 0xc3ced6, wallB: 0xe1e7ea, accent: 0x2f6fb5, body: 0xe9ecec, front: 0x2b3238, trim: 0x8b979e };
 
 function buildChemRoom() {
   // slab and tiled floor (cooler, bluer tiles than the Kogason lab)

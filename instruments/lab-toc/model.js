@@ -1,18 +1,15 @@
-/* js/lab/island-toc.js — Island bench with glassware and the TOC analyzer.
-   Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
+/* instruments/lab-toc/model.js — TOC analyzer on the island bench, with its carousel autosampler and carrier-gas cylinder.
+   The site loads this file as it is. To work on it offline, open index.html in this folder (see instruments/README.md).
+   Built from the shared building blocks in js/core/helpers.js (box, cyl, plane, mat, tex, led, …). Sizes are in metres;
+   +x points right, +y up and +z toward the front of the room.
+   Other files use these names, so keep them as they are:
+     ITOP, TX, TZ (js/core/lights.js)
+     furnaceMat (js/main.js)
+     rotor (js/lab/merge.js, js/main.js) */
 "use strict";
 
-// Island bench: glassware on the left, TOC analyzer on the right
+// the island bench this sits on (js/lab/island.js builds the bench at the same place)
 const IX = 1.4, IZ = 1.3, ITOP = 1.26;
-box(2.6, 1.15, 1.1, C.cab, IX, 0.6, IZ);
-for (let x = IX - 0.65; x < IX + 1.3; x += 0.65) box(0.01, 0.95, 1.12, C.cabLine, x, 0.6, IZ);
-box(2.7, 0.08, 1.2, C.epoxy, IX, 1.22, IZ);
-box(0.95, 0.04, 0.2, C.steel, IX - 0.7, 1.75, IZ - 0.3, null, { metalness: 0.5 });
-[-1.15, -0.25].forEach(o => cyl(0.025, 0.025, 0.5, C.steel, IX + o, 1.5, IZ - 0.3, null, 8));
-[0x9ad8ff, C.amber, 0xffd9a0].forEach((c, i) => bottle(IX - 1.0 + i * 0.3, 1.77, IZ - 0.3, 0.06, 0.24, c, i % 2 ? 0x111111 : C.line));
-beaker(IX - 1.0, ITOP, IZ + 0.2, 0.13, 0.28, 0x6fd3a0, 0.55);
-beaker(IX - 0.7, ITOP, IZ + 0.3, 0.09, 0.2, 0xb59cff, 0.6);
-flask(IX - 0.44, ITOP, IZ + 0.22, 0.15, 0xff9a7a);
 
 const gTOC = hotGroup("toc", "TOC analyzer", new THREE.Vector3(IX + 0.6, 2.8, IZ));
 // TOC analyzer on the right, carousel autosampler on its left
@@ -101,9 +98,3 @@ cyl(0.165, 0.165, 0.05, 0x1f9a4f, GX, 1.3, GZ, null, 20);
 const gasLine = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3([
   new THREE.Vector3(GX, 1.88, GZ + 0.06), new THREE.Vector3(GX - 0.05, 2.0, GZ + 0.05), new THREE.Vector3(TX + 0.2, 2.0, TZ - 0.38), new THREE.Vector3(TX + 0.2, 1.9, TZ - 0.42)
 ]), 30, 0.008, 6, false), mat(C.steel, { metalness: 0.7, roughness: 0.3 })); lab.add(gasLine);
-
-[[IX - 0.6, IZ + 1.05], [IX + 0.6, IZ + 1.05]].forEach(p => {
-  cyl(0.24, 0.24, 0.08, 0x2a2f33, p[0], 0.9, p[1]);
-  cyl(0.03, 0.03, 0.85, C.steel, p[0], 0.45, p[1], null, 8, { metalness: 0.6 });
-  cyl(0.25, 0.25, 0.03, C.steel, p[0], 0.03, p[1], null, 5, { metalness: 0.6 });
-});
