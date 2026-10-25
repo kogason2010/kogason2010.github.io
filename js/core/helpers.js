@@ -110,6 +110,55 @@ function mergeGeos(list) {
 function paint(geo, fn) { const p = geo.attributes.position, c = new Float32Array(p.count * 3), col = new THREE.Color(); for (let i = 0; i < p.count; i++) { fn(p.getX(i), p.getY(i), p.getZ(i), col); c[i * 3] = col.r; c[i * 3 + 1] = col.g; c[i * 3 + 2] = col.b; } geo.setAttribute("color", new THREE.BufferAttribute(c, 3)); return geo; }
 // one coloured box for mergeGeos
 function modPart(list, w, h, d, x, y, z, color) { const g = new THREE.BoxGeometry(w, h, d); g.translate(x, y, z); paint(g, (px, py, pz, c) => c.setHex(color)); list.push(g); }
+// fewer draw calls: inside a group, meshes that share a material become one mesh, in the group's own frame. Named meshes
+// (something looks them up), instanced meshes and multi-material meshes are left as they are.
+function mergeByMaterial(root) {
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4(), groups = new Map();
+  root.traverse(o => {
+    if (!o.isMesh || o.isInstancedMesh || o.name || Array.isArray(o.material) || !o.geometry.attributes.normal) return;
+    const names = Object.keys(o.geometry.attributes).sort().join(",");
+    if (!/^(normal,position|normal,position,uv)$/.test(names)) return;
+    const k = [o.material.uuid, names, o.castShadow, o.receiveShadow, o.renderOrder].join("|");
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(o);
+  });
+  groups.forEach(list => {
+    if (list.length < 2) return;
+    const uv = list[0].geometry.attributes.uv !== undefined;
+    const parts = list.map(o => (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld)));
+    const n = parts.reduce((a, g) => a + g.attributes.position.count, 0), pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), tex2 = uv ? new Float32Array(n * 2) : null;
+    let off = 0;
+    parts.forEach(g => { pos.set(g.attributes.position.array, off * 3); nor.set(g.attributes.normal.array, off * 3); if (uv) tex2.set(g.attributes.uv.array, off * 2); off += g.attributes.position.count; g.dispose(); });
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("normal", new THREE.BufferAttribute(nor, 3));
+    if (uv) geo.setAttribute("uv", new THREE.BufferAttribute(tex2, 2));
+    const m = new THREE.Mesh(geo, list[0].material); m.castShadow = list[0].castShadow; m.receiveShadow = list[0].receiveShadow; m.renderOrder = list[0].renderOrder;
+    root.add(m); list.forEach(o => o.parent.remove(o));
+  });
+}
+// fewer draw calls still, for things seen from a distance (the assembly line's modules): a group's plain parts (opaque,
+// untextured, not glowing) become one vertex-coloured mesh per finish (matte, rough or metallic), in the group's frame
+const FINISH = { matte: [0.56, 0.12], rough: [0.88, 0.02], metal: [0.35, 0.6] };
+function mergeByFinish(root) {
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4(), buckets = { matte: [], rough: [], metal: [] };
+  root.traverse(o => {
+    if (!o.isMesh || o.isInstancedMesh || o.name || Array.isArray(o.material) || !o.geometry.attributes.normal) return;
+    const m = o.material;
+    if (!m.isMeshStandardMaterial || m.map || m.transparent || m.vertexColors || (m.emissive && m.emissive.getHex() && m.emissiveIntensity > 0)) return;
+    buckets[m.metalness >= 0.4 ? "metal" : m.roughness >= 0.75 ? "rough" : "matte"].push(o);
+  });
+  Object.entries(buckets).forEach(([finish, list]) => {
+    if (!list.length) return;
+    const geos = list.map(o => {
+      const g = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()).applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld)), c = o.material.color;
+      return paint(g, (x, y, z, col) => col.copy(c));
+    });
+    const m = new THREE.Mesh(mergeGeos(geos), new THREE.MeshStandardMaterial({ vertexColors: true, roughness: FINISH[finish][0], metalness: FINISH[finish][1] }));
+    m.castShadow = list.some(o => o.castShadow); m.receiveShadow = true;
+    root.add(m); list.forEach(o => o.parent.remove(o)); geos.forEach(g => g.dispose());
+  });
+}
 
 /* ---------- NCA: bench height and palette, LC modules and solvent bottles ---------- */
 const CH = { top: 1.28, wallA: 0xc3ced6, wallB: 0xe1e7ea, accent: 0x2f6fb5, body: 0xe9ecec, front: 0x2b3238, trim: 0x8b979e };

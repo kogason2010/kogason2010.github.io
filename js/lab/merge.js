@@ -16,4 +16,6 @@ function mergeLab() {
   const labHot = hotspots.filter(h => { for (let p = h.group; p; p = p.parent) if (p === lab) return true; return false; });
   labHot.forEach(h => mergeStatic(h.group, keep));
   mergeStatic(lab, new Set([...keep, ...labHot.map(h => h.group)]));
+  // the TOC's carousel turns as a whole, so its vials and racks can be merged within it
+  if (typeof rotor !== "undefined") mergeStatic(rotor, new Set());
 }
