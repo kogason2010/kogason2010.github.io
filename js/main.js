@@ -103,7 +103,7 @@ function frame() {
   updateDoor(dt);
   if (worldOn) updateWorld(dt, time);
   if (basement.visible && !reduce) updateSfc(dt, time);
-  if (chem.visible) updateLc(dt, time);
+  if (chem.visible) { updateLc(dt, time); updateAssembly(dt, time); }
   if (library.visible) updateLibrary(dt, time);
   if (mathRoom.visible) updateMath(dt, time);
   if (lab.visible) {
