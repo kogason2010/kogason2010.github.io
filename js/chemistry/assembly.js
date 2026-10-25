@@ -24,11 +24,11 @@ function newPallet(slot, upTo) {
   p.g.position.set(p.x, ASM.TOP, ASM.Z); ASM.dyn.add(p.g);
   const plate = armMesh(b => { b(0.96, 0.05, 0.7, 0, 0.025, 0, 0x4a545a); [-0.35, 0.35].forEach(z => b(0.98, 0.02, 0.04, 0, 0.05, z, 0x2f6fb5)); }); p.g.add(plate);
   // pallets further down the line arrive already carrying what earlier stations added
-  const order = ["sampler", "detector", "pumpA", "pumpB", "controller", "tray", "oven"];
+  const order = [...STACK, "oven"];
   order.slice(0, upTo || 0).forEach(k => addToPallet(p, makeModule(k)));
   ASM.pallets.push(p); return p;
 }
-const STACK_X = -0.13, OVEN_X = 0.24;
+const STACK_X = -0.13, OVEN_X = STACK_X + MOD.W / 2 + 0.013 * MOD.W / NexeraModules.width + MOD_KINDS.oven.w / 2;
 function stackTop(p) { return 0.052 + p.stack.reduce((a, m) => a + m.userData.h, 0); }
 function placeOn(p, kind) { return kind === "oven" ? new THREE.Vector3(OVEN_X, 0.052, 0) : new THREE.Vector3(STACK_X, stackTop(p), 0); }
 function addToPallet(p, m) {
@@ -36,7 +36,7 @@ function addToPallet(p, m) {
   if (m.userData.kind === "oven") p.oven = m; else p.stack.push(m);
 }
 // where each part is gripped: its top centre (the tray by its handle bar)
-const gripHeight = kind => kind === "tray" ? 0.12 : MOD_KINDS[kind].h;
+const gripHeight = kind => NexeraModules.gripHeight(kind, MOD.W);
 
 function buildAssembly() {
   modTextures();
@@ -66,8 +66,8 @@ function buildAssembly() {
   for (let x = x0 - 0.2; x <= x1 + 0.25; x += (L + 0.4) / 6) box(0.07, 1.1, 0.07, C.yellow, x, 0.55, fz, g, { roughness: 0.45 });
   box(L + 0.4, 0.05, 0.05, C.yellow, cx, 1.08, fz, g, { roughness: 0.45 });
   box(L + 1.0, 0.006, 0.07, C.yellow, cx, 0.014, fz + 0.3, g).castShadow = false;
-  // the four arms, each with its part list
-  ASM.robots = [["sampler"], ["detector", "pumpA"], ["pumpB", "controller"], ["tray", "oven"]].map((picks, i) => { const r = buildArmRobot(ASM.slotX(i + 1), Z - 1.0, picks, ASM.dyn); refillFeeder(r, true); return r; });
+  // the four arms, each with its part list, in stack order (see STACK in instruments/nca-hplc-modules/model.js)
+  ASM.robots = [["sampler"], ["pumpA", "detector"], ["degasser", "controller"], ["tray", "oven"]].map((picks, i) => { const r = buildArmRobot(ASM.slotX(i + 1), Z - 1.0, picks, ASM.dyn); refillFeeder(r, true); return r; });
   // a sign and a running count on the back wall
   const sign = tex((c, w, h) => { c.fillStyle = "#2b3238"; c.fillRect(0, 0, w, h); c.fillStyle = "#ffffff"; c.font = "800 44px 'Bricolage Grotesque', 'Segoe UI', sans-serif"; c.fillText("HPLC ASSEMBLY", 24, 58); c.fillStyle = "#9fb3c2"; c.font = "500 22px 'IBM Plex Mono', monospace"; c.fillText("AUTOMATED LINE · NCA", 26, 92); c.fillStyle = "#2f6fb5"; c.fillRect(0, h - 10, w, 10); }, 512, 128);
   plane(3.4, 0.85, new THREE.MeshBasicMaterial({ map: sign }), 8.4, 3.7, -4.18, 0, chem);

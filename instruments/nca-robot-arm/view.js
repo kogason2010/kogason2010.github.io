@@ -9,7 +9,7 @@ modTextures();
 const part = makeModule("sampler"); part.position.copy(arm.feeder); part.position.y += 0.02; moving.add(part);
 solveArm(arm);
 const F = arm.feeder, P = new THREE.Vector3(0, 0.95, 1.0);
-const reach = [arm.home.clone(), new THREE.Vector3(F.x, 2.0, F.z), new THREE.Vector3(F.x, F.y + 0.4, F.z), new THREE.Vector3(F.x, 2.0, F.z),
+const reach = [arm.home.clone(), new THREE.Vector3(F.x, 2.0, F.z), new THREE.Vector3(F.x, F.y + MOD_KINDS.sampler.h, F.z), new THREE.Vector3(F.x, 2.0, F.z),
   new THREE.Vector3(P.x, 2.1, P.z), new THREE.Vector3(P.x, P.y + 0.45, P.z), new THREE.Vector3(P.x, 2.1, P.z)];
 workshop.animate((dt, time) => {
   const u = (time * 0.7) % reach.length, i = Math.floor(u), f = u - i, e = f * f * (3 - 2 * f);

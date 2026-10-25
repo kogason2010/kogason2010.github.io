@@ -379,9 +379,15 @@ function updateLc(dt, time) {
   F.plume.material.opacity = 0.3 + 0.2 * Math.sin(time * 23) * Math.sin(time * 7);
   F.plume.scale.set(1 + 0.08 * Math.sin(time * 31), 1, 1 + 0.08 * Math.cos(time * 29));
   f.fracT += dt;
-  const slot = Math.floor(f.fracT / 1.6) % 60, col = slot % 10, row = Math.floor(slot / 10);
-  F.fArm.position.x += ((-0.38 + col * 0.084) - F.fArm.position.x) * Math.min(1, dt * 4);
-  F.fHead.position.z += ((-0.22 + row * 0.088) - F.fHead.position.z) * Math.min(1, dt * 4);
+  if (F.prepTubes) {      // the prep LC model lists its collection tubes as [x, z] under the arm
+    const tube = F.prepTubes[Math.floor(f.fracT / 1.6) % F.prepTubes.length];
+    F.fArm.position.x += (tube[0] - F.fArm.position.x) * Math.min(1, dt * 4);
+    F.fHead.position.z += (tube[1] - 0.012 - F.fHead.position.z) * Math.min(1, dt * 4);
+  } else {
+    const slot = Math.floor(f.fracT / 1.6) % 60, col = slot % 10, row = Math.floor(slot / 10);
+    F.fArm.position.x += ((-0.38 + col * 0.084) - F.fArm.position.x) * Math.min(1, dt * 4);
+    F.fHead.position.z += ((-0.22 + row * 0.088) - F.fHead.position.z) * Math.min(1, dt * 4);
+  }
   const rp = (time * 0.8) % 1; F.ripple.scale.setScalar(0.6 + rp * 2.2); F.ripple.material.opacity = 0.5 * (1 - rp);
   F.fix.color.set(night ? 0xffffff : 0xf4f9ff);
 }

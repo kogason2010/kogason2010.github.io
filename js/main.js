@@ -112,14 +112,15 @@ function frame() {
       leds.forEach((l, i) => { l.visible = i % 3 !== 1 || Math.sin(time * 3 + i) > -0.3; });
       updateDistill(dt, time);
       updateBot(dt, time);
+      // the TOC's autosampler carousel steps one vial (of 24) at a time
       rotorTimer += dt;
-      if (rotorTimer > 1.6) { rotorTimer = 0; rotorTarget -= Math.PI * 2 / 16; }
-      rotorAngle += (rotorTarget - rotorAngle) * Math.min(1, dt * 6);
+      if (rotorTimer > 4) { rotorTimer = 0; rotorTarget -= Math.PI * 2 / 24; }
+      rotorAngle += (rotorTarget - rotorAngle) * Math.min(1, dt * 4);
       rotor.rotation.y = rotorAngle;
-      const pulse = 0.75 + 0.25 * Math.sin(time * 2.2);
-      furnaceMat.color.setRGB(1, 0.42 * pulse + 0.1, 0.12 * pulse);
+      // a furnace window, if the TOC model has one (furnaceMat), glows and pulses
+      if (typeof furnaceMat !== "undefined") { const pulse = 0.75 + 0.25 * Math.sin(time * 2.2); furnaceMat.color.setRGB(1, 0.42 * pulse + 0.1, 0.12 * pulse); }
     }
-    furnaceGlow.intensity = night ? 0.8 : 0.0;
+    furnaceGlow.intensity = night && typeof furnaceMat !== "undefined" ? 0.8 : 0.0;
   }
 
   if (!lab.visible || reduce) botTip.classList.remove("on");
