@@ -111,12 +111,14 @@ function paint(geo, fn) { const p = geo.attributes.position, c = new Float32Arra
 // one coloured box for mergeGeos
 function modPart(list, w, h, d, x, y, z, color) { const g = new THREE.BoxGeometry(w, h, d); g.translate(x, y, z); paint(g, (px, py, pz, c) => c.setHex(color)); list.push(g); }
 // fewer draw calls: inside a group, meshes that share a material become one mesh, in the group's own frame. Named meshes
-// (something looks them up), instanced meshes and multi-material meshes are left as they are.
-function mergeByMaterial(root) {
+// (something looks them up), meshes marked userData.keep, anything inside a group in keep (things that move), instanced
+// meshes and multi-material meshes are left as they are.
+function mergeByMaterial(root, keep) {
   root.updateMatrixWorld(true);
-  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4(), groups = new Map();
-  root.traverse(o => {
-    if (!o.isMesh || o.isInstancedMesh || o.name || Array.isArray(o.material) || !o.geometry.attributes.normal) return;
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4(), groups = new Map(), found = [];
+  (function walk(o) { o.children.forEach(c => { if (!(keep && keep.has(c))) { found.push(c); walk(c); } }); })(root);
+  found.forEach(o => {
+    if (!o.isMesh || o.isInstancedMesh || o.name || o.userData.keep || Array.isArray(o.material) || !o.geometry.attributes.normal) return;
     const names = Object.keys(o.geometry.attributes).sort().join(",");
     if (!/^(normal,position|normal,position,uv)$/.test(names)) return;
     const k = [o.material.uuid, names, o.castShadow, o.receiveShadow, o.renderOrder].join("|");

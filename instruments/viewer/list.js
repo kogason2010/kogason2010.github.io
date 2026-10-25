@@ -12,7 +12,7 @@ window.WORKSHOP_LIST = [
   {"id": "lab-about-cabinet", "room": "Kogason Lab", "name": "Reagent cabinet (About)", "blurb": "The glass-fronted reagent cabinet on the left wall: bottles, binders and the corrosives cupboard."},
   {"id": "lab-contact-board", "room": "Kogason Lab", "name": "Whiteboard (Contact)", "blurb": "The whiteboard on the back wall with the web address and a hand-drawn peak."},
   {"id": "lab-robot-vacuum", "room": "Kogason Lab", "name": "Robot vacuum", "blurb": "The little cleaning robot and its charging dock."},
-  {"id": "basement-sfc", "room": "Basement SFC suite", "name": "SFC", "blurb": "The supercritical fluid chromatograph: CO₂ and modifier pumps, autosampler, column oven with PDA, back-pressure regulator, vent and chiller."},
+  {"id": "basement-sfc", "room": "Basement SFC suite", "name": "SFC", "blurb": "The preparative SFC: CO₂ pump with its chiller, valve and pump modules, the column oven with its window, the detector, and the six-bottle collection station."},
   {"id": "basement-sfc-pc", "room": "Basement SFC suite", "name": "SFC workstation", "blurb": "The monitor that shows the live SFC run, with keyboard and mouse."},
   {"id": "basement-co2", "room": "Basement SFC suite", "name": "CO₂ supply", "blurb": "The dip-tube CO₂ cylinders with regulators and wall bracket, the line to the pump, and the CO₂ monitor and strobe."},
   {"id": "nca-uhplc", "room": "NCA", "name": "UHPLC", "blurb": "NCA's live UHPLC: pump and degasser with solvent bottles, autosampler with needle gantry, column oven and PDA, and its tubing."},
