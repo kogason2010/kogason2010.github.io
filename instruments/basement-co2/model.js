@@ -38,3 +38,6 @@ box(0.06, 0.22, 0.3, 0xe7ebec, -4.16, BY + 1.75, -0.75, basement);
 plane(0.22, 0.11, new THREE.MeshBasicMaterial({ map: co2Mon.t }), -4.128, BY + 1.77, -0.75, Math.PI / 2, basement);
 const strobe = new THREE.Mesh(new THREE.SphereGeometry(0.04, 14, 10, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xc23a3a, { transparent: true, opacity: 0.85, roughness: 0.2 }));
 strobe.position.set(-4.12, BY + 1.88, -0.75); basement.add(strobe);
+
+// What the camera frames when you click the tag: the cylinders and the monitor (the line runs on to the SFC)
+hotspots.find(h => h.key === "co2").focus = { center: new THREE.Vector3(-3.85, BY + 1.15, -1.6), size: new THREE.Vector3(0.7, 1.9, 2.1) };

@@ -10,8 +10,8 @@ const libAspect = () => stage.clientWidth / Math.max(1, stage.clientHeight);
 const libFov = () => Math.min(78, Math.max(55, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(40)) / libAspect()))));
 // the camera stays inside the room: within the ring of columns, and under the dome
 const LIB_CAM_R = 12.4;
-function libClampCamera() {
-  const p = camera.position, r = Math.hypot(p.x, p.z);
+function libClampCamera(p = camera.position) {
+  const r = Math.hypot(p.x, p.z);
   if (r > LIB_CAM_R) { p.x *= LIB_CAM_R / r; p.z *= LIB_CAM_R / r; }
   const Rv = LIB.R / Math.cos(Math.PI / 8), rr = Math.min(Math.hypot(p.x, p.z), Rv - 0.5);
   const top = LIB.H + 0.5 + 0.62 * Math.sqrt(Rv * Rv - rr * rr) - 1.2;
@@ -37,7 +37,7 @@ function libHomeView() {
   libClampCamera();
 }
 PLACES.library = {
-  group: library, build: buildLibrary, home: libHomeView, minD: LIB_VIEW.minD, spawn: LIB_SPAWN, door: LIB_DOOR, eyebrow: "Portfolio · library · app notes",
+  group: library, build: buildLibrary, home: libHomeView, clampCam: libClampCamera, minD: LIB_VIEW.minD, spawn: LIB_SPAWN, door: LIB_DOOR, eyebrow: "Portfolio · library · app notes",
   hint: "Drag to look around · scroll or pinch to zoom · tap an alcove or the central desk to browse app notes",
   enter() {
     libSaved = { minA: controls.minAzimuthAngle, maxA: controls.maxAzimuthAngle, minP: controls.minPolarAngle, maxP: controls.maxPolarAngle, maxD: controls.maxDistance };

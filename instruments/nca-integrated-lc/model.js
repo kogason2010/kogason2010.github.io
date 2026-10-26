@@ -21,4 +21,9 @@ function buildIntegratedLc() {
   box(0.56, 0.012, 0.014, C.line, IX, T + 0.06, BZ + 0.345, gI); led(IX + 0.22, T + 0.92, BZ + 0.346, 0x3fd17a, gI);
   box(0.58, 0.025, 0.6, C.steel, IX, T + 1.035, BZ, gI, steelM);
   [[-0.17, 0xdcecf8, "A"], [-0.06, 0xdcecf8, "B"], [0.06, 0xf1e6f6, "C"], [0.17, 0xf1e6f6, "D"]].forEach(([dx, c, l]) => solventBottle(gI, IX + dx, T + 1.05, BZ + 0.05, 0.05, 0.22, c, l, l < "C" ? "#2f6fb5" : "#c23a3a"));
+
+  // What the camera frames when you click the tag: straight on, so the LC-MS's snorkel beside it stays out of the way
+  const hI = hotspots.find(h => h.key === "ilc");
+  hI.focus = { center: V3(IX, T + 0.62, BZ + 0.1), size: V3(1.3, 1.3, 0.7) };
+  hI.front = [-0.15, 0, 1];
 }

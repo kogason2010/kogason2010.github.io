@@ -283,7 +283,7 @@ function buildMathPrizeWall() {
     ["1. Published in a qualifying refereed outlet", "2. At least two years since publication", "3. Generally accepted by mathematicians", "4. Answers the problem's official description", "5. No direct submissions to the Institute", "$1,000,000 per problem, may be shared"].forEach((l, i) => c.fillText(l, 70, 196 + i * 56));
   });
   const plaque = plane(1.5, 1.05, new THREE.MeshStandardMaterial({ map: rt, metalness: 0.6, roughness: 0.35, emissive: 0xffffff, emissiveMap: rt, emissiveIntensity: 0.12 }), rx, 1.5, rz, Math.PI / 2, gr);
-  plaque.rotation.set(0, Math.PI / 2 - 0.5, 0); plaque.rotateX(-0.45);
+  plaque.rotation.set(0, Math.atan2(0.85, -0.5), 0); plaque.rotateX(-0.45);       // faces into the hall, the way the camera comes in (front)
   hotspots[hotspots.length - 1].focus = { center: new THREE.Vector3(rx, 1.4, rz), size: new THREE.Vector3(2.2, 2.4, 1.2) }; hotspots[hotspots.length - 1].front = [0.85, 0, -0.5];
 }
 

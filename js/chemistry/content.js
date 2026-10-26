@@ -76,13 +76,14 @@ Object.assign(SECTIONS, {
     kicker: "NCA · the new hall · automation",
     title: "Robots building an HPLC",
     html: `
-      <p>Four robot arms put together a modular HPLC, one module per stop. Each pallet moves along the line, the arm at each stop takes the next module from its lift and sets it on the stack, and a QC arch scans the finished system before it ships.</p>
+      <p>Four robot arms put together a modular HPLC, a module or two at each stop. Each pallet moves along the line, the arm at each stop takes the next module from its lift and sets it on the stack, and a QC arch scans the finished system before it ships.</p>
       <p>A modular HPLC is a stack of separate instruments, each with one job. The order here is one common arrangement; labs stack them to suit their bench.</p>
       <div class="row"><span class="k">Autosampler</span><span class="v">At the bottom. Holds the sample vials and injects a set volume of each into the flowing solvent</span></div>
+      <div class="row"><span class="k">Pump</span><span class="v">Pushes the mobile phase through the column at high pressure. For a gradient, a second pump or a mixing valve blends in a stronger solvent during the run</span></div>
       <div class="row"><span class="k">Detector</span><span class="v">Measures compounds as they leave the column, for example by UV absorbance</span></div>
-      <div class="row"><span class="k">Pumps A and B</span><span class="v">Two pumps, one per solvent, push the mobile phase at high pressure and blend the two for a gradient</span></div>
+      <div class="row"><span class="k">Degasser</span><span class="v">Pulls dissolved air out of the solvents, so bubbles don't form in the pump or the detector cell</span></div>
       <div class="row"><span class="k">System controller</span><span class="v">Links the modules and shows pressure, flow and oven temperature at a glance</span></div>
-      <div class="row"><span class="k">Solvent tray</span><span class="v">On top, holding the mobile-phase bottles that feed the pumps</span></div>
+      <div class="row"><span class="k">Solvent tray</span><span class="v">On top, holding the mobile-phase bottles that feed the pump</span></div>
       <div class="row"><span class="k">Column oven</span><span class="v">Stands alongside and holds the column at a steady temperature, so retention times stay repeatable</span></div>
       <p class="also">A playful illustration, not a picture of how any real instrument is made. The arms solve their joint angles every frame (two-link inverse kinematics), so they really reach for each part.</p>`
   },

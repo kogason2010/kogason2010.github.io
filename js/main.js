@@ -21,14 +21,24 @@ function focusOn(h) {
   const across = h.front ? fS.x : f[0] ? fS.z : fS.x, depth = h.front ? fS.z : f[0] ? fS.x : fS.z;
   const dH = (fS.y / 2) / (tanV * (freeH / H));
   const dW = (across / 2) / (tanV * camera.aspect * (freeW / W));
-  const d = Math.max(dH, dW) * 1.5 + depth / 2;
+  let d = Math.max(dH, dW) * 1.5 + depth / 2;
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
-  const up = new THREE.Vector3().crossVectors(right, fwd).normalize();
-  const visW = 2 * d * tanV * camera.aspect, visH = 2 * d * tanV;
-  const tgt = fC.clone().addScaledVector(right, (sheetW / 2) / W * visW).addScaledVector(up, -(sheetH / 2) / H * visH);
+  const aim = new THREE.Vector3(), cam = new THREE.Vector3(), q = new THREE.Vector3(), P = PLACES[level];
+  for (let i = 0; i < 40; i++) {
+    // beside the side panel (wide screens), shift the view so the item sits in the space left of it
+    aim.copy(fC).addScaledVector(right, (sheetW / 2) / W * 2 * d * tanV * camera.aspect);
+    cam.copy(aim).addScaledVector(dir, d);
+    // indoor places keep the camera inside the room (clampCam): come in closer rather than end up against a wall
+    if (!P || !P.clampCam || d < 1) break;
+    P.clampCam(q.copy(cam)); if (q.distanceToSquared(cam) < 1e-6) break;
+    d *= 0.92;
+  }
+  // above the bottom sheet (phones), tilt the view down so the item sits in the space above it; lowering the camera
+  // instead could sink it below the floor
+  const look = aim.clone().sub(cam).normalize().applyAxisAngle(right, -Math.atan((sheetH / H) * tanV));
   controls.minDistance = 1;
   labelsEl.hidden = true;
-  animateCamera(tgt.clone().addScaledVector(dir, d), tgt, 0.9);
+  animateCamera(cam, cam.clone().addScaledVector(look, d), 0.9);
 }
 function unfocus() {
   if (!focusHome) return;

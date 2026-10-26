@@ -18,8 +18,7 @@ function buildMath() {
   mathLatticeColors();
 }
 // the camera stays inside the hall
-function mathClampCamera() {
-  const p = camera.position;
+function mathClampCamera(p = camera.position) {
   p.x = Math.max(-MR.X + 0.8, Math.min(MR.X - 0.8, p.x)); p.z = Math.max(-MR.Z + 0.8, Math.min(MR.Z - 0.8, p.z)); p.y = Math.max(0.8, Math.min(MR.H - 0.5, p.y));
 }
 function mathHomeView() {
@@ -41,7 +40,7 @@ sheetBody.addEventListener("input", e => {
 sheetBody.addEventListener("click", e => { if (e.target.closest("[data-lat=hot]")) { latRandomize(); mathLatticeColors(); mathLatticeReadout(); } });
 
 PLACES.math = {
-  group: mathRoom, build: buildMath, home: mathHomeView, minD: MATH_VIEW.minD, spawn: MATH_SPAWN, door: MATH_DOOR, eyebrow: "Portfolio · mathematics · Yang–Mills",
+  group: mathRoom, build: buildMath, home: mathHomeView, clampCam: mathClampCamera, minD: MATH_VIEW.minD, spawn: MATH_SPAWN, door: MATH_DOOR, eyebrow: "Portfolio · mathematics · Yang–Mills",
   hint: "Drag to look around · scroll or pinch to zoom · tap the lattice, the blackboard or the exhibits",
   enter() {
     mathSaved = { minA: controls.minAzimuthAngle, maxA: controls.maxAzimuthAngle, minP: controls.minPolarAngle, maxP: controls.maxPolarAngle, maxD: controls.maxDistance };
