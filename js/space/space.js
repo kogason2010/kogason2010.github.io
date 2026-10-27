@@ -228,7 +228,7 @@ function enterSpace() {
     if (!spaceBuilt) await runWithLoader("Orbit", "Lifting off", [["Lighting the stars", () => buildSpace()]]);
     buildSpace();
     world.visible = false; spaceWorld.visible = true; spaceOn = true; scene.fog = null; scene.environment = null;
-    camera.far = 4000; camera.updateProjectionMatrix();
+    camera.near = 0.1; camera.far = 4000; camera.updateProjectionMatrix();
     renderer.toneMappingExposure = 0.85;
     hemi.color.setHex(0x3a4a6e); hemi.groundColor.setHex(0x101420); hemi.intensity = 0.35; fill.intensity = 0;
     sun.color.setHex(0xfff6ea); sun.intensity = 2.6; headlight.intensity = 0;

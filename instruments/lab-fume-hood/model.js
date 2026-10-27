@@ -37,7 +37,7 @@ box(HWD, 0.62, HDP + 0.02, C.hood, HX, HTOP + 0.31, HZ);
 box(HWD - 0.3, 0.05, 0.01, 0x3a4248, HX, HTOP + 0.12, HZ + HDP / 2 + 0.012);
 // sash raised partway, sliding up behind the header
 const sB = WS + 0.78, sT = HTOP + 0.05;
-box(HWD - 0.3, sT - sB, 0.02, sashGlass, HX, (sB + sT) / 2, HZ + 0.52).castShadow = false;
+box(HWD - 0.3, sT - sB, 0.016, sashGlass, HX, (sB + sT) / 2, HZ + 0.515).castShadow = false;   // set just behind the header's face
 box(HWD - 0.28, 0.05, 0.04, C.steel, HX, sB, HZ + 0.52, null, { metalness: 0.6, roughness: 0.3 });
 [-1, 1].forEach(s => box(0.03, sT - sB, 0.035, C.steel, HX + s * (HWD / 2 - 0.15), (sB + sT) / 2, HZ + 0.52, null, { metalness: 0.6, roughness: 0.3 }));
 cyl(0.018, 0.018, HWD - 0.5, C.steel, HX, sB - 0.035, HZ + 0.56, null, 10, { metalness: 0.7, roughness: 0.25 }).rotation.z = Math.PI / 2;
