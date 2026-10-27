@@ -8,7 +8,7 @@
    ====================================================================== */
 const world = new THREE.Group(); world.visible = false; scene.add(world);
 const WB = 58;                                                     // hedge boundary (half size, metres)
-const CAMPUS = { boxes: [], circles: [], paths: [], bldg: [], lots: [], ponds: [], plazas: [] };
+const CAMPUS = { boxes: [], circles: [], paths: [], bldg: [], lots: [], ponds: [], plazas: [], mulch: [] };   // mulch: the planted beds by the entrances
 let worldBuilt = false, worldOn = false, worldBusy = false;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const seeded = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
@@ -79,7 +79,8 @@ const windy = (m, amount, from, oneSided) => {   // leaves sway with the shared 
 /* shared while the campus is being built (buildWorld fills these) */
 let rnd = null, blobTex = null, pathSet = null;
 const blobs = [];                                                          // contact shadows: [x, z, sx, sz, rot]
-const shrubs = [];                                                         // [x, z, size] beside building entrances
+const shrubs = [];                                                         // [x, y, z, size, kind, turn]: the entrance beds and plaza planters
+const blooms = [];                                                         // [x, y, z, colour]: flowers in the plaza planters
 const tmp = new THREE.Matrix4();
 const wbox = (w, h, d, c, x, y, z, o) => box(w, h, d, c, x, y, z, world, o);
 const wcyl = (rt, rb, h, c, x, y, z, seg, o) => cyl(rt, rb, h, c, x, y, z, world, seg, o);

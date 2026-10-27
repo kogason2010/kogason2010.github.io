@@ -5,18 +5,17 @@
 // flower beds and benches round the fountain
 function buildPlaza() {
   /* ---- flower beds round the plaza, benches between the paths ---- */
-  const flowerGeo = new THREE.IcosahedronGeometry(0.055, 0), leafGeo = new THREE.IcosahedronGeometry(0.2, 2); { const p = leafGeo.attributes.position, n = leafGeo.attributes.normal, d = new THREE.Vector3(); for (let i = 0; i < p.count; i++) { d.set(p.getX(i), p.getY(i), p.getZ(i)).normalize(); n.setXYZ(i, d.x, d.y, d.z); } }
-  const FL = 8 * 150, flowers = new THREE.InstancedMesh(flowerGeo, new THREE.MeshStandardMaterial({ roughness: 0.6 }), FL), leaves = new THREE.InstancedMesh(leafGeo, windy(new THREE.MeshStandardMaterial({ color: 0x2f5a20, roughness: 0.8 }), 0.04, 0), 8 * 40);
-  const fcols = [0xe8505b, 0xf7c548, 0xffffff, 0xb06ad9, 0xff8f3d, 0xf27ba6], tc = new THREE.Color(); let fi = 0, li = 0;
+  // each planter: low leafy clumps (planted with the shrubs, in plants.js) and flowers in two colours over them.
+  // (The random draws here are the ones the trees were laid out after, so keep their number and order.)
+  const fcols = [0xe8505b, 0xf7c548, 0xffffff, 0xb06ad9, 0xff8f3d, 0xf27ba6];
   for (let k = 0; k < 8; k++) {
     const a = (22.5 + k * 45) * Math.PI / 180, bx = Math.cos(a) * 6.7, bz = Math.sin(a) * 6.7;
     wcyl(1.5, 1.55, 0.34, 0xa59d91, bx, 0.17, bz, 40, { roughness: 0.85 }); flat(new THREE.CircleGeometry(1.42, 40), mat(0x4a3526, { roughness: 1 }), bx, 0.345, bz);
-    for (let i = 0; i < 40; i++) { const r = Math.sqrt(rnd()) * 1.2, t = rnd() * 6.283, s = 0.8 + rnd() * 0.9; tmp.compose(V(bx + Math.cos(t) * r, 0.38, bz + Math.sin(t) * r), new THREE.Quaternion(), V(s, s * 0.8, s)); leaves.setMatrixAt(li++, tmp); }
-    for (let i = 0; i < 150; i++) { const r = Math.sqrt(rnd()) * 1.3, t = rnd() * 6.283; tmp.makeTranslation(bx + Math.cos(t) * r, 0.5 + rnd() * 0.16, bz + Math.sin(t) * r); flowers.setMatrixAt(fi, tmp); flowers.setColorAt(fi++, tc.setHex(fcols[(k + i) % fcols.length])); }
+    for (let i = 0; i < 40; i++) { const r = Math.sqrt(rnd()) * 1.2, t = rnd() * 6.283, s = 0.8 + rnd() * 0.9; shrubs.push([bx + Math.cos(t) * r, 0.34, bz + Math.sin(t) * r, 0.7 + s * 0.3, "bedding", t * 7]); }
+    for (let i = 0; i < 150; i++) { const r = Math.sqrt(rnd()) * 1.3, t = rnd() * 6.283; blooms.push([bx + Math.cos(t) * r, 0.56 + (rnd() * 0.16) * 0.6, bz + Math.sin(t) * r, fcols[(k + (i % 4 ? 0 : 3)) % fcols.length]]); }
     CAMPUS.circles.push([bx, bz, 1.6, "bed"]);
     bench(Math.cos(a) * 9.7, Math.sin(a) * 9.7, Math.atan2(Math.cos(a), Math.sin(a)));
   }
-  flowers.castShadow = leaves.castShadow = true; leaves.receiveShadow = true; world.add(flowers, leaves);
   function bench(x, z, ry) {
     const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; world.add(g);
     const wood = mat(0xa0703f, { roughness: 0.62 }), iron = mat(0x2a3034, { roughness: 0.4, metalness: 0.6 });
