@@ -23,6 +23,7 @@ function applyWorldNight(nightOn) {
   headlight.intensity = nightOn ? 2.4 : 0;
   mmEl.style.filter = nightOn ? "brightness(0.62) saturate(0.85)" : "";   // the minimap dims with the campus at night
   if (FX.pond) FX.pond.material.uniforms.sunDirection.value.copy(nightOn ? MOON_DIR : SUN_DIR);
+  fountainNight(nightOn);
 }
 function restoreLabLighting() {
   hemi.color.copy(LAB_HEMI.sky); hemi.groundColor.copy(LAB_HEMI.ground); scene.environment = null; renderer.toneMappingExposure = 0.95; setNight(night);
@@ -55,16 +56,7 @@ function updateWorldFx(dt, time) {
   FX.sunV.value.copy(FX.night ? MOON_DIR : SUN_DIR).transformDirection(camera.matrixWorldInverse); FX.sunCol.value.setRGB(...(FX.night ? [0.03, 0.04, 0.07] : [0.95, 0.85, 0.55]));
   FX.grassU.uCenter.value.set(DRV.x, DRV.z); FX.grassU.uPush.value.set(DRV.x, DRV.z, (0.42 + 0.9 * Math.min(DRV.y, 1)) * Math.max(0, 1 - DRV.y / 3.5));   // hovering low flattens a wider patch (downwash)
   if (FX.pond) FX.pond.material.uniforms.time.value += dt * 0.45;
-  FX.basinN.offset.x += dt * 0.03; FX.basinN.offset.y += dt * 0.02;
-  // fountain: central jet, overflow curtain from the bowl, splashes in the basin
-  const jp = FX.jets.geometry.attributes.position;
-  for (let i = 0; i < FX.jetSeeds.length; i++) {
-    const [kind, a, ph, sp] = FX.jetSeeds[i], t = (time * 0.6 * sp + ph) % 1;
-    if (kind === 0) { const r = t * 0.35, y = 2.62 + t * 2.4 - t * t * 2.3; jp.setXYZ(i, Math.cos(a) * r, y, Math.sin(a) * r); }
-    else if (kind === 1 || kind === 2) { const r = 1.3 + t * 0.35, y = 2.36 - t * t * 1.85; jp.setXYZ(i, Math.cos(a) * r, Math.max(0.46, y), Math.sin(a) * r); }
-    else { const r = 1.55 + ph * 0.5, y = 0.46 + Math.sin(t * Math.PI) * 0.18; jp.setXYZ(i, Math.cos(a + t * 0.2) * r, y, Math.sin(a + t * 0.2) * r); }
-  }
-  jp.needsUpdate = true;
+  updateFountain(dt, time);
   FX.dna.rotation.y += dt * 0.25;
   FX.clouds.forEach((c, i) => { c.position.x += dt * (1.2 + (i % 3) * 0.4); if (c.position.x > 480) c.position.x = -480; });
   FX.birds.forEach(g => { const u = g.userData, a = time * u.sp + u.ph; g.position.set(u.cx + Math.cos(a) * u.r, u.y + Math.sin(a * 2.3) * 1.5, u.cz + Math.sin(a) * u.r); g.rotation.y = -a; const f = Math.sin(time * 9 + u.ph) * 0.6; u.l.rotation.z = f; u.rw.rotation.z = -f; });
