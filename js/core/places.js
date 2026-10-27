@@ -1,5 +1,6 @@
 /* js/core/places.js — Indoor places you reach from the campus (the NCA LC lab, the library). Each registers in PLACES
-   with how to build it, set up its view, and leave it; enterPlace() and leavePlace() handle the fades and the UI.
+   with how to build it (and, for the loading card, its title, what building it is called, and whether it is built yet),
+   set up its view, and leave it; enterPlace() and leavePlace() handle the fades and the UI.
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
@@ -16,13 +17,17 @@ function enterPlace(name) {
   const P = PLACES[name];
   if (!P || !worldOn || worldBusy) return;
   worldBusy = true; treeTextures();
-  fade(true, 420, () => {
-    P.build();
+  const walkIn = () => {
     teardownWorld();
     lab.visible = false; basement.visible = false; P.group.visible = true; level = name;
     focusHome = null; tween = null; controls.enabled = true;
     P.enter();
     setPlaceUI(name); labelsEl.hidden = false; hint.hidden = false;
+  };
+  fade(true, 420, async () => {
+    // the first time in, the building is built behind the loading card
+    if (P.built && !P.built()) await runWithLoader(P.title, "Walking in", [[P.building || "Building the room", () => P.build()], ["Getting the view ready", () => { walkIn(); warmUp(); }]]);
+    else { P.build(); walkIn(); }
     fade(false, 600, () => { worldBusy = false; });
   });
 }

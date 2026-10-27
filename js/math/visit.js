@@ -41,6 +41,7 @@ sheetBody.addEventListener("input", e => {
 sheetBody.addEventListener("click", e => { if (e.target.closest("[data-lat=hot]")) { latRandomize(); mathLatticeColors(); mathLatticeReadout(); } });
 
 PLACES.math = {
+  title: "Mathematics", building: "Chalking the boards", built: () => mathBuilt,
   group: mathRoom, build: buildMath, home: mathHomeView, minD: MATH_VIEW.minD, spawn: MATH_SPAWN, door: MATH_DOOR, eyebrow: "Portfolio · mathematics · Yang–Mills",
   hint: "Drag to look around · scroll or pinch to zoom · tap the lattice, the blackboard or the exhibits",
   enter() {
