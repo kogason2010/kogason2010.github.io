@@ -11,7 +11,7 @@ function buildWorld() {
   buildBuildings(); buildCafe(); buildParking(); buildSculpture();
   buildTrees(); buildShrubsAndHedge(); buildLamps(); buildContactShadows();
   buildGrass(); buildLife(); buildGameplay();
-  world.traverse(o => { if (o.isInstancedMesh) o.frustumCulled = false; if (o.material && o.material.isMeshStandardMaterial && !FX.windowMats.includes(o.material)) o.material.envMapIntensity = 0.55; });
+  world.traverse(o => { if (o.isInstancedMesh) o.frustumCulled = false; if (o.material && o.material.isMeshStandardMaterial && !FX.windowMats.includes(o.material)) o.material.envMapIntensity = o.material.userData.env || 0.55; });
   buildRobot();
   mergeStatic(FX.dna, new Set()); mergeStatic(world, new Set([FX.dna, wbot, wSpotShadow, burstRing, FX.pond, FX.sky, FX.nightDome, FX.grass, wSpotLayer, ...finds.map(f => f.g), ...finds.map(f => f.ring), ...FX.birds, ...FX.butterflies]));
 }

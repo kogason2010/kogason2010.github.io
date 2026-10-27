@@ -15,7 +15,7 @@ window.addEventListener("keydown", e => {
 });
 window.addEventListener("keyup", e => { if (worldOn && e.code === "Space") e.preventDefault(); keys[e.code] = false; });
 // how tall things are, for flying over them (boxes carry their own roof height)
-const OBST_H = { shrub: 1.1, tree: 9, lamp: 4.8, bench: 1.1, table: 1.2, bed: 0.7, sculpture: 3.2, fountain: 2.6, pond: 0.2, column: 6.8, car: 1.45, building: 10 };
+const OBST_H = { shrub: 1.1, tree: 9, lamp: 4.8, bench: 1.1, table: 1.2, bed: 0.7, sculpture: 3.2, fountain: 3.7, pond: 0.2, column: 6.8, car: 1.45, building: 10 };
 const obstH = (type, own) => own != null ? own : OBST_H[type] != null ? OBST_H[type] : 2;
 // the surface under a point: the ground, or a roof or car top you can land on
 function groundAt(x, z) { let g = 0; for (const b of CAMPUS.boxes) if (b[5] != null && x > b[0] && x < b[2] && z > b[1] && z < b[3]) g = Math.max(g, b[5]); return g; }
