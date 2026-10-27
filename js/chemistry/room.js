@@ -68,6 +68,23 @@ function buildChemRoom() {
   plane(0.46, 0.17, new THREE.MeshBasicMaterial({ map: exitTex }), DOOR.x, DOOR.h + 0.32, -4.114, 0, gx);
   // safety: yellow floor tape in front of the instrument bench
   box(6.9, 0.006, 0.07, C.yellow, -0.4, 0.014, -2.45, chem).castShadow = false;
+  // fume extraction: two articulated snorkel arms over the sample-prep island, on a duct that runs back to the wall and
+  // up to the exhaust stacks on NCA's roof
+  {
+    const duct = mat(0xb8bfc3, { metalness: 0.7, roughness: 0.35 }), joint = mat(0x5d666c, { metalness: 0.5, roughness: 0.4 }), DY = 4.55;
+    const pipe = (a, b, r, m) => { const d = new THREE.Vector3().subVectors(b, a), c = cyl(r, r, d.length(), m, (a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2, chem, 14, { metalness: 0.7, roughness: 0.35 }); c.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); return c; };
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z);
+    pipe(V3(1.35, DY, -4.1), V3(1.35, DY, 1.2), 0.16, duct);   // the main duct, from the back wall
+    box(0.5, 0.5, 0.12, joint, 1.35, DY, -4.12, chem);           // where it goes through the wall
+    [[0.75, 1.05, 0.5], [1.95, 1.35, -0.6]].forEach(([x, z, sw]) => {
+      const top = V3(x, DY, z), elbow = V3(x + sw * 0.25, 3.45, z + 0.2), wrist = V3(x + sw * 0.1, 2.55, z + 0.05), bell = V3(x, 2.2, z);
+      pipe(V3(1.35, DY, z), top, 0.07, duct);                    // branch off the main duct
+      pipe(top, elbow, 0.055, duct); pipe(elbow, wrist, 0.05, duct); pipe(wrist, V3(bell.x, bell.y + 0.14, bell.z), 0.05, duct);
+      [top, elbow, wrist].forEach(p => { const s = new THREE.Mesh(new THREE.SphereGeometry(0.075, 14, 10), joint); s.position.copy(p); s.castShadow = true; chem.add(s); });
+      const hood = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.2, 0.22, 24, 1, true), mat(0xe9edee, { roughness: 0.4, side: THREE.DoubleSide })); hood.position.copy(bell); hood.castShadow = true; chem.add(hood);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.016, 8, 32), mat(0x2f6fb5, { roughness: 0.4 })); rim.rotation.x = Math.PI / 2; rim.position.set(bell.x, bell.y - 0.11, bell.z); chem.add(rim);   // a blue rim
+    });
+  }
 }
 
 // shared bits the LC files fill in (door pivot, live instrument parts, screens)

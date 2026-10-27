@@ -8,7 +8,7 @@
 const library = new THREE.Group(); library.visible = false; scene.add(library);
 let libraryBuilt = false;
 const LIB = { R: 14, T: 1.0, H: 13, GAL: 7.0, ENT: 6, ARCH_W: 5.6, ARCH_SPRING: 3.6, UP_W: 4.8, UP_Y0: 7.25, UP_SPRING: 9.4 };
-const LIBFX = { lamps: null, oculus: null };
+const LIBFX = { lamps: null, oculus: null, shaft: null, motes: null };
 const libBayAngle = k => k * Math.PI / 4;                                     // outward normal (cos θ, 0, sin θ)
 const libBayDir = k => new THREE.Vector3(Math.cos(libBayAngle(k)), 0, Math.sin(libBayAngle(k)));
 
@@ -114,6 +114,26 @@ function buildLibraryRoom() {
   LIBFX.oculus = new THREE.Mesh(new THREE.CircleGeometry(ocR, 48), new THREE.MeshBasicMaterial({ map: winTex }));
   LIBFX.oculus.rotation.x = Math.PI / 2; LIBFX.oculus.position.y = ocY; library.add(LIBFX.oculus);
   const ocRing = new THREE.Mesh(new THREE.TorusGeometry(ocR, 0.18, 8, 48), goldM); ocRing.rotation.x = Math.PI / 2; ocRing.position.y = ocY - 0.05; library.add(ocRing);
+  // the light that falls through the oculus (the copper dome outside) onto the catalogue: a soft shaft, a pool on the
+  // floor and dust drifting in it. Sunlight by day, moonlight at night (updateLibrary sets the colours).
+  {
+    const shaftM = new THREE.ShaderMaterial({
+      uniforms: { uCol: { value: new THREE.Color(1, 0.88, 0.68) }, uStr: { value: 0.1 } },
+      vertexShader: "varying vec3 vN; varying vec3 vV; varying float vY; void main() { vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); vY = uv.y; gl_Position = projectionMatrix * mv; }",
+      fragmentShader: "uniform vec3 uCol; uniform float uStr; varying vec3 vN; varying vec3 vV; varying float vY; void main() { float face = pow(abs(dot(vN, vV)), 1.6); float a = face * smoothstep(0.0, 0.25, vY) * (0.55 + 0.45 * vY) * uStr; gl_FragColor = vec4(uCol * a, 1.0); }",
+      transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    });
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(ocR * 0.95, 3.3, ocY - 0.1, 48, 1, true), shaftM); shaft.position.y = (ocY + 0.1) / 2; shaft.renderOrder = 4; library.add(shaft);
+    const poolTex = tex((g, w, h) => { const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); r.addColorStop(0, "rgba(255,240,210,0.85)"); r.addColorStop(0.6, "rgba(255,230,190,0.4)"); r.addColorStop(1, "rgba(255,230,190,0)"); g.fillStyle = r; g.fillRect(0, 0, w, h); }, 256, 256);
+    const pool = new THREE.Mesh(new THREE.CircleGeometry(4.2, 48), new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    pool.rotation.x = -Math.PI / 2; pool.position.y = 0.02; pool.renderOrder = 3; library.add(pool);
+    const N = 220, mp = new Float32Array(N * 3), seeds = [];
+    for (let i = 0; i < N; i++) { const t = Math.random(), a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * (ocR + (3.1 - ocR) * (1 - t)); seeds.push([a, r, t * (ocY - 1)]); }
+    const mg = new THREE.BufferGeometry(); mg.setAttribute("position", new THREE.BufferAttribute(mp, 3));
+    const motes = new THREE.Points(mg, new THREE.PointsMaterial({ size: 0.1, map: dotTex, color: 0xfff0d8, transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending }));
+    motes.frustumCulled = false; motes.userData.seeds = seeds; motes.userData.top = ocY - 1; library.add(motes);
+    LIBFX.shaft = { shaftM, pool: pool.material, motes };
+  }
 
   /* ---- alcoves: book-lined rooms behind the lower arches (and shallower ones behind the gallery arches) ---- */
   const books = { m: [], c: [] }, bookCols = [0x7a2430, 0x2f4a33, 0x5a3a24, 0x23344f, 0x6b4a1e, 0x8a5a2c, 0x3d2f5a, 0x2f5a5a, 0x9a7a3a, 0x4a1e1e];
