@@ -12,7 +12,7 @@ function buildWater() {
   const waterN = normalFrom(wc, 3);
   flat(new THREE.CircleGeometry(8.9, 64), mat(0xc9b88f, { roughness: 1 }), -30, 0.014, 30);
   flat(new THREE.RingGeometry(9.6, 11.2, 72), new THREE.MeshStandardMaterial({ ...setRepeat(pathSet, 6, 1), roughness: 0.9 }), -30, 0.016, 30);
-  if (THREE.Water && !COARSE) {
+  if (THREE.Water && !LIGHT) {
     FX.pond = new THREE.Water(new THREE.CircleGeometry(8.1, 64), { textureWidth: 256, textureHeight: 256, waterNormals: waterN, sunDirection: SUN_DIR.clone(), sunColor: 0xffffff, waterColor: 0x1e4c58, distortionScale: 1.4, fog: true, alpha: 1.0 });
     FX.pond.material.uniforms.size.value = 5.5; FX.pond.rotation.x = -Math.PI / 2; FX.pond.position.set(-30, 0.05, 30); world.add(FX.pond);
     const reflect = FX.pond.onBeforeRender; FX.pond.onBeforeRender = function (...a) {
@@ -189,7 +189,7 @@ function buildFountain(waterN) {
   });
   CAMPUS.circles.push([0, 0, 3.95, "fountain"]);
   // spray: drops crowning the jet, drops breaking off where the sheets land, splashes under the arcing jets
-  { const JN = COARSE ? 420 : 900, g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(JN * 3), 3));
+  { const JN = LIGHT ? 420 : 900, g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(JN * 3), 3));
     FX.jets = new THREE.Points(g, new THREE.PointsMaterial({ size: 0.055, map: dotTex, color: 0xeef8ff, transparent: true, opacity: 0.85, depthWrite: false })); FX.jets.frustumCulled = false; FX.jets.renderOrder = 3; world.add(FX.jets);
     FX.jetSeeds = Array.from({ length: JN }, (_, i) => [i % 4, Math.random() * 6.283, Math.random(), 0.8 + Math.random() * 0.4]); }
   fountainNight(false);

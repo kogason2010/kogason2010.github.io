@@ -1,6 +1,7 @@
 /* js/ui/places-menu.js — The Places menu in the toolbar: every room in one list, so visitors find the campus and the
    buildings without hunting for doors. Picking a place takes the shortest way there (upstairs, out through the lab's
-   door, into a building), one step at a time. Space appears only once someone has found it the hard way.
+   door, into a building), one step at a time. Space appears only once someone has found it the hard way. At its foot,
+   the graphics switch (Full / Light).
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
@@ -18,7 +19,9 @@ const herePlace = () => spaceOn ? "space" : worldOn ? "campus" : level === "up" 
 function renderPlaces() {
   const here = herePlace();
   placesMenu.innerHTML = PLACE_LIST.filter(p => !p.secret || spaceUnlocked).map(p =>
-    `<button type="button" role="menuitem" data-place="${p.id}"${p.id === here ? ' aria-current="true"' : ""}><b>${p.name}</b><span>${p.id === here ? "You're here" : p.note}</span></button>`).join("");
+    `<button type="button" role="menuitem" data-place="${p.id}"${p.id === here ? ' aria-current="true"' : ""}><b>${p.name}</b><span>${p.id === here ? "You're here" : p.note}</span></button>`).join("") +
+    // graphics: switching reloads the page so the campus is rebuilt at the new level of detail
+    `<div class="pm-quality" role="group" aria-label="Graphics"><span>Graphics</span>${["full", "light"].map(q => `<button type="button" data-quality="${q}" aria-pressed="${QUALITY === q}">${q === "full" ? "Full" : "Light"}</button>`).join("")}</div>`;
 }
 function setPlacesOpen(open) {
   if (open) renderPlaces();
@@ -28,7 +31,7 @@ function setPlacesOpen(open) {
 placesBtn.addEventListener("click", e => { e.stopPropagation(); setPlacesOpen(placesMenu.hidden); });
 document.addEventListener("click", e => { if (!placesMenu.hidden && !placesMenu.contains(e.target)) setPlacesOpen(false); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !placesMenu.hidden) { setPlacesOpen(false); placesBtn.focus(); } });
-placesMenu.addEventListener("click", e => { const b = e.target.closest("[data-place]"); if (!b) return; setPlacesOpen(false); travelTo(b.dataset.place); });
+placesMenu.addEventListener("click", e => { const qb = e.target.closest("[data-quality]"); if (qb) { if (qb.dataset.quality !== QUALITY) setQuality(qb.dataset.quality); return; } const b = e.target.closest("[data-place]"); if (!b) return; setPlacesOpen(false); travelTo(b.dataset.place); });
 
 // one step toward the destination each time nothing else is moving, until we arrive (or give up if 20 s pass with no step)
 let travel = null;

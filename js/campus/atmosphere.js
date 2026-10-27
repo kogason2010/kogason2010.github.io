@@ -39,7 +39,7 @@ function cullTrees() {
   });
 }
 // keep the frame rate up: lower the render resolution when frames run long, raise it again when there's headroom
-const DPR_MAX = Math.min(window.devicePixelRatio || 1, 1.5), PERF = { t: 0, n: 0, sum: 0, good: 0, last: 0 };
+const DPR_MAX = Math.min(window.devicePixelRatio || 1, LIGHT ? 1 : 1.5), PERF = { t: 0, n: 0, sum: 0, good: 0, last: 0 };
 function adaptResolution() {
   const now = performance.now(), ms = PERF.last ? now - PERF.last : 16; PERF.last = now;
   if (ms > 250) return;   // tab was hidden or paused

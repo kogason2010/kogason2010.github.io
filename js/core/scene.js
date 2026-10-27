@@ -3,10 +3,21 @@
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
+/* ---------- Graphics: "full", or "light" for phones, tablets and modest computers ---------- */
+// Light draws fewer trees, tufts of grass and leaves outside, softer shadows and fewer pixels. It's chosen automatically
+// unless the visitor picks one in the Places menu (remembered in this browser).
+const QUALITY = (() => {
+  try { const q = localStorage.getItem("labQuality"); if (q === "full" || q === "light") return q; } catch (e) { /* no storage: choose */ }
+  const touch = window.matchMedia("(pointer: coarse)").matches, cores = navigator.hardwareConcurrency || 8, mem = navigator.deviceMemory || 8;
+  return touch || cores <= 4 || mem <= 4 ? "light" : "full";
+})();
+const LIGHT = QUALITY === "light", PIXELS_MAX = LIGHT ? 1.25 : 2;
+function setQuality(q) { try { localStorage.setItem("labQuality", q); } catch (e) { /* this visit only */ } location.reload(); }
+
 /* ---------- Scene ---------- */
 const stage = document.getElementById("stage");
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, PIXELS_MAX));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputEncoding = THREE.sRGBEncoding;

@@ -233,7 +233,7 @@ function setupWorld(spawn) {
   worldOn = true; lab.visible = false; chem.visible = false; library.visible = false; mathRoom.visible = false; world.visible = true; bgGroup.visible = false; botTip.classList.remove("on");
   scene.fog = new THREE.FogExp2(0xc9dbe8, 0.0052); updateWorld.night = null;
   camera.fov = 58; camera.far = 2400; camera.updateProjectionMatrix();
-  shadowRes(2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
+  shadowRes(LIGHT ? 1024 : 2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
   Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 }); sun.shadow.camera.updateProjectionMatrix();
   applyWorldNight(night); updateWorld.night = night;
   if (spaceOn) closeSpace();
@@ -250,7 +250,7 @@ function teardownWorld() {
   worldOn = false; world.visible = false; bgGroup.visible = true; scene.fog = null;
   camera.fov = 32; camera.far = 100; camera.updateProjectionMatrix();
   Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 30 }); sun.shadow.camera.updateProjectionMatrix();
-  sun.position.set(6, 11, 7); sun.target.position.set(0, 0, 0); shadowRes(2048); sun.shadow.normalBias = 0; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); restoreLabLighting();
+  sun.position.set(6, 11, 7); sun.target.position.set(0, 0, 0); shadowRes(LIGHT ? 1024 : 2048); sun.shadow.normalBias = 0; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, PIXELS_MAX)); restoreLabLighting();
   document.body.classList.remove("world-mode"); hudEl.hidden = true; mmEl.hidden = true; joyEl.hidden = true; boostEl.hidden = true; flyEl.hidden = true; toastEl.classList.remove("on");
   for (const k in keys) keys[k] = false; joy.active = false; boostHeld = false; flyHeld = false;
 }
