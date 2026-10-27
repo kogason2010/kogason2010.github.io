@@ -72,6 +72,13 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 .btn:hover { border-color: var(--accent); }
 .tools .btn:not(.primary) { background: color-mix(in srgb, var(--sheet) 84%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+/* Sound button (js/ui/sound.js): a speaker crossed out while off, with waves while on */
+.sound-btn { display: inline-flex; align-items: center; gap: 6px; }
+.sound-btn svg { width: 14px; height: 14px; }
+.sound-btn .wave { display: none; }
+.sound-btn.on .wave { display: inline; }
+.sound-btn.on .mute { display: none; }
+.tools .sound-btn.on { border-color: var(--accent); color: var(--accent); }
 .btn:focus-visible, .hot:focus-visible, .close:focus-visible, .sheet a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .hint, .caption {
