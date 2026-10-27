@@ -224,7 +224,8 @@ function unlockSpace() { spaceUnlocked = true; try { localStorage.setItem(SPACE_
 function enterSpace() {
   if (!worldOn || worldBusy || spaceOn) return;
   worldBusy = true;
-  fade(true, 550, () => {
+  fade(true, 550, async () => {
+    if (!spaceBuilt) await runWithLoader("Orbit", "Lifting off", [["Lighting the stars", () => buildSpace()]]);
     buildSpace();
     world.visible = false; spaceWorld.visible = true; spaceOn = true; scene.fog = null; scene.environment = null;
     camera.far = 4000; camera.updateProjectionMatrix();
@@ -236,7 +237,7 @@ function enterSpace() {
     CAM.yaw = 0; CAM.pitch = 0.28; CAM.dist = 5.5;
     hudNearEl().hidden = true; hudAltEl.hidden = false; setSpaceHud(true); spaceHudSync();
     hint.textContent = COARSE ? "Stick to fly · hold Up or Down · drag elsewhere to look around" : "W A S D to fly · Space to rise · Shift to sink · drag to look · scroll to zoom";
-    updateSpace(0, 0); chaseSpace(0, true);
+    updateSpace(0, 0); chaseSpace(0, true); warmUp();
     fade(false, 900, () => { worldBusy = false; toast("Welcome to orbit. Fly through the eight glowing rings"); }, "#000000");
   }, "#000000");
 }

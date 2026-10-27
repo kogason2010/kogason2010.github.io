@@ -515,3 +515,34 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
 .places-menu button[aria-current] { cursor: default; background: var(--bg-2); }
 .places-menu button[aria-current] span { color: var(--accent); }
 @media (max-width: 640px) { .places-menu { top: calc(56px + env(safe-area-inset-top, 0px)); left: max(12px, env(safe-area-inset-left, 0px)); right: auto; } }
+
+/* loading card on the fade (js/ui/loader.js); the bar moves with transforms so it keeps animating while the page is busy building */
+.fade.dark { --ink: #e3ecf1; --accent: #6aa6f0; }
+.loader { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(380px, calc(100% - 48px)); display: grid; gap: 10px; color: var(--ink); }
+.loader-eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; opacity: .65; }
+.loader-title { font: 800 clamp(30px, 7vw, 44px)/1 var(--display); letter-spacing: -.02em; }
+.loader-bar { position: relative; height: 4px; margin-top: 6px; border-radius: 4px; overflow: hidden; background: color-mix(in srgb, currentColor 14%, transparent); }
+.loader-bar i { position: absolute; inset: 0; transform-origin: left; transform: scaleX(var(--p, 0)); background: var(--accent); border-radius: 4px; transition: transform .35s ease; }
+.loader-bar::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); transform: translateX(-100%); animation: loader-shine 1.2s linear infinite; }
+@keyframes loader-shine { to { transform: translateX(100%); } }
+.loader-step { font: 400 12px/1.3 var(--mono); opacity: .7; min-height: 1.3em; }
+.loader-tip { margin: 16px 0 0; padding-top: 14px; border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); font-size: 13.5px; line-height: 1.5; opacity: .85; }
+kbd { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 5px; border: 1px solid color-mix(in srgb, currentColor 28%, transparent); border-bottom-width: 2px;
+  font: 500 11px/1.5 var(--mono); text-align: center; background: color-mix(in srgb, currentColor 6%, transparent); }
+.keys { white-space: nowrap; }
+.keys > span { margin: 0 2px; opacity: .6; }
+.tag .fresh-note { margin-top: 10px; font-size: 12px; }
+@media (hover: none) { .tag .fresh-note { display: none; } }
+/* "the lab has just been updated" card (js/ui/freshness.js) */
+.fresh { position: fixed; z-index: 8; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(64px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 12px;
+  max-width: calc(100% - 32px); box-sizing: border-box; padding: 12px 12px 12px 16px; border-radius: 16px; background: var(--sheet); border: 1px solid var(--line); box-shadow: 0 12px 32px rgba(0,0,0,.18);
+  opacity: 0; transform: translateY(10px); transition: opacity .3s, transform .3s; }
+.fresh.on { opacity: 1; transform: none; }
+.fresh-text { display: grid; gap: 2px; font-size: 13px; color: var(--ink-soft); }
+.fresh-text b { font: 600 14px/1.25 var(--display); color: var(--ink); }
+.fresh .btn { white-space: nowrap; }
+.fresh-x { border: 0; background: none; color: var(--ink-soft); font-size: 20px; line-height: 1; padding: 4px 6px; cursor: pointer; border-radius: 8px; }
+.fresh-x:hover { color: var(--ink); }
+.fresh-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 560px) { .fresh { left: 16px; right: 16px; flex-wrap: wrap; } .fresh-text { flex: 1 1 60%; } }
+@media (prefers-reduced-motion: reduce) { .loader-bar::after { animation: none; } .fresh, .loader-bar i { transition: none; } }

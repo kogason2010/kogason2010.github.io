@@ -25,6 +25,7 @@ function chemHomeView() {
   controls.target.copy(tgt); camera.position.copy(tgt).addScaledVector(dir, dist); camera.lookAt(tgt); controls.minDistance = 8;
 }
 PLACES.chem = {
+  title: "NCA", building: "Setting up the LC lab", built: () => chemBuilt,
   group: chem, build: buildChem, home: chemHomeView, minD: 8, spawn: CHEM_SPAWN, door: CHEM_DOOR, hint: HINT_CHEM, eyebrow: "Portfolio · NCA · LC lab",
   enter() {
     controls.maxDistance = 46; chemHomeView();

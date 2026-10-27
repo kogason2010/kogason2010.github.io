@@ -20,6 +20,7 @@
   [hidden] { display: none !important; }
 </style>
 <title>kogason2010 Lab</title>
+<script>if (performance.setResourceTimingBufferSize) performance.setResourceTimingBufferSize(2000);</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -43,6 +44,7 @@
     <a class="btn" href="https://kogason2010.github.io/projects/" target="_blank" rel="noopener" data-same>Browse all projects</a>
   </div>
   <p class="featured">Featured: <a href="https://kogason2010.github.io/HPLC-tools/" target="_blank" rel="noopener" data-launch="hplc-tools">HPLC Tools</a> · <a href="https://kogason2010.github.io/nexera-ic/" target="_blank" rel="noopener" data-launch="nexera-ic">Nexera IC</a> · <a href="https://kogason2010.github.io/lcms-2050-oligos/" target="_blank" rel="noopener" data-launch="lcms-2050-oligos">Strand by Strand</a></p>
+  <p class="fresh-note">Updated often. Press <span class="refresh-keys">Ctrl+Shift+R</span> to load the newest version.</p>
   </div></div>
 </div>
 
@@ -143,7 +145,20 @@
 <div class="joy" id="joy" hidden aria-hidden="true"><div class="joy-knob"></div></div>
 <button class="boost" id="boostBtn" type="button" hidden>Boost</button>
 <button class="boost fly" id="flyBtn" type="button" hidden>Fly</button>
-<div class="fade" id="fade"></div>
+<div class="fade" id="fade">
+  <div class="loader" id="loader" role="status" aria-live="polite" hidden>
+    <span class="loader-eyebrow" id="loaderEyebrow">Loading</span>
+    <b class="loader-title" id="loaderTitle">Campus</b>
+    <div class="loader-bar" aria-hidden="true"><i></i></div>
+    <span class="loader-step" id="loaderStep"></span>
+    <p class="loader-tip" id="loaderTip"></p>
+  </div>
+</div>
+<div class="fresh" id="fresh" role="status" hidden>
+  <div class="fresh-text"><b>The lab has just been updated</b><span>You may be looking at an older copy.</span></div>
+  <button class="btn primary" id="freshGo" type="button">Load the latest</button>
+  <button class="fresh-x" id="freshX" type="button" aria-label="Dismiss">×</button>
+</div>
 
 <div class="sfcw" id="sfcApp" hidden role="dialog" aria-modal="true" aria-labelledby="sfcAppTitle">
   <div class="sfcw-win">
@@ -232,6 +247,7 @@
 <script src="js/lab/effects.js"></script>
 <script src="js/ui/labels.js"></script>
 <script src="js/ui/intro.js"></script>
+<script src="js/ui/loader.js"></script>
 <script src="js/lab/desktop.js"></script>
 <script src="js/lab/ic-workstation.js"></script>
 <script src="js/core/levels.js"></script>
@@ -279,6 +295,7 @@
 <script src="js/math/content.js"></script>
 <script src="js/math/visit.js"></script>
 <script src="js/ui/places-menu.js"></script>
+<script src="js/ui/freshness.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

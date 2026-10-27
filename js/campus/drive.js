@@ -214,14 +214,18 @@ function burst(x, z, color) { burstRing.position.set(x, 0.05, z); burstRing.mate
 let labView = null;
 const DOOR_POSE = { pos: V(DOOR.x - 0.3, 1.55, -1.1), tgt: V(DOOR.x, 1.2, -4.3) };
 function shadowRes(n) { if (sun.shadow.mapSize.x === n) return; sun.shadow.mapSize.set(n, n); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
-function fade(on, ms, cb, color) { if (on || color) fadeEl.style.background = color || (night ? "#0b1433" : "#f4fbff"); fadeEl.style.transitionDuration = (reduce ? 0 : ms) + "ms"; fadeEl.classList.toggle("on", on); setTimeout(cb, reduce ? 0 : ms + 30); }
+function fade(on, ms, cb, color) { if (on || color) { const bg = color || (night ? "#0b1433" : "#f4fbff"); fadeEl.style.background = bg; fadeEl.classList.toggle("dark", bg !== "#f4fbff"); } if (!on) setTimeout(() => { loaderEl.hidden = true; }, (reduce ? 0 : ms) + 40); fadeEl.style.transitionDuration = (reduce ? 0 : ms) + "ms"; fadeEl.classList.toggle("on", on); setTimeout(cb, reduce ? 0 : ms + 30); }
 function enterWorld() {
   if (worldOn || worldBusy || lvl || deskOpen || pMode || level !== "up") return;
   worldBusy = true; treeTextures();
   labView = focusHome ? { pos: focusHome.pos.clone(), tgt: focusHome.tgt.clone() } : { pos: camera.position.clone(), tgt: controls.target.clone() };
   focusHome = null; tween = null; closeSheet(true); setHover(null); botHover = false;
   labelsEl.hidden = true; hint.hidden = true; controls.enabled = false; doorGoal = 1;
-  animateCamera(DOOR_POSE.pos.clone(), DOOR_POSE.tgt.clone(), 1.5, () => fade(true, 420, () => { setupWorld(); fade(false, 600, () => { worldBusy = false; }); }));
+  animateCamera(DOOR_POSE.pos.clone(), DOOR_POSE.tgt.clone(), 1.5, () => fade(true, 420, async () => {
+    if (!worldBuilt) await runWithLoader("Campus", "Heading outside", [...WORLD_STEPS, ["Getting the view ready", () => { setupWorld(); warmUp(); }]]);
+    else setupWorld();
+    fade(false, 600, () => { worldBusy = false; });
+  }));
 }
 function setupWorld(spawn) {
   spawn = spawn || SPAWN;

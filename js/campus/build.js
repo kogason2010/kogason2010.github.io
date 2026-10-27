@@ -1,20 +1,29 @@
-/* js/campus/build.js — Builds the whole campus the first time you step outside, in this order (later parts rely on earlier ones:
+/* js/campus/build.js — Builds the whole campus the first time you step outside, in named steps, in this order (later parts rely on earlier ones:
    trees avoid paths and buildings, lamps avoid trees, the grass mask needs everything), then merges static meshes.
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
-function buildWorld() {
-  worldBuilt = true;
-  rnd = seeded(20261019);
-  blobTex = ctex(128, 128, (g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, "rgba(20,30,20,0.55)"); r.addColorStop(0.55, "rgba(20,30,20,0.25)"); r.addColorStop(1, "rgba(20,30,20,0)"); g.fillStyle = r; g.fillRect(0, 0, w, w); });
-  buildSky(); buildGround(); buildPaths(); buildWater(); buildPlaza();
-  buildBuildings(); buildCafe(); buildParking(); buildSculpture();
-  buildTrees(); buildShrubsAndHedge(); buildLamps(); buildContactShadows();
-  buildGrass(); buildLife(); buildGameplay();
-  world.traverse(o => { if (o.isInstancedMesh) o.frustumCulled = false; if (o.material && o.material.isMeshStandardMaterial && !FX.windowMats.includes(o.material)) o.material.envMapIntensity = o.material.userData.env || 0.55; });
-  buildRobot();
-  mergeStatic(FX.dna, new Set()); mergeStatic(world, new Set([FX.dna, wbot, wSpotShadow, burstRing, FX.pond, FX.sky, FX.nightDome, FX.grass, wSpotLayer, ...finds.map(f => f.g), ...finds.map(f => f.ring), ...FX.birds, ...FX.butterflies]));
-}
+// The campus is built in these steps, in this order; the loading card names each one as it runs.
+const WORLD_STEPS = [
+  ["Raising the sky", () => {
+    worldBuilt = true;
+    rnd = seeded(20261019);
+    blobTex = ctex(128, 128, (g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, "rgba(20,30,20,0.55)"); r.addColorStop(0.55, "rgba(20,30,20,0.25)"); r.addColorStop(1, "rgba(20,30,20,0)"); g.fillStyle = r; g.fillRect(0, 0, w, w); });
+    buildSky();
+  }],
+  ["Laying the paths", () => { buildGround(); buildPaths(); }],
+  ["Filling the fountain", () => { buildWater(); buildPlaza(); }],
+  ["Putting up the buildings", () => { buildBuildings(); buildCafe(); buildParking(); buildSculpture(); }],
+  ["Growing the trees", () => buildTrees()],
+  ["Planting the shrubs", () => { buildShrubsAndHedge(); buildLamps(); buildContactShadows(); }],
+  ["Growing the grass", () => { buildGrass(); buildLife(); buildGameplay(); }],
+  ["Tidying up", () => {
+    world.traverse(o => { if (o.isInstancedMesh) o.frustumCulled = false; if (o.material && o.material.isMeshStandardMaterial && !FX.windowMats.includes(o.material)) o.material.envMapIntensity = o.material.userData.env || 0.55; });
+    buildRobot();
+    mergeStatic(FX.dna, new Set()); mergeStatic(world, new Set([FX.dna, wbot, wSpotShadow, burstRing, FX.pond, FX.sky, FX.nightDome, FX.grass, wSpotLayer, ...finds.map(f => f.g), ...finds.map(f => f.ring), ...FX.birds, ...FX.butterflies]));
+  }],
+];
+function buildWorld() { WORLD_STEPS.forEach(([, step]) => step()); }
 // hundreds of small static meshes (benches, car parts, steps, poles) become a handful of merged ones: far fewer draw calls
 function mergeStatic(root, keep) {
   const live = new Set([...FX.windowMats, ...FX.carLights, ...(FX.carLamps || []), FX.lampLens, FX.basinMat]);
