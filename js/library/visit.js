@@ -1,6 +1,6 @@
 /* js/library/visit.js — The library as a place on the campus: drive through its doors to arrive in the reading room.
    Inside, the camera orbits the room's centre (look all the way round, zoom in toward an alcove, or out for the whole
-   room); warm light comes down through the oculus and from the desk lamps. The bronze doors lead back out.
+   room); warm light comes down through the oculus (a shaft with dust drifting in it) and from the desk lamps. The bronze doors lead back out.
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
@@ -25,7 +25,7 @@ function buildLibrary() {
   const before = hotspots.length;
   buildLibraryRoom();
   const libHot = hotspots.slice(before);
-  const keep = new Set([LIBFX.oculus, LIBFX.clock]);
+  const keep = new Set([LIBFX.oculus, LIBFX.clock, LIBFX.shaft && LIBFX.shaft.motes]);
   libHot.forEach(h => mergeStatic(h.group, keep));
   mergeStatic(library, new Set([...keep, ...libHot.map(h => h.group)]));
   libHot.forEach(addHotButton);
@@ -60,6 +60,15 @@ PLACES.library = {
 function updateLibrary(dt, time) {
   hemi.intensity = night ? 0.32 : 0.82; sun.intensity = night ? 0.12 : 0.95; fill.intensity = night ? 0.05 : 0.2;
   if (LIBFX.lamps) LIBFX.lamps.emissiveIntensity = night ? 1.6 : 0.4;
+  // the shaft of light from the oculus: warm sun by day, faint blue moonlight at night; dust drifts slowly down through it
+  const S = LIBFX.shaft;
+  if (S) {
+    S.shaftM.uniforms.uCol.value.setRGB(...(night ? [0.55, 0.68, 1.0] : [1.0, 0.88, 0.68])); S.shaftM.uniforms.uStr.value = night ? 0.13 : 0.26;
+    S.pool.color.setRGB(...(night ? [0.35, 0.45, 0.75] : [1, 1, 1]));
+    const p = S.motes.geometry.attributes.position, top = S.motes.userData.top;
+    S.motes.userData.seeds.forEach(([a, r, y0], i) => { const y = ((y0 - time * 0.12) % top + top) % top + 0.5, aa = a + time * 0.03 + Math.sin(time * 0.3 + i) * 0.05; p.setXYZ(i, Math.cos(aa) * r, y, Math.sin(aa) * r); });
+    p.needsUpdate = true; S.motes.material.opacity = night ? 0.35 : 0.7;
+  }
   const f = libFov(); if (Math.abs(camera.fov - f) > 0.1) { camera.fov = f; camera.updateProjectionMatrix(); }
   libClampCamera();
 }
