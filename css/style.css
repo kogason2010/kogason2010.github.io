@@ -510,7 +510,7 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
 .m-seven li.solved { border-color: #d9b45a; } .m-seven li.solved .m-tag { background: color-mix(in srgb, #d9b45a 30%, transparent); }
 
 /* the Places menu: every room in one list */
-.tools .places-btn { display: inline-flex; align-items: center; gap: 6px; }
+.tools .places-btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .places-btn svg { width: 14px; height: 14px; }
 .places-menu { position: fixed; z-index: 6; top: calc(58px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: min(300px, calc(100vw - 32px));
   display: grid; gap: 2px; padding: 6px; border-radius: 14px; border: 1px solid var(--line); background: color-mix(in srgb, var(--sheet) 94%, transparent);
