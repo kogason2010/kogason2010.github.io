@@ -53,6 +53,7 @@ function buildBuildings() {
     return set;
   }
   const WALL = { brick: wallSet("brick"), concrete: wallSet("concrete"), stone: wallSet("stone"), lab: wallSet("lab") };
+  FX.walls = WALL;   // the café borrows the brick
   // glass: by day a dim room, some with blinds; at night some windows lit (FX.windowMats switches their glow on)
   const roomTex = lit => ctex(512, 512, (g, W) => {
     const Q = W / 2;
@@ -250,23 +251,119 @@ function buildBuildings() {
   wbox(14.4, 0.4, 2.8, 0xece4d2, 0, 6.4, 35.2, { roughness: 0.6 });
 }
 
-// café kiosk and terrace
+// Retention Time, the campus coffee shop: brick walls, a green timber shopfront with steel-framed glass, a room you can
+// see into (espresso machine, grinders, menu boards, a pastry case, pendant lights, a window bar), an awning, and a
+// terrace with bistro tables, parasols, planters, an A-board and string lights. At night the room glows (FX.windowMats).
 function buildCafe() {
-  /* ---- café kiosk with umbrella tables ---- */
-  wbox(7, 3.4, 5, 0xf3e9d6, -17, 1.7, -12, { roughness: 0.75 }); wbox(7.3, 0.35, 5.3, 0x5f676b, -17, 3.55, -12);
-  const awnTex = ctex(256, 32, (g, cw, ch) => { for (let i = 0; i < 14; i++) { g.fillStyle = i % 2 ? "#f4f1ea" : "#c8463c"; g.fillRect(i * cw / 14, 0, cw / 14, ch); } });
-  const awn = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.06, 1.7), new THREE.MeshStandardMaterial({ map: awnTex, roughness: 0.7 })); awn.position.set(-17, 2.78, -8.75); awn.rotation.x = 0.3; awn.castShadow = true; world.add(awn);
-  const cafeGlass = new THREE.MeshStandardMaterial({ color: 0x1f2d36, roughness: 0.05, metalness: 0.85 }); FX.windowMats.push(cafeGlass);
-  wbox(4.6, 1.3, 0.1, cafeGlass, -17, 1.75, -9.46); wbox(5.2, 1.0, 0.55, 0xb88a5a, -17, 0.5, -9.2, { roughness: 0.6 }); wbox(5.4, 0.06, 0.7, 0xe9e4da, -17, 1.03, -9.2);
-  const cafeSign = ctex(512, 128, (g, cw, ch) => { g.fillStyle = "#2b211b"; g.fillRect(0, 0, cw, ch); g.fillStyle = "#f6e7c8"; g.font = "italic 700 76px Georgia, serif"; g.textAlign = "center"; g.fillText("Café", cw / 2, ch * 0.72); });
-  plane(2.2, 0.55, new THREE.MeshBasicMaterial({ map: cafeSign }), -17, 3.1, -9.48, 0, world);
+  const X0 = -20.5, X1 = -13.5, CX = -17, ZB = -14.5, ZF = -9.5, H = 3.6;
+  const green = mat(0x1f3d33, { roughness: 0.55 }), steel = mat(0x1d2124, { roughness: 0.4, metalness: 0.6 }), brass = mat(0xc9a14a, { roughness: 0.3, metalness: 0.9 });
+  const oak = mat(0x5e3b22, { roughness: 0.55 }), marble = mat(0xeeeae4, { roughness: 0.25 }), cream = mat(0xf3ede0, { roughness: 0.7 });
+  const lit = (map, color) => { const m = new THREE.MeshStandardMaterial({ map, color: color || 0xffffff, emissiveMap: map, emissive: 0x000000, roughness: 0.8 }); FX.windowMats.push(m); return m; };
+  // shell: brick sides and back, a roof slab with a dark cornice; the inside of the walls is exposed brick too
+  const brick = (w, h) => new THREE.MeshStandardMaterial({ ...setRepeat(FX.walls.brick, w / 1.8, h / 0.9), roughness: 0.9 });
+  wbox(0.22, H, 5, brick(5, H), X0 + 0.11, H / 2, (ZB + ZF) / 2); wbox(0.22, H, 5, brick(5, H), X1 - 0.11, H / 2, (ZB + ZF) / 2); wbox(7, H, 0.22, brick(7, H), CX, H / 2, ZB + 0.11);
+  wbox(7.4, 0.28, 5.4, 0x2b2f31, CX, H + 0.14, (ZB + ZF) / 2, { roughness: 0.8 }); wbox(7.5, 0.12, 5.5, 0x1f3d33, CX, H + 0.32, (ZB + ZF) / 2, { roughness: 0.6 });
+  wbox(0.9, 0.7, 0.9, 0xa5adb2, CX + 2.2, H + 0.63, ZB + 1.2, { metalness: 0.5, roughness: 0.4 }); wcyl(0.1, 0.1, 1.1, 0x8c9499, CX - 2.4, H + 0.83, ZB + 0.8, 12, { metalness: 0.7, roughness: 0.3 });   // a unit and the roaster's flue
+  // the room: plank floor, white tiles behind the counter, dark green paint above, a ceiling (all lit from inside at night)
+  const planks = ctex(512, 256, (g, w, h) => { for (let i = 0; i < 16; i++) { const v = 100 + Math.random() * 40 | 0; g.fillStyle = `rgb(${v + 40},${v},${v - 40})`; g.fillRect(0, i * h / 16, w, h / 16 - 1); g.fillStyle = "rgba(40,24,12,0.5)"; g.fillRect(Math.random() * w, i * h / 16, 2, h / 16); } });
+  planks.repeat.set(2, 2);
+  const tiles = ctex(256, 256, (g, w) => { g.fillStyle = "#cfd2cf"; g.fillRect(0, 0, w, w); for (let r = 0; r < 16; r++) for (let c = -1; c < 9; c++) { g.fillStyle = "#f6f6f2"; g.fillRect(c * 32 + (r % 2) * 16 + 1, r * 16 + 1, 30, 14); } });
+  tiles.repeat.set(6, 1.2);
+  const paint = ctex(64, 64, g => { g.fillStyle = "#264a3d"; g.fillRect(0, 0, 64, 64); });
+  box(6.56, 0.06, 4.6, lit(planks), CX, 0.03, (ZB + ZF) / 2 + 0.1, world);
+  box(6.56, 1.3, 0.04, lit(tiles), CX, 0.7, ZB + 0.24, world); box(6.56, H - 1.4, 0.04, lit(paint), CX, 1.35 + (H - 1.4) / 2, ZB + 0.24, world);
+  box(6.56, 0.04, 4.6, lit(ctex(64, 64, g => { g.fillStyle = "#e9e2d4"; g.fillRect(0, 0, 64, 64); })), CX, H - 0.04, (ZB + ZF) / 2 + 0.1, world);
+  // the menu: three chalkboards over the back counter
+  const MENU = [["ESPRESSO", [["Espresso", "3.0"], ["Cortado", "3.8"], ["Flat white", "4.2"], ["Latte", "4.5"]]], ["BREWED", [["Pour over", "4.0"], ["Cold brew", "4.5"], ["Batch", "2.8"], ["Tea", "3.0"]]], ["BAKED", [["Croissant", "3.5"], ["Pain au choc.", "3.9"], ["Banana bread", "3.2"], ["Cookie", "2.5"]]]];
+  MENU.forEach(([title, rows], i) => {
+    const t = ctex(256, 320, (g, w, h) => {
+      g.fillStyle = "#1d2321"; g.fillRect(0, 0, w, h); g.strokeStyle = "#b08a52"; g.lineWidth = 10; g.strokeRect(5, 5, w - 10, h - 10);
+      g.fillStyle = "#f2efe6"; g.textAlign = "center"; g.font = "700 34px Georgia, serif"; g.fillText(title, w / 2, 58);
+      g.font = "400 22px Georgia, serif"; rows.forEach(([n, p], k) => { g.textAlign = "left"; g.fillText(n, 24, 112 + k * 50); g.textAlign = "right"; g.fillText(p, w - 24, 112 + k * 50); });
+    });
+    box(1.15, 1.42, 0.05, lit(t), CX - 1.9 + i * 1.9, 2.55, ZB + 0.28, world);
+  });
+  // the back counter: espresso machine with three group heads, two grinders, stacked cups
+  box(6.2, 0.9, 0.6, oak, CX, 0.45, ZB + 0.6, world); box(6.3, 0.05, 0.66, marble, CX, 0.925, ZB + 0.6, world);
+  box(1.1, 0.5, 0.52, mat(0xbfc6ca, { metalness: 0.85, roughness: 0.25 }), CX - 0.3, 1.2, ZB + 0.6, world); box(1.12, 0.08, 0.54, steel, CX - 0.3, 1.49, ZB + 0.6, world);
+  [-0.65, -0.3, 0.05].forEach(dx => { cyl(0.045, 0.045, 0.08, steel, CX + dx, 1.07, ZB + 0.9, world, 12); const h = box(0.03, 0.03, 0.2, mat(0x111111), CX + dx, 1.03, ZB + 1.02, world); h.rotation.x = 0.15; });
+  for (let k = 0; k < 8; k++) cyl(0.04, 0.032, 0.06, cream, CX - 0.6 + (k % 4) * 0.12, 1.56 + Math.floor(k / 4) * 0.065, ZB + 0.55, world, 12);
+  [CX + 0.9, CX + 1.35].forEach(gx => { box(0.22, 0.35, 0.28, steel, gx, 1.12, ZB + 0.62, world); const hop = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.05, 0.26, 16), new THREE.MeshStandardMaterial({ color: 0x5a3a22, roughness: 0.4, transparent: true, opacity: 0.85 })); hop.position.set(gx, 1.43, ZB + 0.62); world.add(hop); });
+  // the front counter with a pastry case and a till
+  box(3.6, 1.0, 0.6, oak, CX - 0.4, 0.5, -12.1, world); box(3.7, 0.05, 0.7, marble, CX - 0.4, 1.025, -12.1, world);
+  for (let i = 0; i < 18; i++) box(0.05, 0.9, 0.02, mat(0x6e4a2e, { roughness: 0.6 }), CX - 2.1 + i * 0.2, 0.47, -11.79, world);   // slatted front
+  const caseG = new THREE.MeshStandardMaterial({ color: 0xe8f4f8, roughness: 0.05, transparent: true, opacity: 0.25, depthWrite: false });
+  box(1.1, 0.42, 0.55, caseG, CX - 1.55, 1.26, -12.1, world).castShadow = false;
+  for (let i = 0; i < 10; i++) { const p = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.025, 6, 10, Math.PI), mat(i % 3 ? 0xc98a3c : 0x6b3d1e, { roughness: 0.6 })); p.position.set(CX - 1.95 + (i % 5) * 0.2, 1.08 + Math.floor(i / 5) * 0.18, -12.1); p.rotation.x = -Math.PI / 2; world.add(p); }
+  box(0.3, 0.06, 0.25, steel, CX + 0.9, 1.08, -12.15, world); const scr = box(0.26, 0.18, 0.02, lit(ctex(64, 48, g => { g.fillStyle = "#cfe8ff"; g.fillRect(0, 0, 64, 48); })), CX + 0.9, 1.2, -12.2, world); scr.rotation.x = -0.4;
+  // pendant lights over the counter (always on: it's open)
+  const bulbM = new THREE.MeshBasicMaterial({ color: 0xffe2a8 });
+  [-2.1, -0.9, 0.3, 1.5].forEach(dx => {
+    cyl(0.006, 0.006, 0.9, mat(0x111111), CX + dx, H - 0.45, -12.6, world, 4);
+    const shade = new THREE.Mesh(new THREE.ConeGeometry(0.17, 0.2, 20, 1, true), new THREE.MeshStandardMaterial({ color: 0x1f3d33, roughness: 0.5, side: THREE.DoubleSide })); shade.position.set(CX + dx, H - 0.95, -12.6); world.add(shade);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 8), bulbM); b.position.set(CX + dx, H - 1.06, -12.6); world.add(b);
+  });
+  // a bar along the window with stools, and a plant in the corner
+  box(2.6, 0.05, 0.36, oak, CX - 1.9, 1.05, ZF - 0.35, world); [-2.9, -1.9, -0.9].forEach(dx => { cyl(0.16, 0.16, 0.05, oak, CX + dx, 0.72, ZF - 0.85, world, 16); cyl(0.025, 0.025, 0.7, steel, CX + dx, 0.36, ZF - 0.85, world, 8); cyl(0.17, 0.17, 0.02, steel, CX + dx, 0.01, ZF - 0.85, world, 16); });
+  cyl(0.24, 0.18, 0.45, 0xb9b2a6, X1 - 0.5, 0.22, ZF - 0.6, world, 20); shrubs.push([X1 - 0.5, 0.44, ZF - 0.6, 0.55, "laurel", 0.7]);
+  // shopfront: a green stall riser and fascia, steel mullions, glass, and a glazed door with a brass bar and an OPEN sign
+  wbox(7, 0.45, 0.16, green, CX, 0.225, ZF); wbox(7.2, 0.72, 0.26, green, CX, H - 0.36, ZF + 0.02);
+  const sign = ctex(1024, 128, (g, w, h) => { g.fillStyle = "#1f3d33"; g.fillRect(0, 0, w, h); g.fillStyle = "#e3c27a"; g.textAlign = "center"; g.font = "700 64px Georgia, serif"; g.fillText("RETENTION  TIME", w / 2, 70); g.font = "400 22px Georgia, serif"; g.fillText("COFFEE  ·  TEA  ·  PASTRIES      EST. 2010", w / 2, 108); });
+  plane(6.6, 0.62, lit(sign), CX, H - 0.36, ZF + 0.155, 0, world);   // lit at night
+  const glassM = new THREE.MeshStandardMaterial({ color: 0xd8e8ee, roughness: 0.04, metalness: 0.2, transparent: true, opacity: 0.2, depthWrite: false }); glassM.userData.env = 1.4;
+  const GY0 = 0.45, GY1 = H - 0.72, DX0 = CX + 0.75, DX1 = CX + 1.85;   // door between DX0 and DX1
+  [X0 + 0.25, CX - 1.9, DX0, DX1, X1 - 0.25].forEach(x => wbox(0.07, GY1 - GY0, 0.1, steel, x, (GY0 + GY1) / 2, ZF));
+  wbox(7 - 0.4, 0.07, 0.1, steel, CX, GY1 - 0.55, ZF); wbox(7 - 0.4, 0.06, 0.1, steel, CX, GY0 + 0.03, ZF);
+  [[X0 + 0.25, CX - 1.9], [CX - 1.9, DX0], [DX1, X1 - 0.25]].forEach(([a, b]) => { const p = plane(b - a - 0.07, GY1 - GY0, glassM, (a + b) / 2, (GY0 + GY1) / 2, ZF, 0, world); p.castShadow = false; p.renderOrder = 2; });
+  const door = plane(DX1 - DX0 - 0.16, GY1 - GY0 - 0.1, glassM, (DX0 + DX1) / 2, (GY0 + GY1) / 2 - 0.05, ZF + 0.02, 0, world); door.renderOrder = 2;
+  wbox(DX1 - DX0 - 0.1, 0.1, 0.05, green, (DX0 + DX1) / 2, GY0 + 0.1, ZF + 0.03); wbox(0.05, 0.9, 0.05, brass, DX0 + 0.2, 1.15, ZF + 0.08);
+  const open = ctex(128, 64, (g, w, h) => { g.fillStyle = "#1d2321"; g.fillRect(0, 0, w, h); g.fillStyle = "#ff6a4a"; g.font = "700 34px sans-serif"; g.textAlign = "center"; g.fillText("OPEN", w / 2, 44); });
+  plane(0.34, 0.17, new THREE.MeshBasicMaterial({ map: open }), (DX0 + DX1) / 2, 1.7, ZF + 0.035, 0, world);
+  // a hanging blade sign at the corner: a coffee cup
+  wbox(0.04, 0.04, 0.7, steel, X1 - 0.12, H - 0.95, ZF + 0.35); 
+  const cup = ctex(128, 128, (g, w) => { g.fillStyle = "#1f3d33"; g.beginPath(); g.arc(64, 64, 62, 0, 7); g.fill(); g.strokeStyle = "#e3c27a"; g.lineWidth = 4; g.beginPath(); g.arc(64, 64, 56, 0, 7); g.stroke(); g.fillStyle = "#e3c27a"; g.fillRect(36, 52, 44, 34); g.beginPath(); g.arc(84, 66, 10, -1.6, 1.6); g.stroke(); g.fillRect(30, 88, 56, 5); [46, 58, 70].forEach(x => { g.fillRect(x, 32, 3, 14); }); });
+  const blade = plane(0.55, 0.55, new THREE.MeshStandardMaterial({ map: cup, roughness: 0.5, side: THREE.DoubleSide }), X1 - 0.12, H - 1.3, ZF + 0.5, Math.PI / 2, world); blade.castShadow = true;
+  // the awning: striped canvas sloping out from under the fascia, a scalloped valance, two arms
+  const stripes = ctex(512, 64, (g, w, h) => { for (let i = 0; i < 16; i++) { g.fillStyle = i % 2 ? "#f1ead8" : "#24493c"; g.fillRect(i * w / 16, 0, w / 16, h); } });
+  const awn = new THREE.Mesh(new THREE.PlaneGeometry(6.8, 1.45), new THREE.MeshStandardMaterial({ map: stripes, roughness: 0.8, side: THREE.DoubleSide }));
+  awn.position.set(CX, H - 0.98, ZF + 0.66); awn.rotation.x = -Math.PI / 2 + 0.38; awn.castShadow = awn.receiveShadow = true; world.add(awn);
+  const val = ctex(512, 64, (g, w, h) => { g.clearRect(0, 0, w, h); for (let i = 0; i < 16; i++) { g.fillStyle = i % 2 ? "#f1ead8" : "#24493c"; g.fillRect(i * w / 16, 0, w / 16, h * 0.55); g.beginPath(); g.arc((i + 0.5) * w / 16, h * 0.55, w / 32, 0, Math.PI); g.fill(); } });
+  const valance = new THREE.Mesh(new THREE.PlaneGeometry(6.8, 0.28), new THREE.MeshStandardMaterial({ map: val, alphaTest: 0.5, roughness: 0.8, side: THREE.DoubleSide }));
+  valance.position.set(CX, H - 1.4, ZF + 1.33); valance.castShadow = true; world.add(valance);
+  [X0 + 0.4, X1 - 0.4].forEach(x => { const arm = cyl(0.02, 0.02, 1.5, steel, x, H - 1.55, ZF + 0.66, world, 8); arm.rotation.x = Math.PI / 2 - 0.6; });
+  // the terrace: paving, bistro tables with chairs, two parasols, planters, an A-board and string lights
   flat(new THREE.PlaneGeometry(11, 6), new THREE.MeshStandardMaterial({ ...setRepeat(pathSet, 11 / 3, 2), roughness: 0.9 }), -17.5, 0.014, -6.5);
-  CAMPUS.boxes.push([-20.5, -14.5, -13.5, -9.0, "building", 3.73]); CAMPUS.bldg.push({ x: -17, z: -12, w: 7, d: 5, name: "Café" });
-  const umbr = new THREE.MeshStandardMaterial({ map: awnTex, side: THREE.DoubleSide, roughness: 0.7 });
-  [[-14.3, -5.4], [-18.6, -5.2], [-21.4, -7.6]].forEach(([tx, tz]) => {
-    wcyl(0.45, 0.45, 0.04, 0xe9eef0, tx, 0.74, tz, 24, { roughness: 0.4 }); wcyl(0.035, 0.035, 2.5, 0x6b767c, tx, 1.25, tz, 8, { metalness: 0.6, roughness: 0.3 }); wcyl(0.14, 0.32, 0.06, 0x2f3539, tx, 0.03, tz, 14);
-    const um = new THREE.Mesh(new THREE.ConeGeometry(1.4, 0.5, 14, 1, true), umbr); um.position.set(tx, 2.42, tz); um.castShadow = true; world.add(um);
-    [0, 2.1, 4.2].forEach(a => { const cx = tx + Math.cos(a) * 0.75, cz = tz + Math.sin(a) * 0.75; wcyl(0.17, 0.17, 0.04, 0xc8463c, cx, 0.46, cz, 16); wcyl(0.02, 0.02, 0.44, 0x6b767c, cx, 0.22, cz, 6); });
-    CAMPUS.circles.push([tx, tz, 0.45, "table"]); blobs.push([tx, tz, 2.6, 2.6, 0]);
+  CAMPUS.boxes.push([X0, ZB, X1, ZF + 0.3, "building", H + 0.38]); CAMPUS.bldg.push({ x: CX, z: -12, w: 7, d: 5, name: "Café" });
+  const iron = mat(0x1d2124, { roughness: 0.45, metalness: 0.5 }), cane = mat(0xa8763f, { roughness: 0.7 }), seatM = mat(0x24493c, { roughness: 0.6 });
+  function chair(x, z, ry) {
+    const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry; world.add(g);
+    cyl(0.2, 0.2, 0.04, seatM, 0, 0.46, 0, g, 18);
+    [[-0.13, -0.13], [0.13, -0.13], [-0.13, 0.13], [0.13, 0.13]].forEach(([lx, lz]) => { const l = cyl(0.012, 0.012, 0.46, cane, lx, 0.23, lz, g, 6); l.rotation.set(lz * 0.5, 0, -lx * 0.5); });
+    const back = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.016, 6, 16, Math.PI), cane); back.position.set(0, 0.62, -0.16); g.add(back);
+    [-0.17, 0.17].forEach(bx => cyl(0.014, 0.014, 0.18, cane, bx, 0.54, -0.16, g, 6));
+  }
+  [[-19.6, -7.6, true], [-16.8, -6.0, false], [-14.6, -7.9, false], [-21.3, -5.2, true], [-18.6, -4.6, false]].forEach(([tx, tz, shade]) => {
+    cyl(0.34, 0.34, 0.03, marble, tx, 0.75, tz, world, 28); cyl(0.03, 0.03, 0.72, iron, tx, 0.37, tz, world, 10); cyl(0.22, 0.25, 0.03, iron, tx, 0.015, tz, world, 20);
+    chair(tx - 0.55, tz + 0.15, Math.PI / 2 + 0.2); chair(tx + 0.55, tz - 0.1, -Math.PI / 2 + 0.15);
+    if (shade) {
+      wcyl(0.025, 0.025, 2.4, steel, tx, 1.2, tz, 8);
+      const um = new THREE.Mesh(new THREE.ConeGeometry(1.35, 0.45, 12, 1, true), new THREE.MeshStandardMaterial({ color: 0xf1ead8, side: THREE.DoubleSide, roughness: 0.8 })); um.position.set(tx, 2.38, tz); um.castShadow = true; world.add(um);
+      const edge = new THREE.Mesh(new THREE.CylinderGeometry(1.35, 1.35, 0.12, 12, 1, true), new THREE.MeshStandardMaterial({ color: 0x24493c, side: THREE.DoubleSide, roughness: 0.8 })); edge.position.set(tx, 2.1, tz); world.add(edge);
+    }
+    CAMPUS.circles.push([tx, tz, 0.85, "table"]); blobs.push([tx, tz, 2.2, 2.2, 0]);
+  });
+  [[DX0 - 0.4, ZF + 0.45], [DX1 + 0.4, ZF + 0.45], [-22.5, -4.1], [-12.6, -4.1]].forEach(([px, pz]) => { wbox(0.55, 0.5, 0.55, 0x3a3d3f, px, 0.25, pz, { roughness: 0.8 }); shrubs.push([px, 0.5, pz, 0.5, "box", px]); CAMPUS.circles.push([px, pz, 0.4, "bed"]); });
+  // A-board on the paving by the door
+  const chalk = ctex(128, 160, (g, w, h) => { g.fillStyle = "#1d2321"; g.fillRect(0, 0, w, h); g.fillStyle = "#f2efe6"; g.textAlign = "center"; g.font = "700 18px Georgia, serif"; g.fillText("TODAY", w / 2, 34); g.font = "400 15px Georgia, serif"; ["cold brew", "oat flat white", "~", "fresh", "croissants"].forEach((t, i) => g.fillText(t, w / 2, 64 + i * 20)); });
+  const aG = new THREE.Group(); aG.position.set(DX1 + 1.1, 0, ZF + 1.7); aG.rotation.y = -0.4; world.add(aG);
+  [1, -1].forEach(s => { const leaf = new THREE.Group(); leaf.rotation.x = s * 0.18; aG.add(leaf); box(0.5, 0.82, 0.03, oak, 0, 0.41, 0, leaf); plane(0.42, 0.66, new THREE.MeshStandardMaterial({ map: chalk, roughness: 0.9 }), 0, 0.44, s * 0.017, s > 0 ? 0 : Math.PI, leaf); });
+  // string lights from the fascia out to two posts at the terrace's edge
+  [[-22.7, -3.8], [-12.3, -3.8]].forEach(([px, pz]) => wcyl(0.05, 0.06, 3.2, steel, px, 1.6, pz, 10));
+  const bulb = new THREE.MeshBasicMaterial({ color: 0xffe7b5 }), bulbG = new THREE.SphereGeometry(0.045, 8, 6), wireM = mat(0x111111);
+  [[X0 + 0.3, -22.7], [CX, -17.5], [X1 - 0.3, -12.3]].forEach(([fx, px]) => {
+    const a = new THREE.Vector3(fx, H - 0.05, ZF + 0.15), b = new THREE.Vector3(px, 3.15, -3.8), pts = [];
+    for (let i = 0; i <= 20; i++) { const t = i / 20, p = new THREE.Vector3().lerpVectors(a, b, t); p.y -= Math.sin(t * Math.PI) * 0.55; pts.push(p); }
+    const wire = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.008, 4, false), wireM); world.add(wire);
+    pts.slice(1, -1).forEach(p => { const m = new THREE.Mesh(bulbG, bulb); m.position.copy(p).y -= 0.07; world.add(m); });
   });
 }
