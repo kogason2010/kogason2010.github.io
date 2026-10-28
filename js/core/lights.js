@@ -7,7 +7,7 @@ const hemi = new THREE.HemisphereLight(0xfff4e8, 0x5f6f7a, 0.5); scene.add(hemi)
 const sun = new THREE.DirectionalLight(0xffe7cc, 1.05);
 const fill = new THREE.DirectionalLight(0xbfd8ff, 0.35); fill.intensity = 0.25; fill.position.set(-2, 6, 10); scene.add(fill);
 sun.position.set(6, 11, 7); sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.mapSize.set(LIGHT ? 1024 : 2048, LIGHT ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 30 });
 sun.shadow.bias = -0.0008; sun.shadow.radius = 4;
 scene.add(sun);

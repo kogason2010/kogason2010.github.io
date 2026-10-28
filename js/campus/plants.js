@@ -22,7 +22,7 @@ function ezTree(o, height, lod) {
   const qForce = new Q().setFromUnitVectors(UP, new V3(0, 1, 0));
   if (lod) o = { ...o, levels: o.type === "deciduous" ? Math.max(1, o.levels - 1) : o.levels, children: o.type === "evergreen" ? [Math.round(o.children[0] * 0.55), ...o.children.slice(1)] : o.children };
   const segs = l => lod ? 3 : o.segments[l], secs = l => Math.max(1, Math.round(o.sections[l] * (lod ? 0.34 : 1)));
-  const lv = o.levels, thin = (lod ? (o.type === "evergreen" ? 0.55 : 0.6) : 1) * (COARSE ? 0.7 : 1), leafCount = Math.max(2, Math.round(o.leafCount * thin)), leafSize = o.leafSize / Math.pow(thin, 0.6) * (lod ? (o.type === "deciduous" ? 1.6 : 1.45) : 1);
+  const lv = o.levels, thin = (lod ? (o.type === "evergreen" ? 0.55 : 0.6) : 1) * (LIGHT ? 0.7 : 1), leafCount = Math.max(2, Math.round(o.leafCount * thin)), leafSize = o.leafSize / Math.pow(thin, 0.6) * (lod ? (o.type === "deciduous" ? 1.6 : 1.45) : 1);
   const at = (sections, t) => {
     const n = sections.length - 1, si = Math.min(n, Math.floor(t * n)), A = sections[si], B = sections[Math.min(si + 1, n)], al = n ? (t - si / n) * n : 0;
     return { origin: new V3().lerpVectors(A.origin, B.origin, al), radius: (1 - al) * A.radius + al * B.radius, orient: new E().setFromQuaternion(new Q().setFromEuler(B.orient).slerp(new Q().setFromEuler(A.orient), al)) };
@@ -254,7 +254,7 @@ function shrubGeos(k, R) {
     }
     o.subVectors(p, C).multiply(_e3.set(1, 1.3, 1)).normalize();
   };
-  const per = Math.round(k.per * (COARSE ? 0.6 : 1));
+  const per = Math.round(k.per * (LIGHT ? 0.6 : 1));
   for (let i = 0; i < per; i++) {
     place(-0.45, 0.9); const t = Math.min(1, Math.max(0, p.y / k.h));
     f.copy(o).multiplyScalar(0.55).addScaledVector(d, 0.45).add(rand3(_e3, 0.6)).normalize(); n.copy(o).multiplyScalar(0.65).addScaledVector(d, 0.35).normalize();
@@ -264,7 +264,7 @@ function shrubGeos(k, R) {
     addCard(G, p, f, R() * 6.283, k.size * (0.75 + R() * 0.5), k.q, n, col);
   }
   const fl = k.flowers;
-  if (fl) for (let i = 0; i < Math.round(fl.n * (COARSE ? 0.7 : 1)); i++) {
+  if (fl) for (let i = 0; i < Math.round(fl.n * (LIGHT ? 0.7 : 1)); i++) {
     place(fl.low, 1.06); const t = Math.min(1, Math.max(0, p.y / k.h)), fc = fl.cols[(R() * fl.cols.length) | 0], v = (0.8 + R() * 0.25) * (0.75 + 0.25 * t);
     f.copy(o).multiplyScalar(0.5).addScaledVector(d, 0.5).addScaledVector(UP, 0.35).add(rand3(_e3, 0.25)).normalize(); n.copy(o).add(d).normalize();
     addCard(G, p, f, R() * 6.283, fl.size * (0.75 + R() * 0.5), fl.q, n, col.setRGB(fc[0] * v, fc[1] * v, fc[2] * v));
@@ -295,9 +295,9 @@ function buildTrees() {
     || CAMPUS.mulch.some(({ box: b }) => x > b[0] - m && x < b[2] + m && z > b[1] - m && z < b[3] + m)
     || FIND_AT.some(f => Math.hypot(x - f[0], z - f[1]) < 1.6 + m);
   rows.forEach(t => { if (!blocked(t[0], t[1], 1.0)) treePts.push(t); });
-  for (let n = 0; n < 1200 && treePts.length < 120; n++) { const x = (rnd() * 2 - 1) * (WB - 4), z = (rnd() * 2 - 1) * (WB - 4); if (!blocked(x, z, 2.6) && !treePts.some(t => Math.hypot(t[0] - x, t[1] - z) < 5.2)) treePts.push([x, z, rnd() < 0.45 ? 0 : rnd() < 0.55 ? 1 : 2]); }
+  for (let n = 0; n < 1200 && treePts.length < (LIGHT ? 80 : 120); n++) { const x = (rnd() * 2 - 1) * (WB - 4), z = (rnd() * 2 - 1) * (WB - 4); if (!blocked(x, z, 2.6) && !treePts.some(t => Math.hypot(t[0] - x, t[1] - z) < 5.2)) treePts.push([x, z, rnd() < 0.45 ? 0 : rnd() < 0.55 ? 1 : 2]); }
   const nearN = treePts.length;
-  for (let n = 0; n < 900 && treePts.length < nearN + (COARSE ? 160 : 280); n++) { const a = rnd() * 6.283, r = WB + 5 + Math.pow(rnd(), 0.8) * 140, x = Math.cos(a) * r, z = Math.sin(a) * r; if (Math.max(Math.abs(x), Math.abs(z)) < WB + 4) continue; treePts.push([x, z, rnd() < 0.5 ? 1 : rnd() < 0.7 ? 0 : 2, hillH(x, z) + 0.01]); }
+  for (let n = 0; n < 900 && treePts.length < nearN + (LIGHT ? 110 : 280); n++) { const a = rnd() * 6.283, r = WB + 5 + Math.pow(rnd(), 0.8) * 140, x = Math.cos(a) * r, z = Math.sin(a) * r; if (Math.max(Math.abs(x), Math.abs(z)) < WB + 4) continue; treePts.push([x, z, rnd() < 0.5 ? 1 : rnd() < 0.7 ? 0 : 2, hillH(x, z) + 0.01]); }
   treePts.forEach(t => { t[4] = Math.floor(rnd() * KINDS[t[2]].length); });
   const SWAY = [[0.035, 2.0], [0.02, 1.2], [0.05, 2.4]];
   const barkMats = {}, leafMats = {};
@@ -398,7 +398,7 @@ function buildShrubsAndHedge() {
 // The hedge round the campus: a clipped hedge 1.6 m tall and 1.6 m thick, swept along a square with rounded corners
 // (half size WB), its sides gently lumpy and its top wandering a little, with leaf cards over its skin.
 function buildHedge(K) {
-  const R = seeded(5151), RC = 1.6, HS = WB - RC, step = COARSE ? 0.4 : 0.26, line = [];
+  const R = seeded(5151), RC = 1.6, HS = WB - RC, step = LIGHT ? 0.4 : 0.26, line = [];
   const run = (x0, z0, x1, z1, nx, nz) => { const n = Math.round(Math.hypot(x1 - x0, z1 - z0) / step); for (let i = 0; i < n; i++) line.push([x0 + (x1 - x0) * i / n, z0 + (z1 - z0) * i / n, nx, nz]); };
   const turn = (cx, cz, a0) => { const n = Math.round(RC * Math.PI / 2 / step); for (let i = 0; i < n; i++) { const a = a0 + Math.PI / 2 * i / n; line.push([cx + Math.cos(a) * RC, cz + Math.sin(a) * RC, Math.cos(a), Math.sin(a)]); } };
   run(WB, -HS, WB, HS, 1, 0); turn(HS, HS, 0); run(HS, WB, -HS, WB, 0, 1); turn(-HS, HS, Math.PI / 2);
@@ -434,7 +434,7 @@ function buildHedge(K) {
     (A.getX(a) * (1 - t) + A.getX(a + 1) * t) * (1 - s) + (A.getX(b) * (1 - t) + A.getX(b + 1) * t) * s,
     (A.getY(a) * (1 - t) + A.getY(a + 1) * t) * (1 - s) + (A.getY(b) * (1 - t) + A.getY(b + 1) * t) * s,
     (A.getZ(a) * (1 - t) + A.getZ(a + 1) * t) * (1 - s) + (A.getZ(b) * (1 - t) + A.getZ(b + 1) * t) * s);
-  const per = COARSE ? 3 : 6;
+  const per = LIGHT ? 3 : 6;
   for (let i = 0; i < N - 1; i++) for (let k = 0; k < per; k++) {
     let r = R() * wsum, j = 0; while (j < M - 2 && (r -= W[j]) > 0) j++;
     const a = i * M + j, b = a + M, s = R(), t = R();

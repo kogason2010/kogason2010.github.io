@@ -553,3 +553,9 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 
 .fresh-x:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 560px) { .fresh { left: 16px; right: 16px; flex-wrap: wrap; } .fresh-text { flex: 1 1 60%; } }
 @media (prefers-reduced-motion: reduce) { .loader-bar::after { animation: none; } .fresh, .loader-bar i { transition: none; } }
+
+/* graphics switch at the foot of the Places menu */
+.places-menu .pm-quality { display: flex; align-items: center; gap: 6px; margin-top: 4px; padding: 10px 12px 4px; border-top: 1px solid var(--line); }
+.places-menu .pm-quality span { flex: 1; font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+.places-menu .pm-quality button { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font: 500 12px/1 var(--mono); color: var(--ink); }
+.places-menu .pm-quality button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

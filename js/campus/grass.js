@@ -36,7 +36,7 @@ function buildGrass() {
     [0, 0.5, 1].forEach(v => [-0.5, 0.5].forEach(u => { const lean = v * v * (k % 2 ? 1 : -1); tp.push(u * cx + lx * lean, v, u * cz + lz * lean); tuv.push(u + 0.5, v); }));
     tix.push(i0, i0 + 1, i0 + 2, i0 + 1, i0 + 3, i0 + 2, i0 + 2, i0 + 3, i0 + 4, i0 + 3, i0 + 5, i0 + 4);
   }
-  const GN = COARSE ? 15000 : 36000, GH = 18, gg = new THREE.InstancedBufferGeometry();
+  const GN = LIGHT ? 14000 : 36000, GH = 18, gg = new THREE.InstancedBufferGeometry();
   gg.setAttribute("position", new THREE.Float32BufferAttribute(tp, 3)); gg.setAttribute("uv", new THREE.Float32BufferAttribute(tuv, 2)); gg.setIndex(tix);
   gg.setAttribute("normal", new THREE.Float32BufferAttribute(new Array(tp.length).fill(0).map((_, i) => (i % 3 === 1 ? 1 : 0)), 3));
   const goff = new Float32Array(GN * 2), grnd = new Float32Array(GN * 4);
