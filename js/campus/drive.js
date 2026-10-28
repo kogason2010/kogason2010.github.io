@@ -213,7 +213,8 @@ function burst(x, z, color) { burstRing.position.set(x, 0.05, z); burstRing.mate
 /* stepping outside and back in */
 let labView = null;
 const DOOR_POSE = { pos: V(DOOR.x - 0.3, 1.55, -1.1), tgt: V(DOOR.x, 1.2, -4.3) };
-function shadowRes(n) { if (sun.shadow.mapSize.x === n) return; sun.shadow.mapSize.set(n, n); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
+function shadowRes(n) { if (LIGHT) n = Math.min(n, 1024); if (sun.shadow.mapSize.x === n) return;   // Light graphics: smaller shadow maps
+  sun.shadow.mapSize.set(n, n); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } }
 function fade(on, ms, cb, color) { if (on || color) { const bg = color || (night ? "#0b1433" : "#f4fbff"); fadeEl.style.background = bg; fadeEl.classList.toggle("dark", bg !== "#f4fbff"); } if (!on) setTimeout(() => { loaderEl.hidden = true; }, (reduce ? 0 : ms) + 40); fadeEl.style.transitionDuration = (reduce ? 0 : ms) + "ms"; fadeEl.classList.toggle("on", on); setTimeout(cb, reduce ? 0 : ms + 30); }
 function enterWorld() {
   if (worldOn || worldBusy || lvl || deskOpen || pMode || level !== "up") return;
@@ -233,7 +234,7 @@ function setupWorld(spawn) {
   worldOn = true; lab.visible = false; chem.visible = false; library.visible = false; mathRoom.visible = false; world.visible = true; bgGroup.visible = false; botTip.classList.remove("on");
   scene.fog = new THREE.FogExp2(0xc9dbe8, 0.0052); updateWorld.night = null;
   camera.fov = 58; camera.far = 2400; camera.updateProjectionMatrix();
-  shadowRes(LIGHT ? 1024 : 2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
+  shadowRes(2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
   Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 }); sun.shadow.camera.updateProjectionMatrix();
   applyWorldNight(night); updateWorld.night = night;
   if (spaceOn) closeSpace();
@@ -250,7 +251,7 @@ function teardownWorld() {
   worldOn = false; world.visible = false; bgGroup.visible = true; scene.fog = null;
   camera.fov = 32; camera.far = 100; camera.updateProjectionMatrix();
   Object.assign(sun.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7, near: 1, far: 30 }); sun.shadow.camera.updateProjectionMatrix();
-  sun.position.set(6, 11, 7); sun.target.position.set(0, 0, 0); shadowRes(LIGHT ? 1024 : 2048); sun.shadow.normalBias = 0; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, PIXELS_MAX)); restoreLabLighting();
+  sun.position.set(6, 11, 7); sun.target.position.set(0, 0, 0); shadowRes(2048); sun.shadow.normalBias = 0; renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, PIXELS_MAX)); restoreLabLighting();
   document.body.classList.remove("world-mode"); hudEl.hidden = true; mmEl.hidden = true; joyEl.hidden = true; boostEl.hidden = true; flyEl.hidden = true; toastEl.classList.remove("on");
   for (const k in keys) keys[k] = false; joy.active = false; boostHeld = false; flyHeld = false;
 }
