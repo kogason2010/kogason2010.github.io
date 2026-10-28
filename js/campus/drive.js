@@ -233,7 +233,7 @@ function setupWorld(spawn) {
   if (!worldBuilt) buildWorld();
   worldOn = true; lab.visible = false; chem.visible = false; library.visible = false; mathRoom.visible = false; world.visible = true; bgGroup.visible = false; botTip.classList.remove("on");
   scene.fog = new THREE.FogExp2(0xc9dbe8, 0.0052); updateWorld.night = null;
-  camera.fov = 58; camera.far = 2400; camera.updateProjectionMatrix();
+  camera.fov = 58; camera.near = 0.1; camera.far = 2400; camera.updateProjectionMatrix();
   shadowRes(2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
   Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 }); sun.shadow.camera.updateProjectionMatrix();
   applyWorldNight(night); updateWorld.night = night;

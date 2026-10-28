@@ -23,7 +23,7 @@ function buildLcMs() {
   // the mass spectrometer: long body, dark front band with status lights, ion source housing on the left
   const MSX = 1.95, MSW = 1.6, MSH = 0.62;
   box(MSW, MSH, 0.74, 0xf1f3f3, MSX, T + MSH / 2, BZ, gM, { roughness: 0.45 });
-  box(MSW, 0.07, 0.75, 0xe2e6e7, MSX, T + MSH - 0.035, BZ, gM, { roughness: 0.45 });
+  box(MSW + 0.006, 0.074, 0.75, 0xe2e6e7, MSX, T + MSH - 0.035, BZ, gM, { roughness: 0.45 });   // a hair proud of the body, so their faces don't fight
   box(MSW * 0.72, 0.26, 0.012, CH.front, MSX + 0.18, T + 0.36, BZ + 0.376, gM);
   box(MSW * 0.72, 0.014, 0.014, C.line, MSX + 0.18, T + 0.2, BZ + 0.38, gM);
   const msText = tex((g, w, h) => { g.fillStyle = "#2b3238"; g.fillRect(0, 0, w, h); g.fillStyle = "#e8f2f8"; g.font = "600 30px 'Segoe UI', sans-serif"; g.fillText("Triple Quad  LC-MS/MS", 18, 46); }, 512, 64);

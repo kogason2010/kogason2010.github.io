@@ -139,6 +139,12 @@ function frame() {
 
   if (liveCam && sfcAppOpen && !camTween) updateLiveCam(dt);
   if (lcLive && lcAppOpen && !camTween) updateLcLiveCam(dt);
+  // indoors, keep the near clipping plane as far out as the view allows: depth is far more precise that way, so parts a
+  // millimetre apart don't flicker when you orbit from across the room (close-ups, like a monitor, bring it back in)
+  if (!worldOn && !spaceOn) {
+    const want = THREE.MathUtils.clamp(camera.position.distanceTo(controls.target) * 0.04, 0.05, 0.6);
+    if (Math.abs(want - camera.near) > 0.005) { camera.near = want; camera.updateProjectionMatrix(); }
+  }
   if (!osFull) { renderer.render(scene, camera); if (cssRenderer) cssRenderer.render(cssScene, camera); }
 
   if (!pMode) {

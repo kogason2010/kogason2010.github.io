@@ -65,7 +65,7 @@ function buildChemRoom() {
   box(DW - 0.12, 0.05, 0.06, C.steel, DW / 2 + 0.02, 1.02, 0.05, piv, { metalness: 0.7, roughness: 0.3 });
   box(DW - 0.04, 0.22, 0.006, C.steel, DW / 2, 0.12, 0.026, piv, { metalness: 0.75, roughness: 0.3 });
   box(0.5, 0.2, 0.07, 0xf2f4f3, DOOR.x, DOOR.h + 0.32, -4.15, gx);
-  plane(0.46, 0.17, new THREE.MeshBasicMaterial({ map: exitTex }), DOOR.x, DOOR.h + 0.32, -4.114, 0, gx);
+  plane(0.46, 0.17, new THREE.MeshBasicMaterial({ map: exitTex }), DOOR.x, DOOR.h + 0.32, -4.11, 0, gx);
   // safety: yellow floor tape in front of the instrument bench
   box(6.9, 0.006, 0.07, C.yellow, -0.4, 0.014, -2.45, chem).castShadow = false;
   // fume extraction: two articulated snorkel arms over the sample-prep island, on a duct that runs back to the wall and

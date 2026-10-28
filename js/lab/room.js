@@ -78,7 +78,7 @@ const winGlow = new THREE.PointLight(0xcfe6ff, 0.35, 5, 2); winGlow.position.set
   const arm = cyl(0.025, 0.025, 0.3, C.steel, -3.97, BY - 0.07, EZ - 0.12, null, 10, chrome); arm.rotation.z = Math.PI / 2;
   cyl(0.025, 0.025, 0.12, C.steel, BXW, BY - 0.07, EZ - 0.06, null, 10, chrome).rotation.x = Math.PI / 2;
   cyl(0.2, 0.11, 0.11, C.yellow, BXW, BY, EZ, null, 32, { roughness: 0.4 });
-  cyl(0.17, 0.17, 0.01, 0xd9a91f, BXW, BY + 0.05, EZ, null, 32);
+  cyl(0.17, 0.17, 0.01, 0xd9a91f, BXW, BY + 0.058, EZ, null, 32);
   [-0.07, 0.07].forEach(dz => {
     cyl(0.022, 0.022, 0.09, C.steel, BXW, BY + 0.08, EZ + dz, null, 10, chrome);
     cyl(0.034, 0.034, 0.025, 0x1f9a4f, BXW, BY + 0.135, EZ + dz, null, 14);
@@ -153,13 +153,13 @@ box(DW, DOOR.h - 0.02, 0.045, leafMat, DW / 2, (DOOR.h - 0.02) / 2 + 0.005, 0, d
 const vision = new THREE.MeshStandardMaterial({ color: 0x9fc4dd, roughness: 0.08, metalness: 0.1, transparent: true, opacity: 0.55 });
 [0.026, -0.026].forEach(dz => box(0.24, 0.62, 0.004, vision, DW * 0.68, 1.55, dz, doorPivot).castShadow = false);
 box(DW - 0.12, 0.05, 0.06, C.steel, DW / 2 + 0.02, 1.02, 0.05, doorPivot, { metalness: 0.7, roughness: 0.3 });          // push bar
-[0.08, DW - 0.06].forEach(x => box(0.05, 0.1, 0.07, 0x9aa4a9, x, 1.02, 0.045, doorPivot, { metalness: 0.6 }));
+[0.08, DW - 0.06].forEach(x => box(0.05, 0.1, 0.064, 0x9aa4a9, x, 1.02, 0.045, doorPivot, { metalness: 0.6 }));
 box(DW - 0.04, 0.22, 0.006, C.steel, DW / 2, 0.12, 0.026, doorPivot, { metalness: 0.75, roughness: 0.3 });              // kick plate
 box(0.36, 0.05, 0.05, 0x8a959b, 0.3, DOOR.h - 0.12, 0.05, doorPivot, { metalness: 0.5 });                              // closer
 // EXIT sign
 const exitTex = tex((g, w, h) => { g.fillStyle = "#f7faf8"; g.fillRect(0, 0, w, h); g.fillStyle = "#13a04a"; g.font = "bold 46px sans-serif"; g.textAlign = "center"; g.fillText("EXIT", w / 2, h * 0.72); }, 192, 72);
 box(0.5, 0.2, 0.07, 0xf2f4f3, DOOR.x, DOOR.h + 0.32, -4.15, gDoor);
-plane(0.46, 0.17, new THREE.MeshBasicMaterial({ map: exitTex }), DOOR.x, DOOR.h + 0.32, -4.114, 0, gDoor);
+plane(0.46, 0.17, new THREE.MeshBasicMaterial({ map: exitTex }), DOOR.x, DOOR.h + 0.32, -4.11, 0, gDoor);
 let doorOpen = 0, doorGoal = 0;
 function updateDoor(dt) {
   if (Math.abs(doorGoal - doorOpen) < 1e-3) return;
