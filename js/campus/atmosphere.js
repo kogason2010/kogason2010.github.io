@@ -23,7 +23,7 @@ function applyWorldNight(nightOn) {
   headlight.intensity = nightOn ? 2.4 : 0;
   mmEl.style.filter = nightOn ? "brightness(0.62) saturate(0.85)" : "";   // the minimap dims with the campus at night
   if (FX.pond) FX.pond.material.uniforms.sunDirection.value.copy(nightOn ? MOON_DIR : SUN_DIR);
-  fountainNight(nightOn);
+  fountainNight(nightOn); horizonNight(nightOn);
 }
 function restoreLabLighting() {
   hemi.color.copy(LAB_HEMI.sky); hemi.groundColor.copy(LAB_HEMI.ground); scene.environment = null; renderer.toneMappingExposure = 0.95; setNight(night);
