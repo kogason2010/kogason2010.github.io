@@ -149,3 +149,64 @@ bmat.rotation.x = -Math.PI / 2; bmat.position.set(-0.25, BY + 0.008, -2.98); bma
   box(0.32, 0.18, 0.26, 0xc9a77a, cx - 0.1, BY + 0.72, cz, basement, { roughness: 0.9 });
 })();
 basementClock = wallClock(basement, 2.75, BY + 2.05, -4.16, 0.24);
+
+/* ---- the rest of the room: storage along the left wall, a sample freezer, an analyst's desk, a pallet of
+        consumables, a spill kit and an extinguisher, and floor markings for the walkway and the cart's bay ---- */
+(function () {
+  let rs = 606; const R = () => { rs = (rs * 16807) % 2147483647; return (rs - 1) / 2147483646; };   // (seeded() isn't loaded yet)
+  const steelM = { metalness: 0.6, roughness: 0.35 }, F = BY;
+  const card = [0xc9a77a, 0xb8946a, 0xd4b48a], amber = new THREE.MeshStandardMaterial({ color: 0x7a3d12, roughness: 0.2, transparent: true, opacity: 0.85 });
+  // wire shelving against the left wall: four shelves of boxes, amber solvent bottles and binders
+  const SX = -3.88, SZ = 1.0;
+  [-0.88, 0.88].forEach(dz => [-0.22, 0.22].forEach(dx => cyl(0.014, 0.014, 1.9, C.steel, SX + dx, F + 0.95, SZ + dz, basement, 8, steelM)));
+  [0.12, 0.62, 1.12, 1.62].forEach((y, k) => {
+    box(0.48, 0.02, 1.8, C.steel, SX, F + y, SZ, basement, steelM);
+    for (let z = SZ - 0.8; z < SZ + 0.75;) {
+      const kind = R(), w = kind < 0.45 ? 0.3 + R() * 0.2 : kind < 0.75 ? 0.12 : 0.06;
+      if (z + w > SZ + 0.85) break;
+      if (kind < 0.45) { const h = 0.18 + R() * 0.2; box(0.4, h, w - 0.02, card[(R() * 3) | 0], SX, F + y + 0.01 + h / 2, z + w / 2, basement, { roughness: 0.9 }); }
+      else if (kind < 0.75 && k < 3) { cyl(0.05, 0.05, 0.24, amber, SX + 0.05, F + y + 0.13, z + w / 2, basement, 14); cyl(0.022, 0.022, 0.04, 0x1f2428, SX + 0.05, F + y + 0.27, z + w / 2, basement, 10); }
+      else box(0.3, 0.28, w - 0.01, [0x2f6fb5, 0xc23a3a, 0x3a7d44][(R() * 3) | 0], SX + 0.04, F + y + 0.15, z + w / 2, basement, { roughness: 0.6 });
+      z += w + 0.02;
+    }
+  });
+  // an upright sample freezer at the back wall, -20 °C on its display
+  const FX0 = 4.75, FZ = -3.75;
+  box(0.78, 1.85, 0.72, 0xf1f3f3, FX0, F + 0.925, FZ, basement, { roughness: 0.4 });
+  box(0.74, 1.6, 0.02, 0xe6eaeb, FX0, F + 0.88, FZ + 0.37, basement, { roughness: 0.35 });
+  box(0.03, 0.5, 0.04, C.steel, FX0 - 0.3, F + 1.1, FZ + 0.4, basement, steelM);
+  const disp = tex((g, w, h) => { g.fillStyle = "#0c1a14"; g.fillRect(0, 0, w, h); g.fillStyle = "#5fe39a"; g.font = "700 30px monospace"; g.textAlign = "center"; g.fillText("-20.1 °C", w / 2, 40); }, 160, 56);
+  plane(0.2, 0.07, new THREE.MeshBasicMaterial({ map: disp }), FX0 + 0.15, F + 1.76, FZ + 0.362, 0, basement);
+  const lab2 = tex((g, w, h) => { g.fillStyle = "#ffffff"; g.fillRect(0, 0, w, h); g.fillStyle = "#c23a3a"; g.fillRect(0, 0, w, 16); g.fillStyle = "#1f2428"; g.font = "600 13px sans-serif"; g.fillText("SAMPLES · -20 °C", 8, 34); g.font = "400 11px sans-serif"; g.fillText("No food or drink", 8, 52); }, 140, 64);
+  plane(0.22, 0.1, new THREE.MeshBasicMaterial({ map: lab2 }), FX0 + 0.1, F + 1.35, FZ + 0.382, 0, basement);
+  // an analyst's desk in the open corner: laptop with a chromatogram, notebook, mug, a chair
+  const DX = 3.75, DZ = 1.9;
+  box(1.5, 0.04, 0.72, 0xd9cdb8, DX, F + 0.74, DZ, basement, { roughness: 0.5 });
+  [[-0.7, -0.32], [0.7, -0.32], [-0.7, 0.32], [0.7, 0.32]].forEach(([dx, dz]) => box(0.04, 0.72, 0.04, 0x3a4248, DX + dx, F + 0.36, DZ + dz, basement, steelM));
+  box(0.36, 0.015, 0.25, 0x2b3136, DX - 0.1, F + 0.768, DZ + 0.06, basement, steelM);
+  const chrom = tex((g, w, h) => { g.fillStyle = "#f7fafc"; g.fillRect(0, 0, w, h); g.strokeStyle = "#0a5fb4"; g.lineWidth = 2; g.beginPath(); for (let x = 0; x < w; x++) { const t = x / w; let y = 0.92; [[0.22, 0.5, 0.012], [0.38, 0.75, 0.01], [0.55, 0.35, 0.016], [0.7, 0.6, 0.01]].forEach(([c, a, s]) => { y -= a * Math.exp(-((t - c) ** 2) / (2 * s * s)) * 0.8; }); x ? g.lineTo(x, y * h) : g.moveTo(x, y * h); } g.stroke(); g.fillStyle = "#51616c"; g.font = "10px monospace"; g.fillText("SFC · chiral screen", 6, 14); }, 256, 160);
+  const scr = box(0.35, 0.23, 0.012, new THREE.MeshBasicMaterial({ map: chrom }), DX - 0.1, F + 0.885, DZ - 0.07, basement); scr.rotation.x = -0.2;
+  box(0.36, 0.24, 0.008, 0x2b3136, DX - 0.1, F + 0.885, DZ - 0.078, basement).rotation.x = -0.2;
+  box(0.22, 0.015, 0.3, 0x2f6fb5, DX + 0.45, F + 0.768, DZ + 0.05, basement); box(0.2, 0.004, 0.28, 0xf4f1e8, DX + 0.45, F + 0.778, DZ + 0.05, basement);
+  cyl(0.04, 0.035, 0.1, 0xf2f0ea, DX - 0.55, F + 0.81, DZ + 0.1, basement, 14);
+  const chair = new THREE.Group(); chair.position.set(DX - 0.05, F, DZ + 0.62); chair.rotation.y = 0.25; basement.add(chair);
+  box(0.46, 0.06, 0.44, 0x24323a, 0, 0.47, 0, chair); box(0.44, 0.5, 0.05, 0x24323a, 0, 0.78, 0.22, chair).rotation.x = -0.1;
+  cyl(0.025, 0.025, 0.42, C.steel, 0, 0.24, 0, chair, 8, steelM);
+  for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2; const leg = box(0.28, 0.03, 0.04, 0x2a2f33, Math.cos(a) * 0.14, 0.04, Math.sin(a) * 0.14, chair); leg.rotation.y = -a; }
+  // a pallet of boxed consumables, shrink-wrapped
+  const PX = 1.4, PZ = 4.3;
+  for (let i = 0; i < 3; i++) box(1.0, 0.04, 0.12, 0xb8946a, PX, F + 0.13, PZ - 0.42 + i * 0.42, basement, { roughness: 0.9 });
+  [-0.42, 0, 0.42].forEach(dx => box(0.1, 0.1, 1.0, 0xa98560, PX + dx, F + 0.05, PZ, basement, { roughness: 0.9 }));
+  [[-0.25, -0.24, 0], [0.25, -0.24, 0], [-0.25, 0.24, 0], [0.25, 0.24, 0], [0, -0.24, 1], [0, 0.24, 1]].forEach(([dx, dz, lvl]) => box(lvl ? 0.9 : 0.48, 0.32, 0.46, card[(R() * 3) | 0], PX + dx, F + 0.31 + lvl * 0.33, PZ + dz, basement, { roughness: 0.9 }));
+  const wrap = box(1.02, 0.68, 1.0, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15, transparent: true, opacity: 0.18, depthWrite: false }), PX, F + 0.48, PZ, basement); wrap.castShadow = false;
+  // spill kit drum and a fire extinguisher by the cylinders
+  cyl(0.24, 0.24, 0.62, C.yellow, 4.95, F + 0.31, -2.75, basement, 24, { roughness: 0.5 }); cyl(0.25, 0.25, 0.05, 0x1f2428, 4.95, F + 0.64, -2.75, basement, 24);
+  const spill = tex((g, w, h) => { g.fillStyle = "#f2c230"; g.fillRect(0, 0, w, h); g.fillStyle = "#1f2428"; g.font = "700 22px sans-serif"; g.textAlign = "center"; g.fillText("SPILL KIT", w / 2, 36); }, 128, 48);
+  const sp = cyl(0.243, 0.243, 0.18, new THREE.MeshStandardMaterial({ map: spill, roughness: 0.5, transparent: true, alphaTest: 0.1 }), 4.95, F + 0.36, -2.75, basement, 24); sp.rotation.y = -Math.PI / 2;
+  cyl(0.065, 0.065, 0.5, 0xc0282d, -4.05, F + 0.62, -0.25, basement, 16, { roughness: 0.4 }); cyl(0.03, 0.04, 0.08, 0x1f2428, -4.05, F + 0.91, -0.25, basement, 10);
+  box(0.02, 0.22, 0.16, 0xc0282d, -4.17, F + 1.25, -0.25, basement);
+  // floor markings: a walkway from the stairs to the bench, and a bay for the cart
+  const tape = new THREE.MeshStandardMaterial({ color: 0xf2c230, roughness: 0.6 });
+  [-1.25, 0.15].forEach(x => { const t = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 4.6), tape); t.rotation.x = -Math.PI / 2; t.position.set(x, F + 0.006, 0.0); t.receiveShadow = true; basement.add(t); });
+  [[2.35, -1.25, 1.25, 0.06], [2.35, -2.25, 1.25, 0.06], [1.73, -1.75, 0.06, 1.06], [2.97, -1.75, 0.06, 1.06]].forEach(([x, z, w, d]) => { const t = new THREE.Mesh(new THREE.PlaneGeometry(w, d), tape); t.rotation.x = -Math.PI / 2; t.position.set(x, F + 0.006, z); basement.add(t); });
+})();
