@@ -368,7 +368,7 @@ function buildShrubsAndHedge() {
       cm.setMatrixAt(i, tmp); lm.setMatrixAt(i, tmp);
       const v = 0.9 + R() * 0.2; c.setRGB(v * (0.95 + R() * 0.1), v, v * (0.92 + R() * 0.12)); cm.setColorAt(i, c); lm.setColorAt(i, c);
     });
-    cm.castShadow = cm.receiveShadow = lm.castShadow = lm.receiveShadow = true; lm.customDepthMaterial = depthMat(K.atlas);
+    cm.castShadow = cm.receiveShadow = lm.receiveShadow = true; lm.castShadow = !LIGHT; lm.customDepthMaterial = depthMat(K.atlas);   // Light: the cores' shadows only
     world.add(cm, lm);
   });
   // the beds: mulch mounded a little in the middle, a low stone edging round the three open sides
@@ -427,7 +427,7 @@ function buildHedge(K) {
   const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2)); geo.setAttribute("color", new THREE.BufferAttribute(col, 3)); geo.setIndex(ix); geo.computeVertexNormals();
   const NR = geo.attributes.normal, t3 = new THREE.Vector3();
   for (let j = 0; j < M; j++) { const a = j, b = (N - 1) * M + j; t3.set(NR.getX(a) + NR.getX(b), NR.getY(a) + NR.getY(b), NR.getZ(a) + NR.getZ(b)).normalize(); NR.setXYZ(a, t3.x, t3.y, t3.z); NR.setXYZ(b, t3.x, t3.y, t3.z); }
-  const hm = new THREE.Mesh(geo, K.hedgeMat); hm.castShadow = hm.receiveShadow = true; hm.userData.keep = true; world.add(hm);
+  const hm = new THREE.Mesh(geo, K.hedgeMat); hm.castShadow = !LIGHT; hm.receiveShadow = true; hm.userData.keep = true; world.add(hm);
   // leaf cards over the skin, most on the top and the campus side (what you see), a few low down
   const W = [0.4, 1, 1, 1, 1.4, 1.7, 1.7, 1.7, 1.7, 1.4, 0.8, 0.6, 0.5, 0.4, 0.2], wsum = W.reduce((a, b) => a + b, 0);
   const G = newCards(), p = new THREE.Vector3(), n = new THREE.Vector3(), f = new THREE.Vector3(), cc = new THREE.Color(), CP = geo.attributes.position, CC = geo.attributes.color;
