@@ -56,7 +56,7 @@ function buildHorizon() {
     crown.computeVertexNormals();
     const im = new THREE.InstancedMesh(crown, new THREE.MeshLambertMaterial({ color: 0xffffff }), LIGHT ? 300 : 700), q = new THREE.Quaternion(), c = new THREE.Color();
     for (let i = 0; i < im.count; i++) {
-      let x, z; do { const a = R() * Math.PI * 2, rr = 170 + Math.pow(R(), 0.7) * 190; x = Math.cos(a) * rr; z = Math.sin(a) * rr; } while (fbm(x * 0.012, 9, z * 0.012, 2) < 0.42);   // woods, with clearings
+      let x, z; do { const a = R() * Math.PI * 2, rr = 215 + Math.pow(R(), 0.7) * 170; x = Math.cos(a) * rr; z = Math.sin(a) * rr; } while (fbm(x * 0.012, 9, z * 0.012, 2) < 0.42);   // woods, with clearings
       const s = 0.9 + R() * 0.8; tmp.compose(V(x, hillH(x, z) - 1.2, z), q.setFromAxisAngle(UP, R() * 6.283), V(s * (0.9 + R() * 0.3), s * (0.8 + R() * 0.5), s)); im.setMatrixAt(i, tmp);
       const v = 0.6 + R() * 0.35; im.setColorAt(i, c.setRGB(0.07 * v, 0.15 * v, 0.05 * v));
     }
