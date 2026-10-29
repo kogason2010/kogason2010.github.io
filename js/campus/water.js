@@ -10,10 +10,10 @@ function buildWater() {
   for (let y = 0; y < 256; y++) for (let x = 0; x < 256; x++) { let hgt = 0; waves.forEach(([kx, ky, ph, a]) => { hgt += a * Math.sin((kx * x + ky * y) / 256 * 6.283 + ph); }); const v = (hgt / 9 * 0.5 + 0.5) * 255, i = (y * 256 + x) * 4; wimg.data[i] = wimg.data[i + 1] = wimg.data[i + 2] = v; wimg.data[i + 3] = 255; }
   wcg.putImageData(wimg, 0, 0);
   const waterN = normalFrom(wc, 3);
-  flat(new THREE.CircleGeometry(8.9, 64), mat(0xc9b88f, { roughness: 1 }), -30, 0.014, 30);
+  flat(new THREE.CircleGeometry(8.6, 64), mat(0x6b5d44, { roughness: 1 }), -30, 0.014, 30);   // a muddy bank under the stones
   flat(new THREE.RingGeometry(9.6, 11.2, 72), new THREE.MeshStandardMaterial({ ...setRepeat(pathSet, 6, 1), roughness: 0.9 }), -30, 0.016, 30);
   if (THREE.Water && !LIGHT) {
-    FX.pond = new THREE.Water(new THREE.CircleGeometry(8.1, 64), { textureWidth: 256, textureHeight: 256, waterNormals: waterN, sunDirection: SUN_DIR.clone(), sunColor: 0xffffff, waterColor: 0x1e4c58, distortionScale: 1.4, fog: true, alpha: 1.0 });
+    FX.pond = new THREE.Water(new THREE.CircleGeometry(8.1, 64), { textureWidth: 256, textureHeight: 256, waterNormals: waterN, sunDirection: SUN_DIR.clone(), sunColor: 0xffffff, waterColor: 0x3d7f86, distortionScale: 1.4, fog: true, alpha: 1.0 });
     FX.pond.material.uniforms.size.value = 5.5; FX.pond.rotation.x = -Math.PI / 2; FX.pond.position.set(-30, 0.05, 30); world.add(FX.pond);
     const reflect = FX.pond.onBeforeRender; FX.pond.onBeforeRender = function (...a) {
       const gv = FX.grass.visible, saved = FX.chunks.map(ch => ch.meshes[0].visible), cast = FX.chunks.map(ch => ch.meshes[0].castShadow);
@@ -23,7 +23,7 @@ function buildWater() {
     };
   } else {
     const pw = waterN.clone(); pw.needsUpdate = true; pw.repeat.set(3, 3);
-    flat(new THREE.CircleGeometry(8.1, 64), new THREE.MeshStandardMaterial({ color: 0x2a6476, roughness: 0.05, metalness: 0.2, normalMap: pw, normalScale: new THREE.Vector2(0.5, 0.5) }), -30, 0.05, 30);
+    flat(new THREE.CircleGeometry(8.1, 64), new THREE.MeshStandardMaterial({ color: 0x3f7f88, roughness: 0.05, metalness: 0.2, normalMap: pw, normalScale: new THREE.Vector2(0.5, 0.5) }), -30, 0.05, 30);
   }
   CAMPUS.ponds.push([-30, 30, 8]); CAMPUS.circles.push([-30, 30, 8.25, "pond"]);
   const padMat = mat(0x4f8f3e, { roughness: 0.55 }), flowerPad = mat(0xf3d6e4, { roughness: 0.5 });
@@ -34,7 +34,49 @@ function buildWater() {
   const clumps = Array.from({ length: 16 }, (_, k) => ({ a: (k + rnd() * 0.6) / 16 * 6.283, n: 0.4 + rnd() * 1.2, h: 0.6 + rnd() * 0.7 }));
   for (let i = 0; i < 420; i++) { const cl = clumps[i % 16], a = cl.a + (rnd() - 0.5) * 0.26 * cl.n, r = 7.55 + Math.pow(rnd(), 1.5) * 1.0, s = (0.3 + rnd() * 0.75) * cl.h * (1 - Math.abs(a - cl.a) * 1.6); rm.compose(V(-30 + Math.cos(a) * r, 0, 30 + Math.sin(a) * r), new THREE.Quaternion().setFromEuler(new THREE.Euler((rnd() - 0.5) * 0.25, 0, (rnd() - 0.5) * 0.25)), V(1, s, 1)); reeds.setMatrixAt(i, rm); }
   reeds.castShadow = true; world.add(reeds);
+  buildPondEdge();
   buildFountain(waterN);
+}
+
+// The pond's edge and life: stones round the bank, a wooden jetty out from the path toward the plaza, three ducks.
+// (Its own random numbers, so the rest of the campus keeps its layout.)
+function buildPondEdge() {
+  const R = seeded(4040), PX = -30, PZ = 30, AJ = -Math.PI / 4;   // the jetty points at the plaza
+  // stones: lumpy, flattened, greys and browns, in loose groups round the water's edge, none where the jetty is
+  const sg = new THREE.IcosahedronGeometry(1, 1), sp = sg.attributes.position, d = new THREE.Vector3();
+  for (let i = 0; i < sp.count; i++) { d.set(sp.getX(i), sp.getY(i), sp.getZ(i)).normalize(); const k = 0.75 + fbm(d.x * 2 + 3, d.y * 2, d.z * 2, 3) * 0.6; sp.setXYZ(i, d.x * k, d.y * k, d.z * k); }
+  sg.computeVertexNormals();
+  const SN = 110, stones = new THREE.InstancedMesh(sg, new THREE.MeshStandardMaterial({ roughness: 0.9 }), SN), q = new THREE.Quaternion(), e = new THREE.Euler(), c = new THREE.Color();
+  for (let i = 0, a = 0; i < SN; i++) {
+    a += 0.03 + R() * (R() < 0.15 ? 0.35 : 0.07); if (Math.abs(Math.atan2(Math.sin(a - AJ), Math.cos(a - AJ))) < 0.13) a += 0.26;
+    const r = 8.05 + R() * 0.4, s = 0.12 + Math.pow(R(), 2) * 0.32;
+    tmp.compose(V(PX + Math.cos(a) * r, s * 0.12, PZ + Math.sin(a) * r), q.setFromEuler(e.set(R() * 0.4, R() * 6.283, R() * 0.4)), V(s * (1 + R() * 0.5), s * 0.55, s));
+    stones.setMatrixAt(i, tmp); const v = 0.16 + R() * 0.16; stones.setColorAt(i, c.setRGB(v * (1 + R() * 0.15), v * 0.95, v * (0.82 + R() * 0.1)));
+  }
+  stones.castShadow = stones.receiveShadow = true; world.add(stones);
+  // the jetty: deck planks on two stringers, posts down into the water, the end posts standing proud
+  const jg = new THREE.Group(); jg.position.set(PX, 0, PZ); jg.rotation.y = -AJ; world.add(jg);
+  const wood = mat(0x6a4a30, { roughness: 0.85 }), dark = mat(0x45331f, { roughness: 0.9 }), R0 = 5.9, R1 = 10.5;
+  for (let x = R0; x < R1; x += 0.155) box(0.14, 0.05, 1.4, R() < 0.2 ? dark : wood, x, 0.33, 0, jg).rotation.y = (R() - 0.5) * 0.02;
+  [-0.55, 0.55].forEach(z => box(R1 - R0, 0.12, 0.1, dark, (R0 + R1) / 2, 0.25, z, jg));
+  for (let x = R0 + 0.1; x < R1; x += 1.1) [-0.68, 0.68].forEach(z => { const end = x < R0 + 0.3; cyl(0.07, 0.08, end ? 0.95 : 0.55, dark, x, end ? 0.2 : 0.03, z, jg, 10); });
+  [8.8, 9.9].forEach(r => CAMPUS.circles.push([PX + Math.cos(AJ) * r, PZ + Math.sin(AJ) * r, 0.75, "bench"]));
+  // ducks: a mallard pair and a brown one, paddling slow circles and bobbing (updatePond)
+  FX.ducks = [[0x6b5638, 0x1f5c3a, 3.2], [0x8a6f50, 0x6b5638, 4.6], [0x6b5638, 0x1f5c3a, 2.2]].map(([body, head, rad], i) => {
+    const g = new THREE.Group(); world.add(g);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 10), mat(body, { roughness: 0.8 })); b.scale.set(0.2, 0.1, 0.12); b.position.y = 0.05; b.castShadow = true; g.add(b);
+    const tail = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.12, 8), mat(body, { roughness: 0.8 })); tail.rotation.z = Math.PI / 2 + 0.5; tail.position.set(-0.2, 0.09, 0); g.add(tail);
+    const h = new THREE.Mesh(new THREE.SphereGeometry(0.065, 12, 10), mat(head, { roughness: 0.5 })); h.position.set(0.15, 0.17, 0); g.add(h);
+    if (head !== body) { const ring = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.012, 6, 14), mat(0xf2f2ee)); ring.rotation.y = Math.PI / 2; ring.rotation.z = 0.4; ring.position.set(0.13, 0.12, 0); g.add(ring); }
+    box(0.08, 0.025, 0.05, 0xe8a43a, 0.23, 0.16, 0, g);
+    g.traverse(o => { if (o.isMesh) o.userData.keep = true; });   // they move: not merged with the static campus
+    g.userData = { cx: PX + (R() - 0.5) * 3, cz: PZ + (R() - 0.5) * 3, rad, sp: (0.08 + R() * 0.05) * (i % 2 ? 1 : -1), ph: R() * 6.283 };
+    return g;
+  });
+}
+// per frame (from updateFountain): the ducks paddle round, facing the way they go
+function updatePond(dt, time) {
+  (FX.ducks || []).forEach(g => { const u = g.userData, a = u.ph + time * u.sp; g.position.set(u.cx + Math.cos(a) * u.rad, 0.05 + Math.sin(time * 2.1 + u.ph) * 0.012, u.cz + Math.sin(a) * u.rad); g.rotation.y = -a - (u.sp > 0 ? Math.PI / 2 : -Math.PI / 2); g.rotation.z = Math.sin(time * 1.7 + u.ph) * 0.04; });
 }
 
 /* ---- the fountain ---- */
@@ -211,6 +253,7 @@ function fountainNight(on) {
 // per frame: the water moves, and the spray follows the jets
 function updateFountain(dt, time) {
   const FT = FX.fountain; if (!FT) return;
+  updatePond(dt, time);
   FT.sheets.forEach(m => { m.uniforms.uTime.value = time; }); FT.surfs.forEach(m => { m.uniforms.uTime.value = time; }); FT.caustic.uniforms.uTime.value = time;
   FX.basinN.offset.x += dt * 0.03; FX.basinN.offset.y += dt * 0.02;
   const jp = FX.jets.geometry.attributes.position;
