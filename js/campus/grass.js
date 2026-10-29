@@ -14,6 +14,7 @@ function buildGrass() {
   CAMPUS.circles.forEach(c => { if (c[3] === "tree" || c[3] === "lamp" || c[3] === "shrub") return; mg.beginPath(); mg.arc(MX(c[0]), MX(c[1]), (c[2] + 0.3) * MS, 0, 7); mg.fill(); });
   [[0, 0, 11.9], [-30, 30, 11.4]].forEach(([x, z, r]) => { mg.beginPath(); mg.arc(MX(x), MX(z), r * MS, 0, 7); mg.fill(); });
   CAMPUS.lots.forEach(l => mg.fillRect(MX(l[0]) - 2, MX(l[1]) - 2, (l[2] - l[0]) * MS + 4, (l[3] - l[1]) * MS + 4));
+  CAMPUS.gardens.forEach(c => { mg.beginPath(); mg.arc(MX(c[0]), MX(c[1]), c[2] * 0.72 * MS, 0, 7); mg.fill(); });
   CAMPUS.mulch.forEach(({ box: b }) => mg.fillRect(MX(b[0]) - 1, MX(b[1]) - 1, (b[2] - b[0]) * MS + 2, (b[3] - b[1]) * MS + 2));
   mg.fillRect(MX(-23), MX(-9.5), 11 * MS, 6 * MS);
   [[0, -WB], [0, WB], [-WB, 0], [WB, 0]].forEach(([x, z]) => mg.fillRect(MX(x - (z ? WB : 1.0)), MX(z - (x ? WB : 1.0)), (z ? WB * 2 : 2.0) * MS, (x ? WB * 2 : 2.0) * MS));

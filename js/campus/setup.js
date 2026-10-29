@@ -8,7 +8,7 @@
    ====================================================================== */
 const world = new THREE.Group(); world.visible = false; scene.add(world);
 const WB = 58;                                                     // hedge boundary (half size, metres)
-const CAMPUS = { boxes: [], circles: [], paths: [], bldg: [], lots: [], ponds: [], plazas: [], mulch: [] };   // mulch: the planted beds by the entrances
+const CAMPUS = { boxes: [], circles: [], paths: [], bldg: [], lots: [], ponds: [], plazas: [], mulch: [], gardens: [] };   // mulch: the planted beds by the entrances
 let worldBuilt = false, worldOn = false, worldBusy = false;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const seeded = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };

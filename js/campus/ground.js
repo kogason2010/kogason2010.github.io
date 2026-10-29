@@ -43,6 +43,7 @@ function buildPaths() {
   }
   path(0, -18, 0, -11.2, 3.2); path(11.2, 0, 32, 0, 3.4); path(-11.2, 0, -32, 0, 3.4); path(0, 11.2, 0, 36, 3.6);
   path(8, 8, 21.5, 23.5, 3); path(-8, 8, -21, 21, 3); path(-8, -8, -16.5, -8.4, 2.6);
+  path(8, -8, 16.3, -16.3, 2.4);   // to the physic garden (park.js)
   const PS = 2048, PC = PS / 2, plc = canvasOf(PS, PS), plh = canvasOf(PS, PS), plg = plc.getContext("2d"), plhg = plh.getContext("2d");
   plg.fillStyle = "#8d877d"; plg.fillRect(0, 0, PS, PS); plhg.fillStyle = "#303030"; plhg.fillRect(0, 0, PS, PS);
   for (let r = 40, ring = 0; r < PC; r += 44, ring++) {
