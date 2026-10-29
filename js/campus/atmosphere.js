@@ -56,7 +56,7 @@ function updateWorldFx(dt, time) {
   FX.sunV.value.copy(FX.night ? MOON_DIR : SUN_DIR).transformDirection(camera.matrixWorldInverse); FX.sunCol.value.setRGB(...(FX.night ? [0.03, 0.04, 0.07] : [0.95, 0.85, 0.55]));
   FX.grassU.uCenter.value.set(DRV.x, DRV.z); FX.grassU.uPush.value.set(DRV.x, DRV.z, (0.42 + 0.9 * Math.min(DRV.y, 1)) * Math.max(0, 1 - DRV.y / 3.5));   // hovering low flattens a wider patch (downwash)
   if (FX.pond) FX.pond.material.uniforms.time.value += dt * 0.45;
-  updateFountain(dt, time);
+  updateFountain(dt, time); updatePeople(dt, time);
   FX.dna.rotation.y += dt * 0.25;
   FX.clouds.forEach((c, i) => { c.position.x += dt * (1.2 + (i % 3) * 0.4); if (c.position.x > 480) c.position.x = -480; });
   FX.birds.forEach(g => { const u = g.userData, a = time * u.sp + u.ph; g.position.set(u.cx + Math.cos(a) * u.r, u.y + Math.sin(a * 2.3) * 1.5, u.cz + Math.sin(a) * u.r); g.rotation.y = -a; const f = Math.sin(time * 9 + u.ph) * 0.6; u.l.rotation.z = f; u.rw.rotation.z = -f; });

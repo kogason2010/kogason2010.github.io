@@ -292,6 +292,7 @@ function buildTrees() {
     || CAMPUS.circles.some(c => Math.hypot(x - c[0], z - c[1]) < c[2] + m)
     || CAMPUS.paths.some(p => segDist(x, z, p) < p[4] / 2 + m) || Math.hypot(x, z) < 12.5 + m
     || CAMPUS.lots.some(l => x > l[0] - m && x < l[2] + m && z > l[1] - m && z < l[3] + m)
+    || CAMPUS.gardens.some(c => Math.hypot(x - c[0], z - c[1]) < c[2] + m)
     || CAMPUS.mulch.some(({ box: b }) => x > b[0] - m && x < b[2] + m && z > b[1] - m && z < b[3] + m)
     || FIND_AT.some(f => Math.hypot(x - f[0], z - f[1]) < 1.6 + m);
   rows.forEach(t => { if (!blocked(t[0], t[1], 1.0)) treePts.push(t); });
