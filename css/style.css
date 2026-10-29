@@ -62,7 +62,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
   position: fixed; z-index: 2;
   top: calc(16px + env(safe-area-inset-top, 0px));
   right: max(16px, env(safe-area-inset-right, 0px));
-  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: 60%;
+  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: max(50%, calc(100% - 430px));   /* everything beside the intro panel */
 }
 .btn {
   font: 500 12px/1 var(--mono); letter-spacing: .04em;
@@ -73,7 +73,7 @@ body.os-mode .tag, body.os-mode .tools, body.os-mode .hint { opacity: 0; pointer
 .tools .btn:not(.primary) { background: color-mix(in srgb, var(--sheet) 84%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 /* Sound button (js/ui/sound.js): a speaker crossed out while off, with waves while on */
-.sound-btn { display: inline-flex; align-items: center; gap: 6px; }
+.sound-btn { display: inline-flex; align-items: center; justify-content: center; padding-left: 11px; padding-right: 11px; }   /* icon only (its label is for screen readers) */
 .sound-btn svg { width: 14px; height: 14px; }
 .sound-btn .wave { display: none; }
 .sound-btn.on .wave { display: inline; }

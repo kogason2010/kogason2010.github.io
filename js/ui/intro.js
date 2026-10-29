@@ -33,4 +33,5 @@ cv.addEventListener("pointerdown", () => { if (!tagEl.classList.contains("collap
 // a first-time visitor keeps the introduction open until they start looking around; after that it folds by itself
 let introSeen = false;
 try { introSeen = !!localStorage.getItem("labSeen"); localStorage.setItem("labSeen", "1"); } catch (e) { /* no storage: treat as seen */ introSeen = true; }
-if (introSeen) foldIntroSoon(INTRO_FOLD_MS);
+// (on a phone it folds by itself even the first time: open, it covers half the room)
+if (introSeen || window.matchMedia("(max-width: 640px)").matches) foldIntroSoon(INTRO_FOLD_MS);
