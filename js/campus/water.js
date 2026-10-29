@@ -15,11 +15,16 @@ function buildWater() {
   if (THREE.Water && !LIGHT) {
     FX.pond = new THREE.Water(new THREE.CircleGeometry(8.1, 64), { textureWidth: 256, textureHeight: 256, waterNormals: waterN, sunDirection: SUN_DIR.clone(), sunColor: 0xffffff, waterColor: 0x3d7f86, distortionScale: 1.4, fog: true, alpha: 1.0 });
     FX.pond.material.uniforms.size.value = 5.5; FX.pond.rotation.x = -Math.PI / 2; FX.pond.position.set(-30, 0.05, 30); world.add(FX.pond);
-    const reflect = FX.pond.onBeforeRender; FX.pond.onBeforeRender = function (...a) {
-      const gv = FX.grass.visible, saved = FX.chunks.map(ch => ch.meshes[0].visible), cast = FX.chunks.map(ch => ch.meshes[0].castShadow);
-      FX.grass.visible = false; FX.chunks.forEach(ch => { const v = !ch.far && Math.hypot(ch.sphere.center.x + 30, ch.sphere.center.z - 30) < 30 + ch.sphere.radius; ch.meshes.forEach(m => { m.visible = v; }); });
+    // The reflection draws the campus a second time, so: only from within 70 m, only every third frame (the last one
+    // stays on the water in between), and without the grass, far trees, leaf cards, flowers, people and spray.
+    const reflect = FX.pond.onBeforeRender; let frame = 0, skip = null;
+    FX.pond.onBeforeRender = function (...a) {
+      if (Math.hypot(camera.position.x + 30, camera.position.z - 30) > 70 || frame++ % 3) return;
+      if (!skip) { skip = [FX.grass, FX.jets, ...(FX.people || [])]; world.traverse(o => { if (o.isMesh && o.material && o.material.alphaTest > 0 && !FX.chunks.some(ch => ch.meshes.includes(o))) skip.push(o); }); }
+      const was = skip.map(o => o.visible), saved = FX.chunks.map(ch => ch.meshes[0].visible), cast = FX.chunks.map(ch => ch.meshes[0].castShadow);
+      skip.forEach(o => { o.visible = false; }); FX.chunks.forEach(ch => { const v = !ch.far && Math.hypot(ch.sphere.center.x + 30, ch.sphere.center.z - 30) < 30 + ch.sphere.radius; ch.meshes.forEach(m => { m.visible = v; }); });
       reflect.apply(this, a);
-      FX.grass.visible = gv; FX.chunks.forEach((ch, i) => ch.meshes.forEach(m => { m.visible = saved[i]; m.castShadow = cast[i]; }));
+      skip.forEach((o, i) => { o.visible = was[i]; }); FX.chunks.forEach((ch, i) => ch.meshes.forEach(m => { m.visible = saved[i]; m.castShadow = cast[i]; }));
     };
   } else {
     const pw = waterN.clone(); pw.needsUpdate = true; pw.repeat.set(3, 3);

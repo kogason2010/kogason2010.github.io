@@ -80,6 +80,7 @@ const clock = new THREE.Clock();
 let rotorAngle = 0, rotorTarget = 0, rotorTimer = 0;
 function frame() {
   const dt = Math.min(clock.getDelta(), 0.05), time = clock.elapsedTime;
+  watchPerformance();
   if (camTween) {
     const ct = camTween;
     ct.t = Math.min(1, ct.t + dt / ct.dur);
