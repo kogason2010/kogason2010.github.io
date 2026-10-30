@@ -165,9 +165,9 @@ function cbotNavBuild() {
   // the doors: four buildings with steps up to their doors, and the café's door off its terrace
   NV.doors = CAMPUS.bldg.filter(b => b.door).map(b => {
     const dx = b.door[0] - b.x, dz = b.door[1] - b.z, f = Math.abs(dx) / b.w > Math.abs(dz) / b.d ? [Math.sign(dx), 0] : [0, Math.sign(dz)];
-    return { name: b.name, D: [b.door[0], b.door[1]], f, B: [b.door[0] + f[0] * 1.7, b.door[1] + f[1] * 1.7], steps: true };
+    return { name: b.name, D: [b.door[0], b.door[1]], f, B: [b.door[0] + f[0] * 1.7, b.door[1] + f[1] * 1.7] };
   });
-  NV.doors.push({ name: "Café", D: [-15.7, -9.15], f: [0, 1], B: [-15.7, -8.2], steps: false });   // the shopfront door (buildCafe: CX + 1.3, ZF)
+  NV.doors.push({ name: "Café", D: [-15.7, -9.15], f: [0, 1], B: [-15.7, -8.2] });   // the shopfront door (buildCafe: CX + 1.3, ZF)
   // things worth stopping to look at: the fountain, the pond, the garden's beds and sundial, the sculpture, the café
   const V = NV.visits = [];
   for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; V.push([Math.cos(a) * 4.7, Math.sin(a) * 4.7, 0, 0]); }
@@ -226,17 +226,6 @@ function cbotPath(sx, sz, gx, gz, lawn) {
   }
   return out.map(p => ({ x: p[0], z: p[1] }));
 }
-// the height of the steps up to a building's door, under a point
-function cbotStepY(x, z) {
-  const D = CBOT_NAV.doors; if (!D) return 0;
-  for (const d of D) {
-    if (!d.steps) continue;
-    const fx = d.D[0] - d.f[0] * 0.6, fz = d.D[1] - d.f[1] * 0.6, a = (x - fx) * d.f[0] + (z - fz) * d.f[1], s = Math.abs((x - fx) * d.f[1] - (z - fz) * d.f[0]);
-    if (s < 2.1 && a > -0.5 && a < 1.98) return a < 1.22 ? 0.42 : a < 1.6 ? 0.28 : 0.14;
-  }
-  return 0;
-}
-
 /* ---- what they do ---- */
 function buildCampusBots() {
   FX.bots = CBOT_TYPES.slice(0, LIGHT ? 4 : 6).map(cbotBuild);
@@ -343,7 +332,7 @@ function cbotStep(p, dt) {
   if (faded) p.mats.forEach(m => { m.opacity = p.fade; });
   p.root.visible = p.fade > 0.02;
   if (!p.root.visible) return;
-  const h = p.o.h, ty = cbotStepY(p.x, p.z) + p.sitBlend * (0.48 - 0.48 * h);
+  const h = p.o.h, ty = stepsAt(p.x, p.z) + p.sitBlend * (0.48 - 0.48 * h);
   p.y += (ty - p.y) * Math.min(1, dt * 10);
   p.root.position.set(p.x + p.sitOff[0] * p.sitBlend, p.y, p.z + p.sitOff[1] * p.sitBlend); p.root.rotation.y = p.heading;
   // the vacuum coming close: turn to watch it, and smile
