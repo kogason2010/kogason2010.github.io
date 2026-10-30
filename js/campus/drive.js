@@ -3,7 +3,7 @@
 "use strict";
 
 /* driving */
-const DRV = { x: SPAWN.x, z: SPAWN.z, h: SPAWN.h, v: 0, w: 0, acc: 0, bumpT: 0, msgT: 0, y: 0, vy: 0, ground: 0, flown: false, holdT: 0, launch: -1 };
+const DRV = { x: SPAWN.x, z: SPAWN.z, h: SPAWN.h, v: 0, w: 0, acc: 0, bumpT: 0, msgT: 0, y: 0, vy: 0, ground: 0, onGround: true, tilt: 0, flown: false, holdT: 0, launch: -1 };
 const keys = {}, joy = { active: false, x: 0, y: 0 };
 let boostHeld = false, flyHeld = false;
 window.addEventListener("keydown", e => {
@@ -59,13 +59,18 @@ function driveCampus(dt) {
   DRV.y += DRV.vy * dt;
   const nx = DRV.x + Math.cos(DRV.h) * DRV.v * dt, nz = DRV.z - Math.sin(DRV.h) * DRV.v * dt, res = collide(nx, nz, BOT_R, DRV.y);
   DRV.x = res.x; DRV.z = res.z; DRV.bumpT -= dt; DRV.msgT -= dt;
-  DRV.ground = groundAt(DRV.x, DRV.z);
-  if (DRV.y <= DRV.ground) {
+  DRV.ground = Math.max(groundAt(DRV.x, DRV.z), stepsUnder(DRV.x, DRV.z, BOT_R * 0.85));
+  // on the ground, steps are driven up and down rather than flown: a quick lift, nose up, or a drop, nose down
+  const wasDown = DRV.onGround;
+  if (fly) DRV.onGround = false; else if (DRV.y <= DRV.ground + 0.001) DRV.onGround = true; else if (DRV.y - DRV.ground > 0.5) DRV.onGround = false;
+  DRV.tilt = 0;
+  if (wasDown && DRV.onGround && Math.abs(DRV.ground - DRV.y) < 0.5) { const d = DRV.ground - DRV.y; DRV.y += d * Math.min(1, dt * 12); DRV.vy = 0; DRV.tilt = Math.max(-0.2, Math.min(0.2, d * 2)); }
+  else if (DRV.y <= DRV.ground) {
     if (DRV.vy < -2 && DRV.y > 0.05 + DRV.ground - 0.5) { camShake = Math.max(camShake, 0.12); if (DRV.ground > 0.5 && DRV.msgT <= 0) { toast("Touchdown on the roof"); DRV.msgT = 2.5; } }
     DRV.y = DRV.ground; DRV.vy = Math.max(0, DRV.vy);
   }
   // into NCA's LC lab or the Library: steering at the doors while driving forward (checked on the intended move, so no bump first)
-  const fwd = (thr > 0 || DRV.v > 0.15) && DRV.y < 0.2;
+  const fwd = (thr > 0 || DRV.v > 0.15) && DRV.y - DRV.ground < 0.2;
   if (fwd && nx > CHEM_DOOR.x - 0.4 && Math.abs(nz - CHEM_DOOR.z) < 1.3 && Math.cos(DRV.h) > 0.4) { DRV.v = 0; enterPlace("chem"); return; }
   if (fwd && nz > LIB_DOOR.z - 0.4 && Math.abs(nx - LIB_DOOR.x) < 0.9 && Math.sin(DRV.h) < -0.4) { DRV.v = 0; enterPlace("library"); return; }
   if (fwd && nx < MATH_DOOR.x + 0.4 && Math.abs(nz - MATH_DOOR.z) < 1.3 && Math.cos(DRV.h) < -0.4) { DRV.v = 0; enterPlace("math"); return; }
@@ -171,13 +176,13 @@ function drawMinimap(time) {
 function updateWorld(dt, time) {
   if (spaceOn) { updateSpace(dt, time); return; }
   const boost = driveCampus(dt);
-  const air = DRV.y - DRV.ground;
+  const air = DRV.onGround ? 0 : DRV.y - DRV.ground;
   wbot.position.set(DRV.x, DRV.y + 0.003 + (air > 0.05 ? Math.sin(time * 5) * 0.03 * Math.min(1, air) : 0), DRV.z);
   const thrust = DRV.launch >= 0 ? 2.6 : (keys.Space || flyHeld) ? 1 : air > 0.05 ? 0.35 : 0;
   wJet.visible = thrust > 0; wJet.scale.set(1, thrust * (0.8 + Math.random() * 0.4), 1); wJet.material.opacity = 0.5 * thrust;
   wSpotShadow.visible = air > 0.05; wSpotShadow.position.set(DRV.x, DRV.ground + 0.03, DRV.z); wSpotShadow.scale.setScalar(0.9 + air * 0.08); wSpotShadow.material.opacity = Math.max(0, 0.45 - air * 0.012);
   altClock -= dt; if (altClock <= 0) { altClock = 0.15; const a = Math.round(DRV.y); hudAltEl.hidden = DRV.y < 0.5; if (!hudAltEl.hidden) hudAltEl.textContent = DRV.launch >= 0 ? "Breaking orbit…" : DRV.holdT > 4 ? `Flying · ${a} m up · keep holding… ${Math.ceil(10 - DRV.holdT)}` : `Flying · ${a} m up`; }
-  const pitch = Math.max(-0.05, Math.min(0.05, DRV.acc * 0.012));
+  const pitch = Math.max(-0.05, Math.min(0.05, DRV.acc * 0.012)) + DRV.tilt;
   wbot.rotation.set(0, DRV.h + (R.flash > 0 ? Math.sin(time * 40) * 0.05 : 0), wbot.rotation.z + (pitch - wbot.rotation.z) * Math.min(1, dt * 8));
   wBrush.rotation.y += dt * (8 + Math.abs(DRV.v) * 14 + (air > 0.05 ? 30 : 0)); wTurret.rotation.y += dt * 4;
   R.flash -= dt;

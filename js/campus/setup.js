@@ -8,13 +8,23 @@
    ====================================================================== */
 const world = new THREE.Group(); world.visible = false; scene.add(world);
 const WB = 58;                                                     // hedge boundary (half size, metres)
-const CAMPUS = { boxes: [], circles: [], paths: [], bldg: [], lots: [], ponds: [], plazas: [], mulch: [], gardens: [], seats: [] };   // mulch: the planted beds by the entrances; seats: [x, z, facing] on the benches
+const CAMPUS = { boxes: [], circles: [], paths: [], bldg: [], lots: [], ponds: [], plazas: [], mulch: [], gardens: [], seats: [], steps: [] };   // mulch: the planted beds by the entrances; seats: [x, z, facing] on the benches; steps: up to the doors
 let worldBuilt = false, worldOn = false, worldBusy = false;
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 const seeded = (seed) => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 const LAB_DOOR = { x: 0, z: -18 }, SPAWN = { x: 0, z: -14.2, h: -Math.PI / 2 };
 const CHEM_DOOR = { x: 31.6, z: 0, hinted: false }, CHEM_SPAWN = { x: 27.6, z: 0, h: Math.PI, msg: "Back outside, by NCA" };
 const MATH_DOOR = { x: -31.6, z: 0, hinted: false }, MATH_SPAWN = { x: -27.6, z: 0, h: 0, msg: "Back outside, by Mathematics" };
+// the steps up to a building's doors (landing 0.42 m, then 0.28 and 0.14 m treads), and how high they are under a point
+function stepsAt(x, z) {
+  for (const s of CAMPUS.steps) {
+    const dx = x - s.x, dz = z - s.z, lx = dx * Math.cos(s.ry) - dz * Math.sin(s.ry), lz = dx * Math.sin(s.ry) + dz * Math.cos(s.ry);
+    if (Math.abs(lx) < 2.1 && lz > -0.6 && lz < 1.98) return lz < 1.22 ? 0.42 : lz < 1.6 ? 0.28 : 0.14;
+  }
+  return 0;
+}
+// the highest step under a round footprint (so the front edge climbs on, and the back edge steps off)
+function stepsUnder(x, z, r) { return Math.max(stepsAt(x, z), stepsAt(x + r, z), stepsAt(x - r, z), stepsAt(x, z + r), stepsAt(x, z - r)); }
 const FLY_CEIL = 32;   // how high the robot can fly, in metres
 const LIB_DOOR = { x: 0, z: 35.6, hinted: false }, LIB_SPAWN = { x: 0, z: 31.6, h: Math.PI / 2, msg: "Back outside, by the Library" };
 const wSpots = [], wSpotLayer = new THREE.Group(), finds = [];

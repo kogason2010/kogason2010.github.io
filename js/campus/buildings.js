@@ -239,6 +239,11 @@ function buildBuildings() {
     const ends = door === "s" || door === "n" ? [along(x - w / 2, ez), along(x + w / 2, ez)] : [along(ex, z - d / 2), along(ex, z + d / 2)];
     entranceBeds(ex, ez, ry, o.beds || 2.5, -Math.min(...ends) - 0.6, Math.max(...ends) - 0.6);
     CAMPUS.boxes.push([x - w / 2 - 0.2, z - d / 2 - 0.2, x + w / 2 + 0.2, z + d / 2 + 0.2, "building", h + 0.74]);   // last: roof height
+    CAMPUS.steps.push({ x: ex, z: ez, ry });   // the robots and the vacuum climb these
+    [-2.16, 2.16].forEach(dx => {   // the cheek walls either side of them are solid
+      const a = [ex + (dx - 0.07) * Math.cos(ry) + 0.12 * Math.sin(ry), ez - (dx - 0.07) * Math.sin(ry) + 0.12 * Math.cos(ry)], b = [ex + (dx + 0.07) * Math.cos(ry) + 2.0 * Math.sin(ry), ez - (dx + 0.07) * Math.sin(ry) + 2.0 * Math.cos(ry)];
+      CAMPUS.boxes.push([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[0], b[0]), Math.max(a[1], b[1]), "wall", 0.5]);
+    });
     CAMPUS.bldg.push({ x, z, w, d, name, door: [ex + fx * 0.6, ez + fz * 0.6] });
   }
   building({ x: 0, z: -24, w: 16, d: 12, h: 7.4, style: "lab", name: "Kogason Lab", door: "s", wall: 0xe6e9ea, trim: 0xf4f6f6 });
