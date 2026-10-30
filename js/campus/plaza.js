@@ -23,6 +23,7 @@ function buildPlaza() {
     [0.6, 0.75].forEach(y => box(1.72, 0.1, 0.04, wood, 0, y, 0.18, g));
     [-0.74, 0.74].forEach(dx => { box(0.05, 0.46, 0.44, iron, dx, 0.23, -0.04, g); box(0.05, 0.45, 0.05, iron, dx, 0.67, 0.19, g); box(0.05, 0.04, 0.4, iron, dx, 0.66, -0.02, g); });
     blobs.push([x, z, 2.2, 1.0, ry]); [-0.5, 0.5].forEach(s => CAMPUS.circles.push([x + Math.cos(ry) * s, z - Math.sin(ry) * s, 0.42, "bench"]));
+    [-0.45, 0.45].forEach(s => CAMPUS.seats.push([x + Math.cos(ry) * s - Math.sin(ry) * 0.04, z - Math.sin(ry) * s - Math.cos(ry) * 0.04, ry + Math.PI]));   // facing the fountain (-z)
   }
 }
 
