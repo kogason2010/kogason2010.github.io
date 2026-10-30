@@ -17,7 +17,7 @@ const WORLD_STEPS = [
   ["Laying out the garden", () => { buildGarden(); buildBenches(); }],
   ["Growing the trees", () => buildTrees()],
   ["Planting the shrubs", () => { buildShrubsAndHedge(); buildLamps(); buildContactShadows(); }],
-  ["Growing the grass", () => { buildGrass(); buildLife(); buildGameplay(); buildPeople(); }],
+  ["Growing the grass", () => { buildGrass(); buildLife(); buildGameplay(); buildCampusBots(); }],
   ["Tidying up", () => {
     world.traverse(o => { if (o.isInstancedMesh) o.frustumCulled = false; if (o.material && o.material.isMeshStandardMaterial && !FX.windowMats.includes(o.material)) o.material.envMapIntensity = o.material.userData.env || 0.55; });
     buildRobot();
