@@ -88,7 +88,7 @@ function updateSound() {
     L.wind = night ? 0.012 : 0.03; L.crickets = night ? 0.018 : 0;
     if (!night && performance.now() > SND.nextBird) { chirp(); SND.nextBird = performance.now() + 1500 + Math.random() * 5000; }
   }
-  if (here === "library" && performance.now() > SND.nextPage) { if (SND.nextPage) pageTurn(); SND.nextPage = performance.now() + 7000 + Math.random() * 12000; }
+  if (here === "library" && performance.now() > SND.nextPage) { if (SND.nextPage) { pageTurn(); if (typeof libPageTurn === "function") libPageTurn(); } SND.nextPage = performance.now() + 7000 + Math.random() * 12000; }
   Object.keys(L).forEach(k => SND.layers[k].g.gain.setTargetAtTime(L[k], now, 0.6));
 }
 function setSound(on) {

@@ -106,6 +106,7 @@ function cbotBuild(o) {
   if (o.carry === "phone") { add(new THREE.BoxGeometry(0.18, 0.012, 0.13), DARK, 0, -0.08, 0.05, hand); add(new THREE.PlaneGeometry(0.16, 0.11), 0x7fd3ff, 0, -0.073, 0.05, hand, [-Math.PI / 2, 0, 0], null, true); }
   if (o.carry === "rack") { add(new THREE.BoxGeometry(0.2, 0.03, 0.08), ACC, 0, -0.1, 0.05, hand); [0xe3632d, 0x3fa7d6, 0x9b7bff].forEach((c, i) => add(new THREE.CylinderGeometry(0.014, 0.014, 0.1, 8), c, (i - 1) * 0.06, -0.04, 0.05, hand)); }
   if (o.carry === "clipboard") add(new THREE.BoxGeometry(0.03, 0.26, 0.2), 0xb8946a, 0.02, -0.09, 0.02, arms[0].hand);
+  if (o.carry === "book") { add(new THREE.BoxGeometry(0.036, 0.23, 0.17), o.book || 0x7a2430, 0.02, -0.1, 0.03, hand); add(new THREE.BoxGeometry(0.028, 0.214, 0.17), 0xf3ead8, 0.02, -0.1, 0.038, hand); }   // (the library's robots)
 
   // one skinned mesh for the body, one for the glowing bits, on a shared skeleton
   body.updateMatrixWorld(true);
@@ -374,7 +375,7 @@ function cbotWalk(p, dt, walking, speed) {
     if (p.state === "sit") { sh = -0.5; el = -0.9; }
     if (p.state === "chat" && i === 1) { sh = -0.5 + 0.25 * Math.sin(p.t * 3.1); el = -1.2 + 0.3 * Math.sin(p.t * 4.3); roll = -0.25; }
     if (i === 1 && p.o.carry === "cup") { const sip = Math.sin(p.t * 0.9 + p.phase) > 0.93 && !walking; sh = sip ? -1.15 : -0.35 + sh * 0.25; el = sip ? -1.9 : -1.25; }
-    if (i === 1 && p.o.carry === "rack") { sh = -0.3 + sh * 0.2; el = -1.3; }
+    if (i === 1 && (p.o.carry === "rack" || p.o.carry === "book")) { sh = -0.3 + sh * 0.2; el = -1.3; }
     if (i === 0 && p.o.carry === "clipboard") { sh = -0.15; el = -1.6; roll = 0.45; }
     lerp(A[i].sh.rotation, "x", sh); lerp(A[i].el.rotation, "x", el); lerp(A[i].sh.rotation, "z", roll);
   });

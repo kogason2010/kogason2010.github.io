@@ -248,6 +248,7 @@ function buildLibraryRoom() {
   const chairG = mergeGeos([new THREE.BoxGeometry(0.44, 0.06, 0.42).translate(0, 0.46, 0), new THREE.BoxGeometry(0.44, 0.5, 0.05).translate(0, 0.72, -0.19), ...[[-0.18, -0.17], [0.18, -0.17], [-0.18, 0.17], [0.18, 0.17]].map(([x, z]) => new THREE.BoxGeometry(0.04, 0.46, 0.04).translate(x, 0.23, z))]);
   const chairs = new THREE.InstancedMesh(chairG, oakM, DN * 4);
   const q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1);
+  LIBFX.seats = []; LIBFX.chairs = chairs;   // (life.js puts readers in some of them, and things on the desks)
   deskPts.forEach(([a, r], i) => {
     const d = new THREE.Vector3(Math.cos(a), 0, Math.sin(a)), t = new THREE.Vector3(-d.z, 0, d.x), c = d.clone().multiplyScalar(r), rotY = -a;
     q.setFromEuler(new THREE.Euler(0, rotY, 0));
@@ -255,8 +256,10 @@ function buildLibraryRoom() {
     m4.compose(c.clone().setY(0.42), q, one); deskBody.setMatrixAt(i, m4);
     [-0.7, 0.7].forEach((o, li) => { m4.compose(c.clone().addScaledVector(d, o).setY(0.835), q, one); lampBase.setMatrixAt(i * 2 + li, m4); lampShade.setMatrixAt(i * 2 + li, m4); });
     [[-0.7, 1], [0.7, 1], [-0.7, -1], [0.7, -1]].forEach(([o, sd], ci) => {
-      const p = c.clone().addScaledVector(d, o).addScaledVector(t, sd * 0.78); const cq = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.atan2(-t.x * sd, -t.z * sd), 0));
+      const pull = rnd() < 0.3 ? 0.06 + rnd() * 0.16 : rnd() * 0.04, turn = (rnd() - 0.5) * (pull > 0.05 ? 0.6 : 0.08);   // some chairs left pushed back, or turned
+      const p = c.clone().addScaledVector(d, o).addScaledVector(t, sd * (0.78 + pull)); const cq = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.atan2(-t.x * sd, -t.z * sd) + turn, 0));
       m4.compose(p, cq, one); chairs.setMatrixAt(i * 4 + ci, m4);
+      LIBFX.seats.push({ i: i * 4 + ci, r: r + o, sd, d: [d.x, d.z], t: [t.x, t.z] });
     });
   });
   [deskTop, deskBody, lampBase, chairs].forEach(m => { m.castShadow = m.receiveShadow = true; library.add(m); });

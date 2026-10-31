@@ -47,6 +47,7 @@
 | The LC model and LC workstation app | `chemistry/lc.js` |
 | Entering and leaving it | `chemistry/visit.js` |
 | **Library** reading room (rotunda, alcoves, desks, dome) | `library/rotunda.js` |
+| Library life: robot readers, librarian and shelving drone; books on the desks, trucks, lamps, runner, globes | `library/life.js` |
 | Shelf panels, catalogue search, the note reader | `library/reader.js` |
 | Entering the library, its camera and lighting | `library/visit.js` |
 | Main loop, resize, camera easing, start-up | `main.js` |
