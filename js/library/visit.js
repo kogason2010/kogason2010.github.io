@@ -1,6 +1,7 @@
 /* js/library/visit.js — The library as a place on the campus: drive through its doors to arrive in the reading room.
    Inside, the camera orbits the room's centre (look all the way round, zoom in toward an alcove, or out for the whole
    room); warm light comes down through the oculus (a shaft with dust drifting in it) and from the desk lamps. The bronze doors lead back out.
+   The robots reading, shelving and minding the desk, and the things on the desks, are in life.js.
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
@@ -25,7 +26,8 @@ function buildLibrary() {
   const before = hotspots.length;
   buildLibraryRoom();
   const libHot = hotspots.slice(before);
-  const keep = new Set([LIBFX.oculus, LIBFX.clock, LIBFX.shaft && LIBFX.shaft.motes]);
+  buildLibraryLife();
+  const keep = new Set([LIBFX.oculus, LIBFX.clock, LIBFX.shaft && LIBFX.shaft.motes, ...LIBLIFE.live]);
   libHot.forEach(h => mergeStatic(h.group, keep));
   mergeStatic(library, new Set([...keep, ...libHot.map(h => h.group)]));
   libHot.forEach(addHotButton);
@@ -69,6 +71,7 @@ function updateLibrary(dt, time) {
     S.motes.userData.seeds.forEach(([a, r, y0], i) => { const y = ((y0 - time * 0.12) % top + top) % top + 0.5, aa = a + time * 0.03 + Math.sin(time * 0.3 + i) * 0.05; p.setXYZ(i, Math.cos(aa) * r, y, Math.sin(aa) * r); });
     p.needsUpdate = true; S.motes.material.opacity = night ? 0.35 : 0.7;
   }
+  updateLibraryLife(dt);
   const f = libFov(); if (Math.abs(camera.fov - f) > 0.1) { camera.fov = f; camera.updateProjectionMatrix(); }
   libClampCamera();
 }
