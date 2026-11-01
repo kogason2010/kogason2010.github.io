@@ -10,6 +10,7 @@ const HINT_UP = hint.textContent, HINT_DOWN = "Drag to look around · scroll or 
 scene.add(sun.target);
 function goLevel(to) {
   if (lvl || to === level || deskOpen || pMode) return;
+  if (to === "down") foldIntro();
   sheet.classList.add("closed"); sheet.setAttribute("aria-hidden", "true"); document.body.classList.remove("sheet-open");
   if (to === "up") sfcAbort();
   const base = focusHome || { pos: camera.position.clone(), tgt: controls.target.clone() };
@@ -36,7 +37,7 @@ function updateLevel(dt) {
   controls.enabled = true; controls.minDistance = 8;
   labelsEl.hidden = false; hint.hidden = false; hint.textContent = level === "up" ? HINT_UP : HINT_DOWN;
   levelBtn.disabled = false; particleBtn.disabled = level === "down";
-  levelBtn.textContent = level === "up" ? "Go downstairs" : "Go upstairs";
+  levelBtn.querySelector(".lbl").textContent = level === "up" ? "Go downstairs" : "Go upstairs"; levelBtn.classList.toggle("going-up", level === "down");
   document.getElementById("eyebrow").textContent = level === "up" ? "Portfolio · lab 01" : "Portfolio · basement · SFC suite";
   levelBtn.setAttribute("aria-label", level === "up" ? "Go downstairs to the SFC suite" : "Go back upstairs to the lab");
   if (osFrame && level === "up") { osFrame.style.visibility = ""; placeOsFrame(); }

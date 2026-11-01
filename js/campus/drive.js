@@ -223,7 +223,7 @@ function shadowRes(n) { if (LIGHT) n = Math.min(n, 1024); if (sun.shadow.mapSize
 function fade(on, ms, cb, color) { if (on || color) { const bg = color || (night ? "#0b1433" : "#f4fbff"); fadeEl.style.background = bg; fadeEl.classList.toggle("dark", bg !== "#f4fbff"); } if (!on) setTimeout(() => { loaderEl.hidden = true; }, (reduce ? 0 : ms) + 40); fadeEl.style.transitionDuration = (reduce ? 0 : ms) + "ms"; fadeEl.classList.toggle("on", on); setTimeout(cb, reduce ? 0 : ms + 30); }
 function enterWorld() {
   if (worldOn || worldBusy || lvl || deskOpen || pMode || level !== "up") return;
-  worldBusy = true; treeTextures();
+  worldBusy = true; treeTextures(); foldIntro();
   labView = focusHome ? { pos: focusHome.pos.clone(), tgt: focusHome.tgt.clone() } : { pos: camera.position.clone(), tgt: controls.target.clone() };
   focusHome = null; tween = null; closeSheet(true); setHover(null); botHover = false;
   labelsEl.hidden = true; hint.hidden = true; controls.enabled = false; doorGoal = 1;

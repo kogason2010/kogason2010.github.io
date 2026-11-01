@@ -233,6 +233,11 @@ body.world-mode .hint { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 .hot[hidden] { display: none; }
 .hot { transition: border-color .15s, opacity .2s; }
 .hot.tucked { opacity: 0; pointer-events: none; }
+/* a tag crowded out by a nearer one shrinks to its dot (js/main.js); hovering or focusing it shows the name again */
+.hot.dot { gap: 0; padding: 5px; }
+.hot.dot .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.hot.dot:hover, .hot.dot:focus-visible, .hot.dot.on { gap: 7px; padding: 6px 10px 6px 7px; z-index: 1; }
+.hot.dot:hover .lbl, .hot.dot:focus-visible .lbl, .hot.dot.on .lbl { position: static; width: auto; height: auto; clip-path: none; }
 
 .sheet {
   position: fixed; z-index: 3;
@@ -410,6 +415,15 @@ body.world-mode .hint { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
   .tools { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: none; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .tools::-webkit-scrollbar { display: none; }
   .tools .btn { flex: none; padding: 8px 11px; }
+  /* phones: the toolbar's buttons show just their icons so they all fit across the screen (their names stay for screen
+     readers, and Particles says "Back to lab" in words while it's on) */
+  .tools { gap: 6px; }
+  .tools .btn .ico { display: block; width: 14px; height: 14px; flex: none; }
+  .tools .compact { display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; min-width: 36px; padding: 8px 10px; }
+  .tools .compact .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .tools #particleBtn[aria-pressed="true"] .lbl { position: static; width: auto; height: auto; clip-path: none; }
+  .tools #particleBtn[aria-pressed="true"] ~ #levelBtn, .tools #particleBtn[aria-pressed="true"] ~ #lightsBtn { display: none; }   /* (no use to a cloud of points, and the words need their room) */
+  .tools #levelBtn.going-up .ico { transform: rotate(180deg); }
   .tag { top: calc(60px + env(safe-area-inset-top, 0px)); }
 }
 body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-8px); }
@@ -511,6 +525,7 @@ body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-
 
 /* the Places menu: every room in one list */
 .tools .places-btn { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.tools .ico { display: none; }   /* toolbar icons are for phones (below); wider screens have room for the words */
 .places-btn svg { width: 14px; height: 14px; }
 .places-menu { position: fixed; z-index: 6; top: calc(58px + env(safe-area-inset-top, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); width: min(300px, calc(100vw - 32px));
   display: grid; gap: 2px; padding: 6px; border-radius: 14px; border: 1px solid var(--line); background: color-mix(in srgb, var(--sheet) 94%, transparent);
@@ -559,3 +574,11 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 
 .places-menu .pm-quality span { flex: 1; font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
 .places-menu .pm-quality button { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font: 500 12px/1 var(--mono); color: var(--ink); }
 .places-menu .pm-quality button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* the 3D view was taken away by the device (js/core/scene.js) */
+.gl-lost { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 40; width: min(360px, calc(100% - 32px)); box-sizing: border-box;
+  display: grid; gap: 8px; justify-items: start; padding: 18px 20px; border-radius: 16px; background: var(--sheet); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 18px 50px rgba(0,0,0,.18); }
+.gl-lost b { font: 800 22px/1.1 var(--display); letter-spacing: -.01em; }
+.gl-lost p { margin: 0; color: var(--ink-soft); }
+.gl-lost .btn { margin-top: 4px; }
+body.gl-off #labels, body.gl-off .hint { visibility: hidden; }

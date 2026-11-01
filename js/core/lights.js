@@ -24,7 +24,7 @@ function setNight(on) {
   hoodLight.intensity = on ? 1.6 : 0.55; mantleMat.emissiveIntensity = on ? 1.5 : 0.6;
   benchLight.intensity = on ? 1.2 : 0.6;
   screenGlow.intensity = on ? 0.9 : 0;
-  lightsBtn.textContent = on ? "Lights on" : "Lights off";
+  lightsBtn.querySelector(".lbl").textContent = on ? "Lights on" : "Lights off";
   lightsBtn.setAttribute("aria-pressed", String(on));
 }
 lightsBtn.addEventListener("click", () => setNight(!night));

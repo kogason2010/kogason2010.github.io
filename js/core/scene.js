@@ -31,6 +31,15 @@ renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.95;
 stage.appendChild(renderer.domElement);
+// a phone that wants its graphics memory back (or a graphics driver that resets) can take the 3D view away. Say so and
+// offer a reload, rather than leave a blank page; if the browser hands the view back by itself, carry on.
+const glLost = document.createElement("div");
+glLost.className = "gl-lost"; glLost.hidden = true; glLost.setAttribute("role", "alert");
+glLost.innerHTML = '<b>The 3D view stopped</b><p>Your device needed its graphics memory for something else. Reload the page to bring the lab back.</p><button class="btn primary" type="button">Reload</button>';
+glLost.querySelector("button").addEventListener("click", () => location.reload());
+document.body.appendChild(glLost);
+renderer.domElement.addEventListener("webglcontextlost", e => { e.preventDefault(); glLost.hidden = false; document.body.classList.add("gl-off"); });
+renderer.domElement.addEventListener("webglcontextrestored", () => { glLost.hidden = true; document.body.classList.remove("gl-off"); });
 
 const scene = new THREE.Scene();
 const lab = new THREE.Group(); scene.add(lab);

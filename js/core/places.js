@@ -7,6 +7,7 @@
 const PLACES = {};
 function setPlaceUI(name) {
   const P = PLACES[name], inside = !!P;
+  if (inside) foldIntro();
   levelBtn.hidden = inside; particleBtn.hidden = inside;
   hint.textContent = inside ? P.hint : HINT_UP;
   document.getElementById("eyebrow").textContent = inside ? P.eyebrow : "Portfolio · lab 01";

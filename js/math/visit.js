@@ -3,7 +3,10 @@
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
-const MATH_VIEW = { pos: new THREE.Vector3(5.5, 6.6, 11.0), tgt: new THREE.Vector3(0, 2.8, -2.5), minD: 3, maxD: 17 };
+// from high in the corner by the door, so the opening view takes in the blackboard, the lattice and the exhibits on both sides
+const MATH_VIEW = { pos: new THREE.Vector3(7, 8.3, 11.2), tgt: new THREE.Vector3(-0.5, 1.8, -3.5), minD: 3, maxD: 17, fov: 64 };
+// a little wider than the library's lens on a wide screen: the exhibits stand at both ends of the hall
+const mathFov = () => Math.max(MATH_VIEW.fov, libFov());
 let mathSaved = null;
 function buildMath() {
   if (mathBuilt) return;
@@ -24,7 +27,7 @@ function mathClampCamera() {
 }
 function mathHomeView() {
   const a = libAspect(), pos = a < 0.8 ? new THREE.Vector3(3, 8.2, 11.2) : MATH_VIEW.pos;
-  camera.fov = libFov(); camera.updateProjectionMatrix();
+  camera.fov = mathFov(); camera.updateProjectionMatrix();
   camera.position.copy(pos); controls.target.copy(MATH_VIEW.tgt); camera.lookAt(MATH_VIEW.tgt); controls.minDistance = MATH_VIEW.minD;
   mathClampCamera();
 }
