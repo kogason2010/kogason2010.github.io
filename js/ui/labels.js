@@ -7,7 +7,8 @@ const labelsEl = document.getElementById("labels"), tagEl = document.querySelect
 // one floating tag per clickable group; rooms built later (the Chemistry lab) add theirs with addHotButton
 function addHotButton(h) {
   const b = document.createElement("button");
-  b.type = "button"; b.className = "hot"; b.textContent = h.label;
+  b.type = "button"; b.className = "hot";
+  const t = document.createElement("span"); t.className = "lbl"; t.textContent = h.label; b.appendChild(t);   // (a crowded tag hides its name: see main.js)
   b.addEventListener("click", () => openSection(h.key));
   b.addEventListener("pointerenter", () => setHover(h.key));
   b.addEventListener("pointerleave", () => setHover(null));
@@ -103,5 +104,6 @@ sheetBody.addEventListener("click", e => { if (e.target.closest("[data-particles
 document.getElementById("closeBtn").addEventListener("click", () => closeSheet());
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
+  if (!document.getElementById("placesMenu").hidden) return;   // the Places menu closes itself (js/ui/places-menu.js); nothing else should go with it
   if (worldOn) exitWorld(); else if (readerOpen) closeReader(); else if (lcAppOpen) closeLcApp(); else if (sfcAppOpen) closeSfcApp(); else if (wsOpen) closeWorkstation(); else if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else closeSheet();
 });

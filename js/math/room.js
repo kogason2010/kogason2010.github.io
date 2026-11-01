@@ -305,6 +305,6 @@ function updateMath(dt, time) {
   mathFluxUpdate(MFX.t);
   MFX.hopf.rotation.y += dt * 0.18; MFX.hopf.rotation.z = Math.sin(MFX.t * 0.3) * 0.25;
   hemi.intensity = night ? 0.22 : 0.5; sun.intensity = night ? 0.15 : 0.55; fill.intensity = night ? 0.03 : 0.12;
-  const f = libFov(); if (Math.abs(camera.fov - f) > 0.1) { camera.fov = f; camera.updateProjectionMatrix(); }
+  const f = mathFov(); if (Math.abs(camera.fov - f) > 0.1) { camera.fov = f; camera.updateProjectionMatrix(); }
   mathClampCamera();
 }

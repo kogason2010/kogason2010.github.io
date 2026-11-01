@@ -37,6 +37,7 @@ placesMenu.addEventListener("click", e => { const qb = e.target.closest("[data-q
 let travel = null;
 function travelTo(dest) {
   if (herePlace() === dest) return;
+  foldIntro();
   if (deskOpen) closeDesktop();
   if (pMode) setParticleMode(false);
   if (wsOpen) closeWorkstation(); if (sfcAppOpen) closeSfcApp(); if (lcAppOpen) closeLcApp(); if (readerOpen) closeReader();

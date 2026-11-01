@@ -1,6 +1,6 @@
 /* js/ui/intro.js — The introduction panel in the top-left corner folds down to just the name a few seconds after the
    page opens (or as soon as you start looking around), so it stays out of the way. On a first visit it stays open
-   until you start looking around. The arrow, or a click on the folded
+   until you start looking around or head for another room. The arrow, or a click on the folded
    panel, opens it again; it folds itself away again a few seconds after the pointer leaves it.
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
@@ -30,6 +30,8 @@ tagEl.addEventListener("pointerenter", () => { introHover = true; });
 tagEl.addEventListener("pointerleave", () => { introHover = false; if (!tagEl.classList.contains("collapsed")) foldIntroSoon(INTRO_FOLD_MS); });
 // starting to look around folds it straight away
 cv.addEventListener("pointerdown", () => { if (!tagEl.classList.contains("collapsed") && !introHover) setIntroOpen(false); });
+// so does heading somewhere else: open, it would cover a third of the next room
+function foldIntro() { if (!tagEl.classList.contains("collapsed")) setIntroOpen(false); }
 // a first-time visitor keeps the introduction open until they start looking around; after that it folds by itself
 let introSeen = false;
 try { introSeen = !!localStorage.getItem("labSeen"); localStorage.setItem("labSeen", "1"); } catch (e) { /* no storage: treat as seen */ introSeen = true; }

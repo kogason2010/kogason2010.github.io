@@ -76,6 +76,8 @@ resize(); fitDistance();
 
 /* ---------- Loop ---------- */
 const v = new THREE.Vector3();
+// tags that never shrink to a dot when the room is crowded: the workstations the hints tell you to tap, and the projects monitor
+const TAG_FIRST = new Set(["desktop", "icpc", "sfcpc", "lcpc"]);
 const clock = new THREE.Clock();
 let rotorAngle = 0, rotorTarget = 0, rotorTimer = 0;
 function frame() {
@@ -160,17 +162,36 @@ function frame() {
       // keep the whole tag on screen (narrow phones clipped the ones near the edges)
       if (!hs._w && !labelsEl.hidden) { const ow = hs.el.offsetWidth; if (ow) { hs._w = ow / 2; hs._h = hs.el.offsetHeight || 26; } }   // measured once, the first time it shows
       const hw = hs._w || 0;
-      placed.push({ hs, hw, hh: hs._h || 26, lx: Math.min(w - hw - 6, Math.max(hw + 6, (v.x * 0.5 + 0.5) * w)), ly: (-v.y * 0.5 + 0.5) * h });
+      const ax = (v.x * 0.5 + 0.5) * w;
+      placed.push({ hs, hw, hh: hs._h || 26, ax, lx: Math.min(w - hw - 6, Math.max(hw + 6, ax)), ly: (-v.y * 0.5 + 0.5) * h });
     });
-    // tags that would land on top of each other are nudged apart vertically, top to bottom
-    placed.sort((a, b) => a.ly - b.ly);
-    placed.forEach((p, i) => {
-      for (let pass = 0; pass < 4; pass++) {
-        const hit = placed.slice(0, i).find(q => Math.abs(q.lx - p.lx) < q.hw + p.hw + 4 && Math.abs(q.ly - p.ly) < (q.hh + p.hh) / 2 + 3);
-        if (!hit) break; p.ly = hit.ly + (hit.hh + p.hh) / 2 + 4;
+    // tags that would land on top of each other slide down out of the way, top to bottom; one that would have to slide
+    // far from its thing (a crowded bench) shrinks to its glowing dot right where the thing is instead. The name shows
+    // again on hover or focus, or once you zoom in and there's room (a dot needs a little more room to grow back, so tags
+    // don't flicker as the camera moves)
+    placed.sort((a, b) => (TAG_FIRST.has(b.hs.key) - TAG_FIRST.has(a.hs.key)) || a.ly - b.ly);   // the ones the hints point to always keep their names
+    const kept = [], clash = p => kept.find(q => Math.abs(q.lx - p.lx) < q.hw + p.hw + 4 && Math.abs(q.ly - p.ly) < (q.hh + p.hh) / 2 + 3);
+    placed.forEach(p => {
+      const y0 = p.ly, room = p.hs._dot ? 18 : 34;
+      let hit;
+      for (let pass = 0; pass < 3 && (hit = clash(p)); pass++) p.ly = hit.ly + (hit.hh + p.hh) / 2 + 4;
+      const dot = !!hit || p.ly - y0 > room;
+      if (dot !== !!p.hs._dot) { p.hs._dot = dot; p.hs.el.classList.toggle("dot", dot); }
+      let under = false;
+      if (dot) {
+        p.ly = y0; p.hw = 10; p.hh = 20; p.lx = Math.min(w - 16, Math.max(16, p.ax));
+        // a dot that lands on a name steps to the nearest free spot just beside it; with no room anywhere, it waits out of sight
+        const q = clash(p);
+        if (q) {
+          const x0 = p.lx, spots = [[x0, q.ly - q.hh / 2 - 12], [x0, q.ly + q.hh / 2 + 12], [q.lx - q.hw - 16, q.ly], [q.lx + q.hw + 16, q.ly]]
+            .filter(s => s[0] > 12 && s[0] < w - 12).sort((a, b) => Math.hypot(a[0] - x0, a[1] - y0) - Math.hypot(b[0] - x0, b[1] - y0));
+          const free = spots.find(s => { p.lx = s[0]; p.ly = s[1]; return !clash(p); });
+          if (!free) { p.lx = x0; p.ly = y0; under = true; }
+        }
       }
+      if (!under) kept.push(p);
       p.hs.el.style.transform = `translate(${p.lx}px, ${p.ly}px) translate(-50%, -50%)`;
-      p.hs.el.classList.toggle("tucked", cover.some(r => p.lx > r.left - 50 && p.lx < r.right + 50 && p.ly > r.top - 14 && p.ly < r.bottom + 14));
+      p.hs.el.classList.toggle("tucked", under || cover.some(r => p.lx > r.left - 50 && p.lx < r.right + 50 && p.ly > r.top - 14 && p.ly < r.bottom + 14));
     });
   }
   requestAnimationFrame(frame);

@@ -171,7 +171,7 @@ function setParticleMode(on) {
     lab.visible = false; p.points.visible = true;
   }
   pTarget = on ? 1 : 0;
-  particleBtn.textContent = on ? "Back to lab" : "Particles";
+  particleBtn.querySelector(".lbl").textContent = on ? "Back to lab" : "Particles";
   levelBtn.disabled = on;
   particleBtn.setAttribute("aria-pressed", String(on));
   caption.hidden = !on; hint.hidden = on;
