@@ -51,7 +51,8 @@ function mergeStatic(root, keep) {
     parts.forEach(g => { const c = g.attributes.position.count; pos.set(g.attributes.position.array, off * 3); nor.set(g.attributes.normal.array, off * 3); if (g.attributes.uv) uv.set(g.attributes.uv.array, off * 2); off += c; g.dispose(); });
     const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3)); geo.setAttribute("normal", new THREE.BufferAttribute(nor, 3)); geo.setAttribute("uv", new THREE.BufferAttribute(uv, 2)); geo.computeBoundingSphere();
     const m = new THREE.Mesh(geo, list[0].material); m.castShadow = list[0].castShadow; m.receiveShadow = list[0].receiveShadow; m.renderOrder = list[0].renderOrder; if (list[0].userData.baseEmissive) m.userData.baseEmissive = list[0].userData.baseEmissive; root.add(m);
-    list.forEach(o => o.parent.remove(o)); merged += list.length;
+    // the originals are gone from the scene: free their buffers (the lab has already drawn them by the time it merges)
+    list.forEach(o => { o.parent.remove(o); o.geometry.dispose(); }); merged += list.length;
   });
   FX.merged = (FX.merged || 0) + merged;
 }

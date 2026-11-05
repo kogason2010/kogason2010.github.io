@@ -137,7 +137,7 @@ function frame() {
     ray.setFromCamera(pointerNDC, camera);
     u.uRayO.value.copy(ray.ray.origin); u.uRayD.value.copy(ray.ray.direction);
     u.uRepel.value += ((pointerIn && pMode ? 1 : 0) - u.uRepel.value) * Math.min(1, dt * 5);
-    if (!pMode && u.uMix.value <= 0 && P.points.visible) { P.points.visible = false; lab.visible = true; }
+    if (!pMode && u.uMix.value <= 0 && P.points.visible) { P.points.visible = false; lab.visible = true; if (osFrame && level === "up") osFrame.style.visibility = ""; }
   }
 
   if (liveCam && sfcAppOpen && !camTween) updateLiveCam(dt);
@@ -148,17 +148,18 @@ function frame() {
     const want = THREE.MathUtils.clamp(camera.position.distanceTo(controls.target) * 0.04, 0.05, 0.6);
     if (Math.abs(want - camera.near) > 0.005) { camera.near = want; camera.updateProjectionMatrix(); }
   }
-  if (!osFull) { renderer.render(scene, camera); if (cssRenderer) cssRenderer.render(cssScene, camera); }
+  if (!osFull) { renderer.render(scene, camera); if (cssRenderer && lab.visible && !worldOn) cssRenderer.render(cssScene, camera); }   // (the live desktop is only on screen in the lab)
 
-  if (!pMode) {
+  if (!pMode && !labelsEl.hidden && !worldOn) {   // (nothing to lay out while the tags are hidden: outside, zoomed in, moving)
     const w = stage.clientWidth, h = stage.clientHeight;
     // tags that slide under the intro panel or the toolbar fade out instead of overlapping them
     const cover = [tagEl, toolsEl].filter(el => getComputedStyle(el).opacity > 0.5).map(el => el.getBoundingClientRect());
     const placed = [];
     hotspots.forEach(hs => {
       v.copy(hs.anchor).project(camera);
-      hs.el.hidden = v.z > 1 || hs.level !== level;
-      if (hs.el.hidden) return;
+      const off = v.z > 1 || hs.level !== level;
+      if (off !== hs._off) { hs._off = off; hs.el.hidden = off; }
+      if (off) return;
       // keep the whole tag on screen (narrow phones clipped the ones near the edges)
       if (!hs._w && !labelsEl.hidden) { const ow = hs.el.offsetWidth; if (ow) { hs._w = ow / 2; hs._h = hs.el.offsetHeight || 26; } }   // measured once, the first time it shows
       const hw = hs._w || 0;
@@ -190,8 +191,11 @@ function frame() {
         }
       }
       if (!under) kept.push(p);
-      p.hs.el.style.transform = `translate(${p.lx}px, ${p.ly}px) translate(-50%, -50%)`;
-      p.hs.el.classList.toggle("tucked", under || cover.some(r => p.lx > r.left - 50 && p.lx < r.right + 50 && p.ly > r.top - 14 && p.ly < r.bottom + 14));
+      // (only touch the page when something changed: restyling every tag every frame costs the browser time)
+      const tf = `translate(${Math.round(p.lx)}px, ${Math.round(p.ly)}px) translate(-50%, -50%)`;
+      if (tf !== p.hs._tf) { p.hs._tf = tf; p.hs.el.style.transform = tf; }
+      const tuck = under || cover.some(r => p.lx > r.left - 50 && p.lx < r.right + 50 && p.ly > r.top - 14 && p.ly < r.bottom + 14);
+      if (tuck !== p.hs._tuck) { p.hs._tuck = tuck; p.hs.el.classList.toggle("tucked", tuck); }
     });
   }
   requestAnimationFrame(frame);

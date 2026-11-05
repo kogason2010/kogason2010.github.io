@@ -233,11 +233,12 @@ function enterWorld() {
     fade(false, 600, () => { worldBusy = false; });
   }));
 }
+const CAMPUS_FOG = new THREE.FogExp2(0xc9dbe8, 0.0052);   // colour and density follow day and night (js/campus/atmosphere.js)
 function setupWorld(spawn) {
   spawn = spawn || SPAWN;
   if (!worldBuilt) buildWorld();
   worldOn = true; lab.visible = false; chem.visible = false; library.visible = false; mathRoom.visible = false; world.visible = true; bgGroup.visible = false; botTip.classList.remove("on");
-  scene.fog = new THREE.FogExp2(0xc9dbe8, 0.0052); updateWorld.night = null;
+  scene.fog = CAMPUS_FOG; updateWorld.night = null;   // the same fog every time: a new one makes every material outside look up its shader again
   camera.fov = 58; camera.near = 0.1; camera.far = 2400; camera.updateProjectionMatrix();
   shadowRes(2048); sun.shadow.normalBias = 0.03; renderer.setPixelRatio(DPR_MAX); PERF.last = 0; PERF.sum = PERF.n = PERF.good = 0;
   Object.assign(sun.shadow.camera, { left: -SHADOW_R, right: SHADOW_R, top: SHADOW_R, bottom: -SHADOW_R, near: 1, far: 110 }); sun.shadow.camera.updateProjectionMatrix();

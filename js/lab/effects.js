@@ -176,5 +176,6 @@ function setParticleMode(on) {
   particleBtn.setAttribute("aria-pressed", String(on));
   caption.hidden = !on; hint.hidden = on;
   labelsEl.hidden = on;
+  if (osFrame && on) osFrame.style.visibility = "hidden";   // the live desktop sits behind the 3D view: it goes with the lab (and comes back with it, js/main.js)
 }
 particleBtn.addEventListener("click", () => setParticleMode(!pMode));

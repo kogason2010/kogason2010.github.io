@@ -33,7 +33,7 @@ document.addEventListener("click", e => { if (!placesMenu.hidden && !placesMenu.
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !placesMenu.hidden) { setPlacesOpen(false); placesBtn.focus(); } });
 placesMenu.addEventListener("click", e => { const qb = e.target.closest("[data-quality]"); if (qb) { if (qb.dataset.quality !== QUALITY) setQuality(qb.dataset.quality); return; } const b = e.target.closest("[data-place]"); if (!b) return; setPlacesOpen(false); travelTo(b.dataset.place); });
 
-// one step toward the destination each time nothing else is moving, until we arrive (or give up if 20 s pass with no step)
+// one step toward the destination each time nothing else is moving, until we arrive (or give up if 20 s pass and no step gets going)
 let travel = null;
 function travelTo(dest) {
   if (herePlace() === dest) return;
@@ -47,8 +47,11 @@ function travelTo(dest) {
 }
 function travelStep() {
   const T = travel; if (!T) return;
-  if (worldBusy || lvl || deskOpen || pMode || camTween) { T.t0 = performance.now(); return; }      // still moving: wait for it to finish
-  if (performance.now() - T.t0 > 20000) { clearInterval(T.id); travel = null; return; }
+  // a long frame (building a room, or a slow device drawing the campus for the first time) holds this timer up too: that
+  // isn't the journey stalling, so it doesn't count toward giving up
+  const now = performance.now(); if (T.tick && now - T.tick > 1000) T.t0 += now - T.tick; T.tick = now;
+  if (worldBusy || lvl || deskOpen || pMode || camTween) { T.t0 = now; return; }      // still moving: wait for it to finish
+  if (now - T.t0 > 20000) { clearInterval(T.id); travel = null; return; }            // nothing has moved for 20 s: give up
   const here = herePlace(), d = T.dest;
   if (here === d) { clearInterval(T.id); travel = null; return; }
   if (here === "basement") goLevel("up");
@@ -56,5 +59,4 @@ function travelStep() {
   else if (here === "space") { if (d === "lab" || d === "basement") exitWorld(); else if (d === "campus") leaveSpace(); else enterPlace(d); }
   else if (here === "campus") { if (d === "lab" || d === "basement") exitWorld(); else if (d === "space") enterSpace(); else enterPlace(d); }
   else if (PLACES[here]) leavePlace();
-  T.t0 = performance.now();
 }
