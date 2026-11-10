@@ -82,7 +82,7 @@ const lcBandPos = (p, run, t) => { const i = t / run.dt; if (i <= 0) return 0; c
 
 /* ---------- drawing: chromatogram with the %B program, and the van Deemter / pressure panel ---------- */
 function lcDrawChrom(g, W, H, run, tNow, dark) {
-  const cs = getComputedStyle(document.documentElement), mono = cs.getPropertyValue("--mono") || "monospace";
+  const cs = getComputedStyle(document.body), mono = cs.getPropertyValue("--mono") || "monospace";
   const soft = dark ? "#8fa1ab" : cs.getPropertyValue("--ink-soft").trim(), line = dark ? "#26343c" : cs.getPropertyValue("--line").trim(), acc = dark ? "#6aa6f0" : cs.getPropertyValue("--accent").trim();
   g.clearRect(0, 0, W, H); if (dark) { g.fillStyle = "#0f171c"; g.fillRect(0, 0, W, H); }
   const top = dark ? 30 : 12, pl = 34, pr = 34, pb = 26, cw = W - pl - pr, ch = H - top - pb;
@@ -116,7 +116,7 @@ function lcDrawChrom(g, W, H, run, tNow, dark) {
   if (!run.done) { const x = pl + Math.min(1, tNow / Wm) * cw; g.strokeStyle = soft; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(x, top); g.lineTo(x, top + ch); g.stroke(); g.setLineDash([]); }
 }
 function lcDrawVanDeemter(g, W, H) {
-  const cs = getComputedStyle(document.documentElement), mono = cs.getPropertyValue("--mono") || "monospace";
+  const cs = getComputedStyle(document.body), mono = cs.getPropertyValue("--mono") || "monospace";
   const ink = cs.getPropertyValue("--ink").trim(), soft = cs.getPropertyValue("--ink-soft").trim(), line = cs.getPropertyValue("--line").trim(), acc = cs.getPropertyValue("--accent").trim();
   const pl = 36, pr = 10, pt = 10, pb = 24, cw = W - pl - pr, ch = H - pt - pb, F1 = 1.2, H1 = 8;
   const X = f => pl + f / F1 * cw, Y = h => pt + ch - Math.min(1, h / H1) * ch, phi = (lc.b0 + lc.b1) / 200;

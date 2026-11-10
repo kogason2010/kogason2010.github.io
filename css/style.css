@@ -26,6 +26,15 @@
   --sheet: #152028; --line: #283943; --accent: #6aa6f0; --accent-ink: #091a30; --glow: #5fe39a;
   color-scheme: dark;
 }
+/* Dark scenes: any room with the lights off, the mathematics hall and orbit (js/main.js sets the class). The page behind
+   the diorama turns to a night sky and the panels over it take the dark palette, so a dark room doesn't sit in a pale
+   void under pale cards. */
+body.dark-scene {
+  --bg: #0f181e; --bg-2: #18242c; --ink: #e3ecf1; --ink-soft: #97a9b4;
+  --sheet: #152028; --line: #283943; --accent: #6aa6f0; --accent-ink: #091a30; --glow: #5fe39a;
+  color-scheme: dark;
+  background: radial-gradient(120% 90% at 50% 40%, #16243a 0%, #080d16 100%) #0c1320;
+}
 html, body { height: 100%; }
 body {
   background: radial-gradient(120% 90% at 50% 40%, var(--bg) 0%, var(--bg-2) 100%);
@@ -141,7 +150,7 @@ body.world-mode .tag, body.world-mode #labels, body.world-mode .bot-tip { displa
   display: grid; gap: 6px; width: min(260px, calc(100% - 32px)); padding: 14px 16px 16px; border-radius: 16px; box-sizing: border-box;
   background: color-mix(in srgb, var(--sheet) 86%, transparent); border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 8px 28px rgba(0,0,0,.12); }
-.hud .eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
+.hud .eyebrow { font: 500 11px/1.35 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); }
 .hud-title { font: 800 24px/1 var(--display); letter-spacing: -.015em; margin-bottom: 4px; }
 .hud-row { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; }
 .hud-row b { font: 600 13px/1.4 var(--mono); font-variant-numeric: tabular-nums; }
@@ -252,7 +261,8 @@ body.world-mode .hint { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 }
 .sheet.closed { transform: translateX(calc(100% + 40px)); opacity: 0; pointer-events: none; }
 .sheet header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px 20px 12px; border-bottom: 1px solid var(--line); }
-.sheet .kicker { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.sheet .kicker { font: 500 11px/1.35 var(--mono);   /* long kickers wrap on narrow panels: leave room between the lines */
+  letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
 .sheet h2 { margin: 6px 0 0; font: 800 28px/1.05 var(--display); letter-spacing: -.015em; text-wrap: balance; }
 .close { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 18px; cursor: pointer; }
 .sheet .body { min-height: 0; padding: 16px 20px 22px; overflow-y: auto; display: grid; gap: 14px; align-content: start; line-height: 1.55; }

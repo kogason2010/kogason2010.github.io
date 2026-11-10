@@ -105,7 +105,7 @@ function wsChart() {
   const W = cv.clientWidth, H = cv.clientHeight; if (!W || !H) return;
   cv.width = W * dpr; cv.height = H * dpr;
   const g = cv.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  const cs = getComputedStyle(document.documentElement), ink = cs.getPropertyValue("--ink").trim(), soft = cs.getPropertyValue("--ink-soft").trim(), line = cs.getPropertyValue("--line").trim(), acc = cs.getPropertyValue("--accent").trim();
+  const cs = getComputedStyle(document.body), ink = cs.getPropertyValue("--ink").trim(), soft = cs.getPropertyValue("--ink-soft").trim(), line = cs.getPropertyValue("--line").trim(), acc = cs.getPropertyValue("--accent").trim();
   const run = RUNS[wsMode], T = 14, pl = 44, pr = 16, pt = 18, pb = 34, cw = W - pl - pr, ch = H - pt - pb;
   g.clearRect(0, 0, W, H);
   g.strokeStyle = line; g.lineWidth = 1; g.font = "11px " + cs.getPropertyValue("--mono"); g.fillStyle = soft;
