@@ -18,11 +18,14 @@ function buildChem() {
 }
 // the hall is about twice the Kogason lab's width, so the view stands further back and aims at its middle
 const CHEM_TGT = new THREE.Vector3(5.2, 1.3, 1.4);
+// on wider screens the whole hall is in view, centred in the space the toolbar, intro panel and hint leave free. A phone
+// held upright can't fit its length at a useful size, so there the view stands well back and leans toward the robot line,
+// keeping the LC benches on screen
+const CHEM_BOX = new THREE.Box3(new THREE.Vector3(ROOM0 - 0.3, -0.3, ROOM0 - 0.3), new THREE.Vector3(CHR.x1, 4.9, CHR.z1));
 function chemHomeView() {
-  const a = stage.clientWidth / Math.max(1, stage.clientHeight), dist = a < 0.6 ? 44 : a < 0.8 ? 38 : a < 1.2 ? 33 : 28.5;
-  const dir = HOME.clone().sub(TARGET).normalize();
-  const tgt = a < 0.8 ? CHEM_TGT.clone().setX(7.4) : CHEM_TGT;        // on tall phones, lean toward the robot line
-  controls.target.copy(tgt); camera.position.copy(tgt).addScaledVector(dir, dist); camera.lookAt(tgt); controls.minDistance = 8;
+  const a = stage.clientWidth / Math.max(1, stage.clientHeight), dir = HOME.clone().sub(TARGET).normalize();
+  const f = a < 0.8 ? { tgt: CHEM_TGT.clone().setX(7.4), dist: a < 0.6 ? 44 : 38 } : fitBoxView(CHEM_BOX, dir);
+  controls.target.copy(f.tgt); camera.position.copy(f.tgt).addScaledVector(dir, Math.min(f.dist, 46)); camera.lookAt(f.tgt); controls.minDistance = 8;
 }
 PLACES.chem = {
   title: "NCA", building: "Setting up the LC lab", built: () => chemBuilt,

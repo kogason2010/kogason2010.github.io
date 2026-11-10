@@ -81,7 +81,7 @@ function signal(peaks, t) { let y = 0; peaks.forEach(p => { if (Math.abs(t - p.t
 
 // chromatogram, drawn both in the panel and on the instrument PC's screen
 function drawChrom(g, W, H, run, tNow, dark) {
-  const cs = getComputedStyle(document.documentElement);
+  const cs = getComputedStyle(document.body);
   const ink = dark ? "#e3ecf1" : cs.getPropertyValue("--ink").trim(), soft = dark ? "#8fa1ab" : cs.getPropertyValue("--ink-soft").trim(), line = dark ? "#26343c" : cs.getPropertyValue("--line").trim(), acc = dark ? "#6aa6f0" : cs.getPropertyValue("--accent").trim();
   g.fillStyle = dark ? "#0f171c" : "rgba(0,0,0,0)"; g.clearRect(0, 0, W, H); if (dark) g.fillRect(0, 0, W, H);
   const top = dark ? 30 : 12, pl = 34, pr = 12, pb = 26, cw = W - pl - pr, ch = H - top - pb;
@@ -114,7 +114,7 @@ function drawChrom(g, W, H, run, tNow, dark) {
 }
 // CO₂ phase diagram with the current operating point
 function drawPhase(g, W, H) {
-  const cs = getComputedStyle(document.documentElement);
+  const cs = getComputedStyle(document.body);
   const ink = cs.getPropertyValue("--ink").trim(), soft = cs.getPropertyValue("--ink-soft").trim(), line = cs.getPropertyValue("--line").trim(), acc = cs.getPropertyValue("--accent").trim();
   const mono = cs.getPropertyValue("--mono") || "monospace";
   const pl = 36, pr = 10, pt = 10, pb = 24, cw = W - pl - pr, ch = H - pt - pb, T0 = 0, T1 = 60, P1 = 260;

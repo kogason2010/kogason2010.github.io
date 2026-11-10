@@ -62,6 +62,30 @@ function fitDistance() {
   const dist = aspect < 0.6 ? 27 : aspect < 0.8 ? 24 : aspect < 1.2 ? 19.8 : 18.2;   // tall phones step back so the room fits across
   camera.position.copy(controls.target).add(dir.multiplyScalar(dist));
 }
+// where to aim and how far back to stand so a room's box sits whole in the view from direction dir, clear of the toolbar
+// and the intro panel at the top and the hint at the bottom (pad: free pixels to keep on each side)
+function fitBoxView(box, dir, pad) {
+  const W = stage.clientWidth, H = stage.clientHeight, cam = camera.clone();
+  cam.aspect = W / H; cam.updateProjectionMatrix();
+  const P = Object.assign({ top: 84, bottom: 64, side: 20 }, pad);
+  const lo = [-1 + 2 * P.side / W, -1 + 2 * P.bottom / H], hi = [1 - 2 * P.side / W, 1 - 2 * P.top / H];
+  const tgt = box.getCenter(new THREE.Vector3()), q = new THREE.Vector3(), right = new THREE.Vector3(), up = new THREE.Vector3();
+  let dist = box.getSize(q).length() * 1.6;
+  for (let it = 0; it < 6; it++) {
+    cam.position.copy(tgt).addScaledVector(dir, dist); cam.lookAt(tgt); cam.updateMatrixWorld();
+    const e = [9, 9, -9, -9];
+    for (let i = 0; i < 8; i++) {
+      q.set(i & 1 ? box.max.x : box.min.x, i & 2 ? box.max.y : box.min.y, i & 4 ? box.max.z : box.min.z).project(cam);
+      e[0] = Math.min(e[0], q.x); e[1] = Math.min(e[1], q.y); e[2] = Math.max(e[2], q.x); e[3] = Math.max(e[3], q.y);
+    }
+    // re-centre in the free area, then step in or out until the wider of the two spans just fits
+    const tanV = Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)), visH = 2 * dist * tanV, visW = visH * cam.aspect;
+    right.setFromMatrixColumn(cam.matrixWorld, 0); up.setFromMatrixColumn(cam.matrixWorld, 1);
+    tgt.addScaledVector(right, ((e[0] + e[2]) - (lo[0] + hi[0])) / 4 * visW).addScaledVector(up, ((e[1] + e[3]) - (lo[1] + hi[1])) / 4 * visH);
+    dist *= Math.max((e[2] - e[0]) / (hi[0] - lo[0]), (e[3] - e[1]) / (hi[1] - lo[1]));
+  }
+  return { tgt, dist };
+}
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
   renderer.setSize(w, h, false);
@@ -75,6 +99,11 @@ window.addEventListener("resize", resize);
 resize(); fitDistance();
 
 /* ---------- Loop ---------- */
+let darkScene = false;
+// the browser's own bar (on phones) takes the colour of the page behind the room: pale by day, night blue in dark scenes
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+function paintThemeColor() { if (themeMeta) themeMeta.content = darkScene ? "#0c1320" : getComputedStyle(document.body).getPropertyValue("--bg").trim() || "#e9eef2"; }
+paintThemeColor();
 const v = new THREE.Vector3();
 // tags that never shrink to a dot when the room is crowded: the workstations the hints tell you to tap, and the projects monitor
 const TAG_FIRST = new Set(["desktop", "icpc", "sfcpc", "lcpc"]);
@@ -126,6 +155,9 @@ function frame() {
     furnaceGlow.intensity = night && typeof furnaceMat !== "undefined" ? 0.8 : 0.0;
   }
 
+  // dark scenes (lights off anywhere, the mathematics hall, orbit) get the night backdrop and dark panels (css/style.css)
+  const dk = night || level === "math" || spaceOn;
+  if (dk !== darkScene) { darkScene = dk; document.body.classList.toggle("dark-scene", dk); paintThemeColor(); }
   if (!lab.visible || reduce) botTip.classList.remove("on");
   if (!reduce && !osFull && !worldOn) updateBg(time);
   if (P) {
