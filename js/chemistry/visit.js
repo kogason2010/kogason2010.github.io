@@ -37,5 +37,5 @@ PLACES.chem = {
     Object.assign(sun.shadow.camera, { left: -14, right: 14, top: 14, bottom: -14, near: 1, far: 45 }); sun.shadow.camera.updateProjectionMatrix();
   },
   leave(done) { lcAbort(); FX_CHEM.doorGoal = 1; animateCamera(DOOR_POSE.pos.clone(), DOOR_POSE.tgt.clone(), 1.5, done); },
-  exit() { controls.maxDistance = 28; FX_CHEM.doorGoal = 0; FX_CHEM.doorOpen = 0; if (FX_CHEM.doorPivot) FX_CHEM.doorPivot.rotation.y = 0; },
+  exit() { controls.maxDistance = 36; FX_CHEM.doorGoal = 0; FX_CHEM.doorOpen = 0; if (FX_CHEM.doorPivot) FX_CHEM.doorPivot.rotation.y = 0; },
 };

@@ -421,19 +421,23 @@ body.world-mode .hint { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
   .sheet.closed { transform: translateY(calc(100% + 40px)); }
   .hot { font-size: 11px; }
 }
+/* phones, tablets and small laptops: the toolbar's buttons show just their icons, so they sit in one row beside the intro
+   panel instead of wrapping into two or three (their names stay for screen readers and show as tooltips, js/ui/labels.js;
+   Particles says "Back to lab" in words while it's on) */
+@media (max-width: 1180px) {
+  .tools .btn .ico { display: block; width: 14px; height: 14px; flex: none; }
+  .tools .compact { display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; min-width: 38px; padding: 9px 11px; }
+  .tools .compact .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .tools #particleBtn[aria-pressed="true"] .lbl { position: static; width: auto; height: auto; clip-path: none; }
+  .tools #levelBtn.going-up .ico { transform: rotate(180deg); }
+}
 @media (max-width: 640px) {
   .tools { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: none; justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .tools::-webkit-scrollbar { display: none; }
   .tools .btn { flex: none; padding: 8px 11px; }
-  /* phones: the toolbar's buttons show just their icons so they all fit across the screen (their names stay for screen
-     readers, and Particles says "Back to lab" in words while it's on) */
   .tools { gap: 6px; }
-  .tools .btn .ico { display: block; width: 14px; height: 14px; flex: none; }
-  .tools .compact { display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-sizing: border-box; min-width: 36px; padding: 8px 10px; }
-  .tools .compact .lbl { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .tools #particleBtn[aria-pressed="true"] .lbl { position: static; width: auto; height: auto; clip-path: none; }
+  .tools .compact { min-width: 36px; padding: 8px 10px; }
   .tools #particleBtn[aria-pressed="true"] ~ #levelBtn, .tools #particleBtn[aria-pressed="true"] ~ #lightsBtn { display: none; }   /* (no use to a cloud of points, and the words need their room) */
-  .tools #levelBtn.going-up .ico { transform: rotate(180deg); }
   .tag { top: calc(60px + env(safe-area-inset-top, 0px)); }
 }
 body.sheet-open .tag { opacity: 0; pointer-events: none; transform: translateY(-8px); }

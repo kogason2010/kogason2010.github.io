@@ -155,7 +155,8 @@ function ensureParticles() {
   });
   const points = new THREE.Points(geo, material);
   points.frustumCulled = false; points.visible = false; scene.add(points);
-  document.getElementById("capCount").textContent = " · " + N.toLocaleString();
+  document.getElementById("capCount").textContent = N.toLocaleString();   // (the name above is on its own line: no dot before the count)
+  if (window.matchMedia("(pointer: coarse)").matches) document.getElementById("capHow").textContent = "drag a finger through it to push them aside";   // no cursor on a touch screen
   P = { points, uniforms };
   return P;
 }
@@ -166,6 +167,7 @@ function setParticleMode(on) {
   const p = ensureParticles();
   pMode = on;
   if (on) {
+    foldIntro();   // the molecule forms in the middle of the view: on smaller screens the open intro panel would sit over it
     closeSheet(true);
     setHover(null);
     lab.visible = false; p.points.visible = true;
