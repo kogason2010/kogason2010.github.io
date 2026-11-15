@@ -107,3 +107,7 @@ document.addEventListener("keydown", e => {
   if (!document.getElementById("placesMenu").hidden) return;   // the Places menu closes itself (js/ui/places-menu.js); nothing else should go with it
   if (worldOn) exitWorld(); else if (readerOpen) closeReader(); else if (lcAppOpen) closeLcApp(); else if (sfcAppOpen) closeSfcApp(); else if (wsOpen) closeWorkstation(); else if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else closeSheet();
 });
+
+// toolbar buttons that show only an icon on narrower screens (css/style.css) name themselves in a tooltip; the name is read
+// when the pointer arrives because it changes ("Lights off" / "Lights on", "Go downstairs" / "Go upstairs")
+document.querySelectorAll(".tools .compact").forEach(b => b.addEventListener("pointerenter", () => { const l = b.querySelector(".lbl"); if (l) b.title = l.textContent; }));

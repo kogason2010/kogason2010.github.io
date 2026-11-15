@@ -59,7 +59,22 @@ document.getElementById("resetBtn").addEventListener("click", () => {
 function fitDistance() {
   const aspect = stage.clientWidth / stage.clientHeight;
   const dir = camera.position.clone().sub(controls.target).normalize();
-  const dist = aspect < 0.6 ? 27 : aspect < 0.8 ? 24 : aspect < 1.2 ? 19.8 : 18.2;   // tall phones step back so the room fits across
+  let dist = aspect < 0.6 ? 27 : aspect < 0.8 ? 24 : aspect < 1.2 ? 19.8 : 18.2;   // tall phones step back so the room fits across
+  // tablets and small laptops: step back further until the room's side walls are both on screen (at those sizes the
+  // left bench used to sit off the edge, or under the intro panel). Phones held upright keep the closer, cropped view,
+  // where the room would otherwise be too small to tap
+  if (aspect >= 0.6) {
+    const cam = camera.clone(), q = new THREE.Vector3(), dy = controls.target.y - TARGET.y, lim = 1 - 16 / stage.clientWidth;
+    cam.aspect = aspect; cam.updateProjectionMatrix();
+    for (let it = 0; it < 5; it++) {
+      cam.position.copy(controls.target).addScaledVector(dir, dist); cam.lookAt(controls.target); cam.updateMatrixWorld();
+      let m = 0;
+      for (let i = 0; i < 8; i++) { q.set(i & 1 ? ROOM1 : ROOM0 - 0.3, dy + (i & 2 ? 4.9 : 0), i & 4 ? ROOM1 : ROOM0 - 0.3).project(cam); m = Math.max(m, Math.abs(q.x)); }
+      if (m <= lim) break;
+      dist *= m / lim;
+    }
+    dist = Math.min(dist, controls.maxDistance);
+  }
   camera.position.copy(controls.target).add(dir.multiplyScalar(dist));
 }
 // where to aim and how far back to stand so a room's box sits whole in the view from direction dir, clear of the toolbar

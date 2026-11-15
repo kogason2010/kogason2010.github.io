@@ -61,4 +61,4 @@ controls.maxAzimuthAngle = Math.PI / 2 - 0.12;
 controls.minPolarAngle = 0.45;
 controls.maxPolarAngle = 1.3;
 controls.minDistance = 8;
-controls.maxDistance = 28;
+controls.maxDistance = 36;
