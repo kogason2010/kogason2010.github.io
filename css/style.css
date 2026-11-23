@@ -596,3 +596,40 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 
 .gl-lost p { margin: 0; color: var(--ink-soft); }
 .gl-lost .btn { margin-top: 4px; }
 body.gl-off #labels, body.gl-off .hint { visibility: hidden; }
+/* Guided tour (js/ui/tour.js): letterbox bars, the rest of the controls tucked away, and a caption card above the
+   lower bar. The card is dark in every room, like a film's subtitles */
+.tag .tour-btn svg { width: 12px; height: 12px; margin-right: 6px; }
+.places-menu .pm-tour { margin-bottom: 4px; border-bottom: 1px solid var(--line); border-radius: 10px 10px 4px 4px; padding-bottom: 11px; }
+.places-menu .pm-tour b::before { content: "▶"; font-size: 10px; margin-right: 7px; color: var(--accent); vertical-align: 1px; }
+.letterbox { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.letterbox::before, .letterbox::after { content: ""; position: absolute; left: 0; right: 0; height: clamp(26px, 7vh, 70px); background: #05080d; transition: transform .7s cubic-bezier(.2, .7, .2, 1); }
+.letterbox::before { top: 0; transform: translateY(-101%); }
+.letterbox::after { bottom: 0; transform: translateY(101%); }
+body.touring .letterbox::before, body.touring .letterbox::after { transform: none; }
+body.touring .tag, body.touring .tools, body.touring .hint, body.touring #labels, body.touring .hud, body.touring .minimap,
+body.touring .joy, body.touring .boost, body.touring .toast, body.touring .bot-tip, body.touring .caption { opacity: 0 !important; pointer-events: none !important; }
+.tour { position: fixed; z-index: 7; left: 50%; bottom: calc(clamp(26px, 7vh, 70px) + 14px + env(safe-area-inset-bottom, 0px)); width: min(560px, calc(100% - 32px)); box-sizing: border-box;
+  transform: translate(-50%, 16px); opacity: 0; transition: opacity .35s, transform .35s;
+  padding: 14px 16px 14px; border-radius: 16px; color: #e8eef6; background: rgba(9, 14, 22, .8); border: 1px solid rgba(160, 190, 230, .18);
+  backdrop-filter: blur(14px) saturate(1.2); -webkit-backdrop-filter: blur(14px) saturate(1.2); box-shadow: 0 14px 40px rgba(0, 0, 0, .35); }
+.tour.on { opacity: 1; transform: translate(-50%, 0); }
+.tour-top { display: flex; align-items: center; gap: 10px; font: 500 11px/1.3 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #9fb2c8; }
+.tour-place { color: #7fb4f0; }
+.tour-x { margin-left: auto; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(160, 190, 230, .25); background: transparent; color: #e8eef6; font-size: 16px; line-height: 1; cursor: pointer; }
+.tour-title { display: block; margin-top: 8px; font: 800 22px/1.1 var(--display); letter-spacing: -.015em; }
+.tour-text { margin: 6px 0 0; font-size: 14.5px; line-height: 1.5; color: #c9d5e3; min-height: 3em; }
+.tour-bar { height: 3px; margin-top: 12px; border-radius: 3px; background: rgba(160, 190, 230, .16); overflow: hidden; }
+.tour-bar i { display: block; height: 100%; width: 0; background: #6aa6f0; border-radius: 3px; transition: width .15s linear; }
+.tour.paused .tour-bar i { background: #9fb2c8; }
+.tour-ctl { display: flex; gap: 8px; margin-top: 12px; }
+.tour-ctl .btn { background: rgba(255, 255, 255, .07); color: #e8eef6; border-color: rgba(160, 190, 230, .28); }
+.tour-ctl .btn.primary { background: #6aa6f0; color: #08182c; border-color: #6aa6f0; margin-left: auto; }
+.tour-ctl .btn:disabled { opacity: .4; }
+.tour .btn:focus-visible, .tour-x:focus-visible { outline: 2px solid #6aa6f0; outline-offset: 2px; }
+@media (max-width: 640px) {
+  .tour { padding: 12px 14px; }
+  .tour-title { font-size: 19px; }
+  .tour-text { font-size: 13.5px; }
+  .tour-ctl { flex-wrap: wrap; }
+}
+@media (prefers-reduced-motion: reduce) { .letterbox::before, .letterbox::after, .tour, .tour-bar i { transition: none; } }
