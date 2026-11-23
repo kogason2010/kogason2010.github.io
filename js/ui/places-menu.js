@@ -18,7 +18,7 @@ const placesBtn = document.getElementById("placesBtn"), placesMenu = document.ge
 const herePlace = () => spaceOn ? "space" : worldOn ? "campus" : level === "up" ? "lab" : level === "down" ? "basement" : level;
 function renderPlaces() {
   const here = herePlace();
-  placesMenu.innerHTML = PLACE_LIST.filter(p => !p.secret || spaceUnlocked).map(p =>
+  placesMenu.innerHTML = `<button type="button" role="menuitem" class="pm-tour" data-tour><b>Take the tour</b><span>The highlights of every room, a few minutes</span></button>` + PLACE_LIST.filter(p => !p.secret || spaceUnlocked).map(p =>
     `<button type="button" role="menuitem" data-place="${p.id}"${p.id === here ? ' aria-current="true"' : ""}><b>${p.name}</b><span>${p.id === here ? "You're here" : p.note}</span></button>`).join("") +
     // graphics: switching reloads the page so the campus is rebuilt at the new level of detail
     `<div class="pm-quality" role="group" aria-label="Graphics"><span>Graphics</span>${["full", "light"].map(q => `<button type="button" data-quality="${q}" aria-pressed="${QUALITY === q}">${q === "full" ? "Full" : "Light"}</button>`).join("")}</div>`;
@@ -43,7 +43,8 @@ function travelTo(dest) {
   if (wsOpen) closeWorkstation(); if (sfcAppOpen) closeSfcApp(); if (lcAppOpen) closeLcApp(); if (readerOpen) closeReader();
   closeSheet(true);
   clearInterval(travel && travel.id);
-  travel = { dest, t0: performance.now(), id: setInterval(travelStep, 150) };
+  const now = performance.now();
+  travel = { dest, t0: now, tick: now, id: setInterval(travelStep, 150) };   // (tick from the start too, so a long first frame isn't taken for a stall)
 }
 function travelStep() {
   const T = travel; if (!T) return;

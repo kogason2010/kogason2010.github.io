@@ -1,4 +1,5 @@
-/* js/ui/perf.js — Keeps things moving on weaker computers. Indoors it lowers the resolution when frames run long and
+/* js/ui/perf.js — Keeps things moving on weaker computers. Indoors it first turns off the richer rendering (contact
+   shadows and glow, js/core/post.js) when frames run long, then lowers the resolution, and
    raises it again when there's room (outside, the campus and space do the same in atmosphere.js). Anywhere, if frames
    stay slow with the resolution already down, it moves to Light graphics: at once if the campus hasn't been built yet,
    otherwise it offers to, since Light rebuilds the campus (a reload). A visitor who picked Full or Light keeps it.
@@ -14,7 +15,8 @@ function watchPerformance() {
   const avg = PERF_IN.sum / PERF_IN.n, outside = worldOn || spaceOn, max = Math.min(window.devicePixelRatio || 1, PIXELS_MAX); PERF_IN.sum = PERF_IN.n = 0;
   if (!outside) {
     const pr = renderer.getPixelRatio();
-    if (avg > 24 && pr > PIXELS_MIN) { renderer.setPixelRatio(Math.max(PIXELS_MIN, pr - 0.25)); PERF_IN.good = 0; }
+    if (avg > 24 && POST.active) { POST.off = true; PERF_IN.good = 0; }   // the richer rendering goes first (js/core/post.js), then the resolution
+    else if (avg > 24 && pr > PIXELS_MIN) { renderer.setPixelRatio(Math.max(PIXELS_MIN, pr - 0.25)); PERF_IN.good = 0; }
     else if (avg < 17 && pr < max) { if (++PERF_IN.good >= 3) { renderer.setPixelRatio(Math.min(max, pr + 0.1)); PERF_IN.good = 0; } }
     else PERF_IN.good = 0;
   }

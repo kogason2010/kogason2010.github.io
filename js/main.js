@@ -7,16 +7,16 @@ let focusHome = null;
 const viewMinDist = () => (PLACES[level] && PLACES[level].minD) || 8;
 const FRONT = { about: [1, 0, 0], ic: [1, 0, 0], hplc: [0, 0, 1], contact: [0, 0, 1], toc: [0, 0, 1], desktop: [0, 0, 1], sfc: [0, 0, 1], co2: [1, 0, 0] };
 const fBox = new THREE.Box3(), fC = new THREE.Vector3(), fS = new THREE.Vector3();
-function focusOn(h) {
-  if (!focusHome) focusHome = { pos: camera.position.clone(), tgt: controls.target.clone() };
-  tween = null;
+// where the camera goes to show hotspot h, leaving room for a panel sheetW pixels wide on the right or sheetH tall along the
+// bottom (and, for the guided tour's letterbox, a strip top pixels tall across the top)
+function focusPose(h, sheetW, sheetH, top) {
+  top = top || 0;
   if (h.focus) { fC.copy(h.focus.center); fS.copy(h.focus.size); }
   else { fBox.setFromObject(h.focusObj || h.group); fBox.getCenter(fC); fBox.getSize(fS); }
   const f = h.front || FRONT[h.key] || [0.7, 0, 0.7];
   const dir = h.front ? new THREE.Vector3(f[0], 0.45, f[2]).normalize() : new THREE.Vector3(f[0] + (f[2] ? 0.4 : 0), 0.45, f[2] + (f[0] ? 0.4 : 0)).normalize();
-  const W = stage.clientWidth, H = stage.clientHeight, narrow = W <= 640;
-  const sheetW = narrow ? 0 : sheet.offsetWidth + 16, sheetH = narrow ? sheet.offsetHeight + 12 : 0;
-  const freeW = Math.max(160, W - sheetW), freeH = Math.max(160, H - sheetH);
+  const W = stage.clientWidth, H = stage.clientHeight;
+  const freeW = Math.max(160, W - sheetW), freeH = Math.max(160, H - sheetH - top);
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   const across = h.front ? fS.x : f[0] ? fS.z : fS.x, depth = h.front ? fS.z : f[0] ? fS.x : fS.z;
   const dH = (fS.y / 2) / (tanV * (freeH / H));
@@ -25,10 +25,16 @@ function focusOn(h) {
   const fwd = dir.clone().negate(), right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
   const up = new THREE.Vector3().crossVectors(right, fwd).normalize();
   const visW = 2 * d * tanV * camera.aspect, visH = 2 * d * tanV;
-  const tgt = fC.clone().addScaledVector(right, (sheetW / 2) / W * visW).addScaledVector(up, -(sheetH / 2) / H * visH);
+  const tgt = fC.clone().addScaledVector(right, (sheetW / 2) / W * visW).addScaledVector(up, -((sheetH - top) / 2) / H * visH);
+  return { pos: tgt.clone().addScaledVector(dir, d), tgt };
+}
+function focusOn(h) {
+  if (!focusHome) focusHome = { pos: camera.position.clone(), tgt: controls.target.clone() };
+  tween = null;
+  const narrow = stage.clientWidth <= 640, f = focusPose(h, narrow ? 0 : sheet.offsetWidth + 16, narrow ? sheet.offsetHeight + 12 : 0);
   controls.minDistance = 1;
   labelsEl.hidden = true;
-  animateCamera(tgt.clone().addScaledVector(dir, d), tgt, 0.9);
+  animateCamera(f.pos, f.tgt, 0.9);
 }
 function unfocus() {
   if (!focusHome) return;
@@ -127,6 +133,7 @@ let rotorAngle = 0, rotorTarget = 0, rotorTimer = 0;
 function frame() {
   const dt = Math.min(clock.getDelta(), 0.05), time = clock.elapsedTime;
   watchPerformance();
+  updateTour(dt);
   if (camTween) {
     const ct = camTween;
     ct.t = Math.min(1, ct.t + dt / ct.dur);
@@ -195,7 +202,7 @@ function frame() {
     const want = THREE.MathUtils.clamp(camera.position.distanceTo(controls.target) * 0.04, 0.05, 0.6);
     if (Math.abs(want - camera.near) > 0.005) { camera.near = want; camera.updateProjectionMatrix(); }
   }
-  if (!osFull) { renderer.render(scene, camera); if (cssRenderer && lab.visible && !worldOn) cssRenderer.render(cssScene, camera); }   // (the live desktop is only on screen in the lab)
+  if (!osFull) { POST.active = postWanted(); if (POST.active) POST.render(); else renderer.render(scene, camera); if (cssRenderer && lab.visible && !worldOn) cssRenderer.render(cssScene, camera); }   // (the live desktop is only on screen in the lab)
 
   if (!pMode && !labelsEl.hidden && !worldOn) {   // (nothing to lay out while the tags are hidden: outside, zoomed in, moving)
     const w = stage.clientWidth, h = stage.clientHeight;

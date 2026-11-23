@@ -87,8 +87,9 @@ function hotGroup(key, label, anchor, parent, level) {
 function scaleAbout(g, s, px, py, pz) { g.scale.setScalar(s); g.position.set(px * (1 - s), py * (1 - s), pz * (1 - s)); }
 
 /* ---------- Canvas screens: draw(...) repaints and uploads; lcdLines is the usual two-line LCD ---------- */
+const SCREEN_TEX = new Set();   // canvas screens (they glow a little with Full graphics, js/core/post.js)
 function screenTex(w, h, draw) {
-  const c = document.createElement("canvas"); c.width = w; c.height = h; const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding;
+  const c = document.createElement("canvas"); c.width = w; c.height = h; const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; SCREEN_TEX.add(t);
   const api = { c, t, draw(...a) { draw(c.getContext("2d"), w, h, ...a); t.needsUpdate = true; } }; return api;
 }
 function lcdLines(g, W, H, lines) {

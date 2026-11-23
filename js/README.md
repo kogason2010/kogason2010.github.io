@@ -9,6 +9,7 @@
 | **App notes in the library** (add one here) | `library/catalog.js` |
 | **Instruments**: the look of each one (HPLC, IC, SFC, NCA's instruments, the robot arm…) | `../instruments/<name>/model.js` (see `instruments/README.md`) |
 | Renderer, camera, room size | `core/scene.js` |
+| Richer rendering on Full graphics: contact shadows and glow indoors | `core/post.js` |
 | Colours (`C`), materials and the modelling helpers every instrument uses (`box`, `cyl`, `plane`, `mat`, `tex`, `module`, `lcModule`…) | `core/helpers.js` |
 | Lights and the Lights on/off switch | `core/lights.js` |
 | Floating molecules behind the dioramas | `core/background.js` |
@@ -35,6 +36,7 @@
 | **Space** (hold Space for 10 s outside): Earth, Moon, rings, satellite, asteroids, free flight | `space/space.js` |
 | Intro panel folding away | `ui/intro.js` |
 | The Places menu and travelling between rooms | `ui/places-menu.js` |
+| **Guided tour**: its stops and captions (`TOUR_STOPS`), the caption card and letterbox | `ui/tour.js` |
 | Merging the lab's static meshes (fewer draw calls) | `lab/merge.js` |
 | **Mathematics** hall: the Yang–Mills exhibits | `math/room.js` |
 | Its live SU(2) lattice simulation | `math/lattice.js` |
