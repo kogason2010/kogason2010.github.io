@@ -2,7 +2,8 @@
    lab's instruments, the basement SFC suite, the campus, the NCA hall, the library and the mathematics building), with a
    short caption at each stop. It moves on by itself; Back, Pause, Next and End are on the caption card (and the arrow
    keys, the space bar and Escape). Dragging the view pauses it. Getting from room to room uses the Places menu's
-   travelTo(). The words are drawn from the rooms' own panels (js/content.js and the buildings' content files).
+   travelTo(). The words are drawn from the rooms' own panels (js/content.js and the buildings' content files). A link
+   ending in #tour starts it straight away.
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";
 
@@ -12,11 +13,11 @@ const TOUR_STOPS = [
   { place: "lab", key: "hplc", title: "HPLC",
     text: "High-performance liquid chromatography pumps a sample through a packed column at high pressure. Compounds move at different speeds, so they reach the detector one after another." },
   { place: "lab", key: "ic", title: "Nexera IC",
-    text: "Shimadzu's ion chromatograph, announced in February 2026. Ion chromatography separates charged species, such as the anions in drinking water. The computer beside it compares columns and scales a method." },
+    text: "Shimadzu's ion chromatograph, launched in February 2026. Ion chromatography separates charged species, such as the anions in drinking water. The computer beside it compares columns and scales a method." },
   { place: "lab", key: "toc", title: "TOC analyzer",
-    text: "It measures the organic carbon in water. A common method oxidizes the sample over a heated catalyst and measures the CO₂ by infrared. The orange window is the furnace; the turntable brings each vial to the needle." },
+    text: "It measures the organic carbon in water. A common method oxidizes the sample over a heated catalyst and measures the CO₂ by infrared. The turntable beside it brings each vial to the injection needle." },
   { place: "lab", key: "desktop", title: "Projects",
-    text: "The monitor opens KogasonOS, a desktop where every project runs as an app, from companions to Shimadzu application notes to browser calculators for everyday HPLC work." },
+    text: "The monitor opens KogasonOS, a desktop where every project runs as an app, from interactive companions to Shimadzu application notes to browser calculators for everyday HPLC work." },
   { place: "basement", key: "sfc", title: "Downstairs: SFC",
     text: "Supercritical fluid chromatography uses CO₂ as the main mobile phase, usually with some methanol. It is dense enough to dissolve compounds but flows almost like a gas, so runs are fast and use far less organic solvent." },
   { place: "campus", shot: "campus", title: "The campus",
@@ -24,7 +25,7 @@ const TOUR_STOPS = [
   { place: "chem", shot: "home", title: "NCA, the LC lab",
     text: "UHPLC, an integrated LC, LC-MS/MS and preparative LC line the benches. At the LC workstation you can run a sample and watch the chromatogram build." },
   { place: "chem", key: "assembly", title: "Robots building an HPLC",
-    text: "Four robot arms put together a modular HPLC, one module per stop, and a QC arch scans each finished system before it ships." },
+    text: "Four robot arms put together a modular HPLC, one or two modules per stop, and a QC arch scans each finished system before it ships." },
   { place: "library", shot: "home", title: "The library",
     text: "Each project has a place on the shelves here, sorted by technique. Tap an alcove to browse, and read a project's site without leaving the room." },
   { place: "math", key: "mathLattice", title: "Mathematics",
@@ -39,7 +40,7 @@ tourEl.setAttribute("role", "region"); tourEl.setAttribute("aria-label", "Guided
 tourEl.innerHTML = `
   <div class="tour-top"><span class="tour-step" id="tourStep"></span><span class="tour-place" id="tourPlace"></span><button class="tour-x" id="tourEnd" type="button" aria-label="End the tour">×</button></div>
   <div class="tour-copy" aria-live="polite"><b class="tour-title" id="tourTitle"></b><p class="tour-text" id="tourText"></p></div>
-  <div class="tour-bar" aria-hidden="true"><i id="tourBar"></i></div>
+  <div class="tour-segs" id="tourSegs" role="group" aria-label="Tour stops">${TOUR_STOPS.map((s, i) => `<button type="button" class="tour-seg" data-i="${i}" aria-label="Stop ${i + 1}: ${s.title}"><i></i></button>`).join("")}</div>
   <div class="tour-ctl">
     <button class="btn" type="button" id="tourPrev">Back</button>
     <button class="btn" type="button" id="tourPlay" aria-pressed="false">Pause</button>
@@ -68,9 +69,10 @@ function tourStart() {
 }
 function tourEnd() {
   if (!TOUR.on) return;
+  if (location.hash === "#tour") history.replaceState(null, "", location.pathname + location.search);   // (so a reload doesn't start it again)
   TOUR.on = false; TOUR.phase = ""; document.body.classList.remove("touring"); tourEl.classList.remove("on");
   setTimeout(() => { if (!TOUR.on) tourEl.hidden = true; }, reduce ? 0 : 300);
-  CAM.dist = 3.8; CAM.pitch = 0.36; CAM.idle = 0;   // the campus camera back to its usual distance, wherever the tour ended
+  CAM.dist = 3.8; CAM.pitch = 0.36; CAM.idle = 0; CAM.drop = 0;   // the campus camera back to its usual distance, wherever the tour ended
   if (!lvl && !worldBusy) controls.minDistance = Math.min(viewMinDist(), camera.position.distanceTo(controls.target));   // (from a close-up, zooming out still works)
 }
 function tourGo(i) {
@@ -82,12 +84,12 @@ function tourGo(i) {
     tq("tourStep").textContent = "The end"; tq("tourPlace").textContent = TOUR_PLACE[herePlace()] || "";
     tq("tourTitle").textContent = "That's the tour";
     tq("tourText").textContent = "Every tag has more to read, the workstations run samples, and there's more to find out on the campus.";
-    tq("tourBar").style.width = "100%"; tq("tourFree").focus({ preventScroll: true });
+    tourSegs(TOUR_STOPS.length, 0); tq("tourFree").focus({ preventScroll: true });
     return;
   }
   const s = TOUR_STOPS[TOUR.i];
   tq("tourStep").textContent = `${TOUR.i + 1} / ${TOUR_STOPS.length}`; tq("tourPlace").textContent = TOUR_PLACE[s.place];
-  tq("tourPrev").disabled = TOUR.i === 0; tq("tourBar").style.width = "0%";
+  tq("tourPrev").disabled = TOUR.i === 0; tourSegs(TOUR.i, 0);
   TOUR.t = 0; TOUR.tries = 0; TOUR.waitT = 0; TOUR.drift = TOUR.i % 2 ? -1 : 1;
   if (TOUR.paused) tourPause(false);   // (only Back, Next or Start again get here while paused: each carries on playing)
   TOUR.dwell = Math.min(14, Math.max(7.5, 3.5 + s.text.length * 0.045));   // long enough to read the caption
@@ -103,8 +105,13 @@ function tourFrame() {
   const s = TOUR_STOPS[TOUR.i];
   tq("tourTitle").textContent = s.title; tq("tourText").textContent = s.text;
   TOUR.phase = "frame";
-  if (s.place === "campus") { CAM.dist = 7.5; CAM.pitch = 0.3; CAM.yaw = 0.6; CAM.idle = 0; return; }   // stand back from the robot
-  CAM.dist = 3.8; CAM.pitch = 0.36;
+  if (s.place === "campus") {
+    CAM.dist = 7.5; CAM.pitch = 0.3; CAM.yaw = 0.6; CAM.idle = 0; CAM.drop = 0;   // stand back from the robot (updateTour aims it)
+    // going back indoors later returns to the lab's starting view, not to whichever close-up the tour last stood at
+    if (TOUR.labHome) labView = { pos: TOUR.labHome.pos.clone(), tgt: TOUR.labHome.tgt.clone() };
+    return;
+  }
+  CAM.dist = 3.8; CAM.pitch = 0.36; CAM.drop = 0;
   closeSheet(true);
   const pose = s.key ? tourFocusPose(s.key) : tourHomePose();
   controls.minDistance = s.key ? 1 : viewMinDist();   // (close-ups come nearer than the room's usual zoom limit)
@@ -125,6 +132,7 @@ function tourHomePose() {
   else { const dy = level === "down" ? BY : 0; camera.position.copy(HOME).y += dy; controls.target.copy(TARGET).y += dy; fitDistance(); }
   const out = { pos: camera.position.clone(), tgt: controls.target.clone() };
   camera.position.copy(pos); controls.target.copy(tgt); camera.lookAt(tgt);
+  if (level === "up") TOUR.labHome = { pos: out.pos.clone(), tgt: out.tgt.clone() };   // the lab's own starting view (see tourFrame)
   const H = stage.clientHeight, cardTop = tourEl.getBoundingClientRect().top, below = Math.max(0, H - cardTop) + 10, bar = Math.min(70, Math.max(26, H * 0.07)) + 10;
   const dir = out.pos.clone().sub(out.tgt).normalize(), box = level === "up" || level === "down" ? new THREE.Box3(new THREE.Vector3(ROOM0 - 0.3, -0.3, ROOM0 - 0.3), new THREE.Vector3(ROOM1, 4.9, ROOM1)).translate(new THREE.Vector3(0, level === "down" ? BY : 0, 0)) : level === "chem" && stage.clientWidth / H >= 0.8 ? CHEM_BOX : null;
   if (box) { const f = fitBoxView(box, dir, { top: bar, bottom: below, side: 12 }); return { pos: f.tgt.clone().addScaledVector(dir, Math.min(f.dist, controls.maxDistance)), tgt: f.tgt }; }
@@ -133,7 +141,7 @@ function tourHomePose() {
   const shift = up.multiplyScalar(-(below - bar) / 2 / H * visH);
   return { pos: out.pos.add(shift), tgt: out.tgt.add(shift) };
 }
-const tourAxis = new THREE.Vector3(0, 1, 0), tourOff = new THREE.Vector3();
+const tourAxis = new THREE.Vector3(0, 1, 0), tourOff = new THREE.Vector3(), tourV = new THREE.Vector3();
 function updateTour(dt) {
   if (!TOUR.on) return;
   const s = TOUR_STOPS[TOUR.i];
@@ -146,6 +154,12 @@ function updateTour(dt) {
     }
     return;
   }
+  // outside, keep nudging the aim so the robot sits low in the space above the caption card, with the campus behind it
+  if (worldOn && s && s.place === "campus" && (TOUR.phase === "frame" || TOUR.phase === "dwell")) {
+    const H = stage.clientHeight, top = tourEl.getBoundingClientRect().top, bar = Math.min(70, Math.max(26, H * 0.07));
+    const want = (bar + 0.72 * (top - bar)) / H, y = (1 - tourV.set(DRV.x, 0.25 + DRV.y, DRV.z).project(camera).y) / 2;
+    CAM.drop = Math.max(0, Math.min(3, CAM.drop + (y - want) * 2 * CAM.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.min(1, dt * 3)));
+  }
   if (TOUR.phase === "frame") { if (!camTween) { TOUR.phase = "dwell"; TOUR.t = 0; } return; }
   if (TOUR.phase !== "dwell") return;
   // a slow drift round the subject while the caption is read
@@ -154,8 +168,17 @@ function updateTour(dt) {
     else { tourOff.subVectors(camera.position, controls.target).applyAxisAngle(tourAxis, 0.022 * dt * TOUR.drift); camera.position.copy(controls.target).add(tourOff); }
   }
   if (TOUR.paused) return;
-  TOUR.t += dt; tq("tourBar").style.width = Math.min(100, TOUR.t / TOUR.dwell * 100) + "%";
+  TOUR.t += dt; tourSegs(TOUR.i, TOUR.t / TOUR.dwell);
   if (TOUR.t >= TOUR.dwell) tourGo(TOUR.i + 1);
+}
+// one segment per stop: the ones already seen are full, the current one fills while its caption is read
+const segEls = [...tourEl.querySelectorAll(".tour-seg")];
+function tourSegs(i, frac) {
+  segEls.forEach((el, k) => {
+    const f = k < i ? 1 : k === i ? Math.max(0, Math.min(1, frac)) : 0;
+    if (el._f !== f) { el._f = f; el.style.setProperty("--f", (f * 100).toFixed(1) + "%"); }
+    const cur = k === i; if (el._cur !== cur) { el._cur = cur; el.classList.toggle("cur", cur); if (cur) el.setAttribute("aria-current", "step"); else el.removeAttribute("aria-current"); }
+  });
 }
 function tourPause(p) { TOUR.paused = p; tq("tourPlay").textContent = p ? "Play" : "Pause"; tq("tourPlay").setAttribute("aria-pressed", String(p)); tourEl.classList.toggle("paused", p); }
 
@@ -166,6 +189,7 @@ tq("tourLab").addEventListener("click", () => { tourEnd(); travelTo("lab"); });
 tq("tourNext").addEventListener("click", () => tourGo(TOUR.i + 1));
 tq("tourPrev").addEventListener("click", () => tourGo(TOUR.i - 1));
 tq("tourPlay").addEventListener("click", () => tourPause(!TOUR.paused));
+tq("tourSegs").addEventListener("click", e => { const b = e.target.closest(".tour-seg"); if (b) tourGo(+b.dataset.i); });   // jump to any stop
 // looking around yourself pauses it (press Play to carry on)
 renderer.domElement.addEventListener("pointerdown", () => { if (TOUR.on && TOUR.phase === "dwell" && !TOUR.paused) tourPause(true); });
 // keys: ← → for back and next, space to pause, Escape to end. Nothing else reaches the lab while touring (on the campus
@@ -182,3 +206,6 @@ window.addEventListener("keydown", e => {
 }, true);
 window.addEventListener("keyup", e => { if (TOUR.on && e.key !== "Tab") e.stopImmediatePropagation(); }, true);
 document.addEventListener("click", e => { if (e.target.closest("[data-tour]")) { e.preventDefault(); tourStart(); } });
+// a link to kogason2010.github.io/#tour starts the tour as soon as the lab is on screen
+window.addEventListener("load", () => { if (location.hash === "#tour") setTimeout(tourStart, 600); });
+window.addEventListener("hashchange", () => { if (location.hash === "#tour") tourStart(); });

@@ -177,7 +177,7 @@ window.PORTFOLIO = {
       icon: "icons/hplc-tools.svg",
       size: [1180, 800],
       description:
-        "Browser-based calculators for everyday HPLC and UHPLC work: method transfer with USP <621> checks, gradient design, system suitability, buffer recipes with activity corrections, back-pressure and viscosity, and unit conversions.",
+        "Browser-based calculators for everyday HPLC and UHPLC work: method transfer with USP <621> checks, gradient design, system suitability, buffer recipes with activity corrections, back-pressure and viscosity, column volume and solvent use, and unit conversions.",
       tip: "Inputs are remembered, and every tab has a Copy link button that shares the current values.",
       stack: ["JavaScript", "No dependencies", "Unit tested"],
       updated: "2026-10-16",

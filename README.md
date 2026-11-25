@@ -1,6 +1,6 @@
 # KogasonOS
 
-> **Layout:** the site's front door (`index.html` at the root) is a 3D analytical chemistry lab built with Three.js. KogasonOS lives in `os/` (kogason2010.github.io/os/) and runs live on the lab's monitor: zoom into the screen to use it, and click **Lab** to zoom back out. Each instrument in the lab is its own file in `instruments/`, with an offline viewer for working on it (see `instruments/README.md`).
+> **Layout:** the site's front door (`index.html` at the root) is a 3D analytical chemistry lab built with Three.js. KogasonOS lives in `os/` (kogason2010.github.io/os/) and runs live on the lab's monitor: zoom into the screen to use it, and click **Lab** to zoom back out. Each instrument in the lab is its own file in `instruments/`, with an offline viewer for working on it (see `instruments/README.md`). From the lab you can go downstairs to an SFC suite, or drive the robot vacuum out onto a campus with an LC lab (NCA), a library and a mathematics building; **Take the tour** in the intro card, or in **Places**, visits the highlights of every room.
 
 **Live at [kogason2010.github.io](https://kogason2010.github.io/)**
 
@@ -27,7 +27,7 @@ The desktop sorts them into two folders, plus a couple of standalone apps.
 
 - **[HPLC Tools](https://github.com/kogason2010/HPLC-tools)**: calculators for everyday HPLC work: method transfer with USP <621> checks, gradients, buffers, system suitability, back-pressure.
 - **[Solvane](https://github.com/kogason2010/solvane)**: a design study for a fictional analytical-science company.
-- **Resolve** (built into the desktop): a method-development game. Each level is a sample whose peaks overlap; tune the gradient and column temperature until every pair hits Rs 1.5 inside the run-time limit. Retention follows the linear-solvent-strength model, migrated numerically through the gradient (`js/resolve-engine.js`).
+- **Resolve** (built into the desktop): a method-development game. Each level is a sample whose peaks overlap; tune the gradient and column temperature until every pair hits Rs 1.5 inside the run-time limit. Retention follows the linear-solvent-strength model, migrated numerically through the gradient (`os/js/resolve-engine.js`).
 
 The Shimadzu-related projects are independent and unofficial, and aren't affiliated with Shimadzu.
 
@@ -72,7 +72,7 @@ node os/tools/capture-shots.mjs my-new-site
 
 ### Other kinds of apps
 
-Websites that aren't on GitHub work too: `{ type: "website", id: "my-shop", title: "My Shop", url: "https://example.com/" }`. Add `embed: false` for sites that won't load inside another page; those open in a new tab. Text files that open in Notepad are `type: "document"`. A completely new built-in app is a small function registered in `js/apps.js`.
+Websites that aren't on GitHub work too: `{ type: "website", id: "my-shop", title: "My Shop", url: "https://example.com/" }`. Add `embed: false` for sites that won't load inside another page; those open in a new tab. Text files that open in Notepad are `type: "document"`. A completely new built-in app is a small function registered in `os/js/apps.js`.
 
 Any of my repos with GitHub Pages turned on that isn't listed in the config still shows up in Projects automatically, opening its live site.
 
@@ -89,11 +89,14 @@ python3 -m http.server
 | Path | What's in it |
 | --- | --- |
 | `os/js/config.js` | Projects, folders, screenshots, and what appears on the desktop, Start menu and taskbar |
-| `js/core.js` | App registry, settings, window manager and snapping |
-| `js/apps.js` | File Explorer, project windows, Notepad, Terminal, Settings |
-| `js/showcase.js` | Showcase and Photos |
-| `js/shell.js` | Desktop, taskbar, Start menu, Task view, notifications |
+| `os/js/core.js` | App registry, settings, window manager and snapping |
+| `os/js/apps.js` | File Explorer, project windows, Notepad, Terminal, Settings |
+| `os/js/showcase.js` | Showcase and Photos |
+| `os/js/shell.js` | Desktop, taskbar, Start menu, Task view, notifications |
 | `os/css/` | All styling, light and dark |
 | `os/apps/` | Bundled copies of each project's built site |
 | `os/media/`, `os/icons/`, `os/wallpapers/` | Screenshots, project icons and wallpaper art |
-| `os/tools/` | The sync and screenshot scripts |
+| `os/tools/` | The sync, screenshot and project-index scripts |
+| `index.html`, `js/`, `css/` | The 3D lab and its campus, buildings and guided tour (`js/README.md` maps every file) |
+| `instruments/` | One `model.js` per instrument, with an offline viewer (`instruments/README.md`) |
+| `projects/index.html` | The plain list of every project, built from `os/js/config.js` by `os/tools/build-index.mjs` |

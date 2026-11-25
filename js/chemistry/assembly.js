@@ -1,6 +1,6 @@
 /* js/chemistry/assembly.js — The robot assembly line in NCA's new hall: four robot arms stack a modular HPLC on pallets
-   that index along a conveyor. Autosampler first, then the detector, two pumps, the system controller and the solvent
-   tray, with the column oven set alongside; a QC arch checks each finished system, and it ships off the end.
+   that index along a conveyor. Autosampler first, then the pump and detector, the degasser and system controller, and
+   the solvent tray, with the column oven set alongside; a QC arch checks each finished system, and it ships off the end.
    The arms are solved each frame with simple two-link inverse kinematics, so they really reach for each part.
    Part of the kogason2010 lab. Scripts load in order from index.html and share one scope. */
 "use strict";

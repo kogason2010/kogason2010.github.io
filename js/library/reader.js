@@ -14,13 +14,13 @@ LIB_SHELVES.forEach(s => {
   const notes = notesOn(s.id);
   SECTIONS["lib_" + s.id] = {
     kicker: "Library · " + s.name.toLowerCase(), title: s.name,
-    html: notes.length ? `<p>${notes.length === 1 ? "One app note" : notes.length + " app notes"} on this shelf.</p><div class="lib-notes">${notes.map(noteCard).join("")}</div>`
-      : `<p>No app notes on this shelf yet. New ones will appear on the lectern in front of the alcove.</p>`,
+    html: notes.length ? `<p>${notes.length === 1 ? "One project" : notes.length + " projects"} on this shelf.</p><div class="lib-notes">${notes.map(noteCard).join("")}</div>`
+      : `<p>Nothing on this shelf yet. New projects will appear on the lectern in front of the alcove.</p>`,
   };
 });
 SECTIONS.libCatalog = {
   kicker: "Library · central desk", title: "Catalogue",
-  html: `<p>Every app note in the library. Search, or browse by shelf.</p>
+  html: `<p>Every project in the library, from app-note companions to tools. Search, or browse by shelf.</p>
     <label class="lib-search"><span>Search</span><input id="libSearch" type="search" placeholder="Title, technique, note number…" autocomplete="off"></label>
     ${LIB_SHELVES.map(s => { const n = notesOn(s.id); return n.length ? `<h3 class="lib-shelf">${libEsc(s.name)}</h3><div class="lib-notes">${n.map(noteCard).join("")}</div>` : ""; }).join("")}
     <p class="lib-empty" id="libEmpty" hidden>Nothing matches that search.</p>`,

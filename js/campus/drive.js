@@ -90,13 +90,13 @@ function driveCampus(dt) {
 }
 
 /* chase camera: behind and above, drag to look round, scroll to zoom */
-const CAM = { yaw: 0, pitch: 0.36, dist: 3.8, drag: null, idle: 9, look: new THREE.Vector3() };
+const CAM = { yaw: 0, pitch: 0.36, dist: 3.8, drag: null, idle: 9, look: new THREE.Vector3(), drop: 0 };   // drop: aim this far below the robot, so it sits higher in the picture (the guided tour, above its caption card)
 let camShake = 0;
 function chase(dt, snap) {
   const yaw = DRV.h + CAM.yaw, cp = Math.cos(CAM.pitch), back = V(-Math.cos(yaw) * cp, 0, Math.sin(yaw) * cp);
   const dist = CAM.dist + Math.min(4, DRV.y * 0.16);
   const want = V(DRV.x, 0.2 + DRV.y, DRV.z).addScaledVector(back, dist).add(V(0, Math.sin(CAM.pitch) * dist, 0));
-  const look = V(DRV.x + Math.cos(DRV.h) * 0.9, 0.25 + DRV.y, DRV.z - Math.sin(DRV.h) * 0.9);
+  const look = V(DRV.x + Math.cos(DRV.h) * 0.9, 0.25 + DRV.y - CAM.drop, DRV.z - Math.sin(DRV.h) * 0.9);
   // keep the camera out of buildings: slide it in toward the robot until it's clear
   const rp = V(DRV.x, 0.3 + DRV.y, DRV.z);
   for (let t = 1; t > 0.15; t -= 0.05) {

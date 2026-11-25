@@ -10,7 +10,7 @@ const PLACE_LIST = [
   { id: "basement", name: "Basement SFC suite", note: "Supercritical fluid chromatography" },
   { id: "campus", name: "Campus", note: "Drive the robot outside" },
   { id: "chem", name: "NCA", note: "The LC lab, with a live LC run" },
-  { id: "library", name: "Library", note: "App notes, shelved by technique" },
+  { id: "library", name: "Library", note: "Every project, shelved by technique" },
   { id: "math", name: "Mathematics", note: "Yang–Mills and the mass gap" },
   { id: "space", name: "Low Earth orbit", note: "You found it", secret: true },
 ];
