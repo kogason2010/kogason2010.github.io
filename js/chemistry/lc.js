@@ -34,7 +34,7 @@ const lcProg = (m, t) => t <= 0 ? m.b0 / 100 : t >= m.tG ? m.b1 / 100 : (m.b0 + 
 const LC_SAMPLES = {
   pain: {
     name: "Pain reliever", short: "Analgesics", cap: "#e3632d", nm: 254,
-    about: "An over-the-counter combination: acetaminophen, caffeine and aspirin, plus salicylic acid, the breakdown product aspirin forms as it ages. Two of the four are acids, so pH matters.",
+    about: "An over-the-counter combination: acetaminophen, caffeine and aspirin, plus salicylic acid, the breakdown product aspirin forms as it ages. Aspirin and salicylic acid are carboxylic acids, so pH matters.",
     ref: { b0: 5, b1: 60, tG: 4, F: 0.5, T: 40, pH: 2.7 },
     comps: [
       { name: "Acetaminophen", lkw: 0.75, S: 3.2, h: 0.9, color: "#3fa7d6" }, { name: "Caffeine", lkw: 1.15, S: 3.5, h: 0.75, color: "#59c3a6" },

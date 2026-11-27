@@ -41,7 +41,7 @@ function libHomeView() {
 PLACES.library = {
   title: "Library", building: "Shelving the application notes", built: () => libraryBuilt,
   group: library, build: buildLibrary, home: libHomeView, minD: LIB_VIEW.minD, spawn: LIB_SPAWN, door: LIB_DOOR, eyebrow: "Portfolio · library · app notes",
-  hint: "Drag to look around · scroll or pinch to zoom · tap an alcove or the central desk to browse app notes",
+  hint: "Drag to look around · scroll or pinch to zoom · tap an alcove or the central desk to browse the projects",
   enter() {
     libSaved = { minA: controls.minAzimuthAngle, maxA: controls.maxAzimuthAngle, minP: controls.minPolarAngle, maxP: controls.maxPolarAngle, maxD: controls.maxDistance };
     Object.assign(controls, { minAzimuthAngle: -Infinity, maxAzimuthAngle: Infinity, minPolarAngle: 0.3, maxPolarAngle: 1.52, maxDistance: LIB_VIEW.maxD });

@@ -22,7 +22,8 @@ if (POST.ok) {
   const rtOpts = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat };
   // the room: antialiased colour plus depth (resolved together, so the depth matches what's on screen)
   const main = new THREE.WebGLMultisampleRenderTarget(1, 1, Object.assign({}, rtOpts));
-  main.samples = Math.min(4, renderer.capabilities.maxSamples || 4);
+  // (on a high-density screen the pixels are already small, so 2× antialiasing is enough and saves a lot of graphics memory)
+  main.samples = Math.min((window.devicePixelRatio || 1) >= 1.75 ? 2 : 4, renderer.capabilities.maxSamples || 4);
   main.texture.encoding = THREE.sRGBEncoding;     // the room is drawn tone-mapped and encoded, exactly as it would be on screen
   main.depthTexture = new THREE.DepthTexture(1, 1, THREE.UnsignedIntType);
   // the glowing things on their own, at half size, with their own depth to compare against the room's

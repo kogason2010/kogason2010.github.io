@@ -108,7 +108,7 @@ const html = `<!doctype html>
     <span class="eyebrow">kogason2010 · all projects</span>
     <h1>Projects</h1>
     <p>${esc(CFG.owner.tagline)} Every project is listed here as a plain page, so nothing has to load before you can read it.</p>
-    <div class="start"><a class="primary" href="${SITE}">Enter the 3D lab</a><a href="${SITE}os/">Open KogasonOS</a><a href="${esc(CFG.owner.github)}">GitHub</a></div>
+    <div class="start"><a class="primary" href="${SITE}">Enter the 3D lab</a><a href="${SITE}#tour">Take the tour</a><a href="${SITE}os/">Open KogasonOS</a><a href="${esc(CFG.owner.github)}">GitHub</a></div>
   </header>
 ${groups.filter((g) => g.items.length).map((g) => `  <section aria-labelledby="g-${esc(g.id)}">
     <h2 id="g-${esc(g.id)}">${esc(g.title)}</h2>

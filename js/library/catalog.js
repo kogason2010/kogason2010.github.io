@@ -56,7 +56,7 @@ const APP_NOTES = [
   {
     id: "hplc-tools", shelf: "tools", cover: "#5a4a1e",
     title: "HPLC Tools", subtitle: "Calculators for everyday LC work",
-    summary: "Browser-based calculators for method transfer and column scaling, system suitability, buffer preparation, pressure and viscosity, column volume and solvent use, and unit conversion. Everything runs in the browser.",
+    summary: "Browser-based calculators for method transfer and column scaling, gradient design, system suitability, buffer preparation, pressure and viscosity, column volume and solvent use, and unit conversion. Everything runs in the browser.",
     sources: [],
     url: "https://kogason2010.github.io/HPLC-tools/",
   },

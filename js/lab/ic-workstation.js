@@ -19,7 +19,7 @@ const WS_TOPICS = [
     lede: "Conductivity detectors see the eluent too. A suppressor after the column strips most of the eluent's conductivity so the analyte peaks stand out.",
     cols: ["Suppressed", "Non-suppressed"],
     rows: [
-      ["How it works", "The suppressor swaps the eluent's cations for H⁺, so a carbonate eluent becomes weakly conducting carbonic acid while the analyte becomes a more conductive acid", "No suppressor: the detector reads the analyte against the eluent's own background"],
+      ["How it works", "In anion IC, the suppressor swaps the eluent's cations for H⁺, so a carbonate eluent becomes weakly conducting carbonic acid while the analyte becomes a more conductive acid. Cation suppressors do the mirror image, swapping the acid eluent's anions for OH⁻ so it becomes water", "No suppressor: the detector reads the analyte against the eluent's own background"],
       ["Background conductivity", "Low", "Higher"],
       ["Sensitivity", "Higher, with lower detection limits", "Lower, suited to higher concentrations"],
       ["Columns and eluents", "Higher-capacity columns, stronger eluents", "Low-capacity columns with low-conductivity eluents"],

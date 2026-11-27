@@ -618,9 +618,14 @@ body.touring .joy, body.touring .boost, body.touring .toast, body.touring .bot-t
 .tour-x { margin-left: auto; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(160, 190, 230, .25); background: transparent; color: #e8eef6; font-size: 16px; line-height: 1; cursor: pointer; }
 .tour-title { display: block; margin-top: 8px; font: 800 22px/1.1 var(--display); letter-spacing: -.015em; }
 .tour-text { margin: 6px 0 0; font-size: 14.5px; line-height: 1.5; color: #c9d5e3; min-height: 3em; }
-.tour-bar { height: 3px; margin-top: 12px; border-radius: 3px; background: rgba(160, 190, 230, .16); overflow: hidden; }
-.tour-bar i { display: block; height: 100%; width: 0; background: #6aa6f0; border-radius: 3px; transition: width .15s linear; }
-.tour.paused .tour-bar i { background: #9fb2c8; }
+.tour-segs { display: flex; gap: 4px; margin-top: 8px; }
+.tour-seg { flex: 1; min-width: 0; height: 16px; padding: 6px 0; border: 0; background: transparent; cursor: pointer; }
+.tour-seg i { display: block; height: 4px; border-radius: 2px; overflow: hidden; background: rgba(160, 190, 230, .18); position: relative; transition: background .15s; }
+.tour-seg i::after { content: ""; position: absolute; inset: 0; width: var(--f, 0%); background: #6aa6f0; border-radius: 2px; transition: width .15s linear; }
+.tour-seg:hover i { background: rgba(160, 190, 230, .36); }
+.tour-seg.cur i { box-shadow: 0 0 0 1px rgba(106, 166, 240, .45); }
+.tour.paused .tour-seg.cur i::after { background: #9fb2c8; }
+.tour-seg:focus-visible { outline: 2px solid #6aa6f0; outline-offset: 1px; border-radius: 3px; }
 .tour-ctl { display: flex; gap: 8px; margin-top: 12px; }
 .tour-ctl .btn { background: rgba(255, 255, 255, .07); color: #e8eef6; border-color: rgba(160, 190, 230, .28); }
 .tour-ctl .btn.primary { background: #6aa6f0; color: #08182c; border-color: #6aa6f0; margin-left: auto; }
@@ -632,4 +637,4 @@ body.touring .joy, body.touring .boost, body.touring .toast, body.touring .bot-t
   .tour-text { font-size: 13.5px; }
   .tour-ctl { flex-wrap: wrap; }
 }
-@media (prefers-reduced-motion: reduce) { .letterbox::before, .letterbox::after, .tour, .tour-bar i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .letterbox::before, .letterbox::after, .tour, .tour-seg i, .tour-seg i::after { transition: none; } }

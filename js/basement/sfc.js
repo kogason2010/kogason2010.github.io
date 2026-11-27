@@ -30,8 +30,9 @@ const rtEPSA = e => (e - EPSA_FIT.b) / EPSA_FIT.m;
 const SAMPLES = {
   epsa: {
     name: "EPSA standards", short: "EPSA", cap: "#2bb3a3",
-    about: "Five EPSA reference compounds, with ritonavir as the unknown. Retention times at the method settings match the app note behind the Nexera UC EPSA project.",
-    column: "Chirex (S)-Val/(R)-NEA · PDA 254 nm", t0: 0.25, N: 4000, window: 4.5, ref: { mod: 20, P: 204, T: 40 },
+    about: "Five of the nine EPSA reference compounds in the app note behind the Nexera UC EPSA project, with ritonavir as the unknown. At the method settings each one elutes where the note's PDA calibration line puts it.",
+    // the app note: Chirex (S)-Val/(R)-NEA, 50 × 4.6 mm, 40 °C, 4.0 mL/min, BPR 20.4 MPa, PDA 254 nm (Shimadzu Application News 01-01161-EN)
+    column: "Chirex (S)-Val/(R)-NEA · PDA 254 nm", flow: 4.0, nm: 254, t0: 0.25, N: 4000, window: 4.5, ref: { mod: 20, P: 204, T: 40 },
     comps: [
       { name: "Lidocaine", epsa: 47, h: 0.18, color: "#3fa7d6" }, { name: "Chlorpromazine", epsa: 68, h: 0.95, color: "#59c3a6" },
       { name: "Ritonavir", epsa: 75, tR: 0.932, h: 0.5, color: "#f0b429", unknown: true }, { name: "Pindolol", epsa: 103, h: 0.28, color: "#9b7bff" },
@@ -41,7 +42,7 @@ const SAMPLES = {
   chiral: {
     name: "Chiral pair", short: "Chiral", cap: "#8a63d2",
     about: "Racemic trans-stilbene oxide, a classic SFC test compound: two mirror-image forms that only a chiral column can tell apart.",
-    column: "Amylose-based chiral column · UV 230 nm", t0: 0.5, N: 3000, window: 2.5, ref: { mod: 10, P: 150, T: 35 },
+    column: "Amylose-based chiral column · UV 230 nm", flow: 3.0, nm: 230, t0: 0.5, N: 3000, window: 2.5, ref: { mod: 10, P: 150, T: 35 },
     comps: [
       { name: "Enantiomer 1", k: 1.8, S: 1.3, H: 1800, h: 0.75, color: "#4cc2d9" },
       { name: "Enantiomer 2", k: 2.25, S: 1.38, H: 2600, h: 0.62, color: "#d96fbf" },
@@ -50,7 +51,7 @@ const SAMPLES = {
   dyes: {
     name: "Dye mix", short: "Dyes", cap: "#e8892c",
     about: "Four coloured dyes, so you can watch the bands with your own eyes. An illustrative mix: the retention values are made up for the demo.",
-    column: "2-Ethylpyridine column · visible, 450 nm", t0: 0.4, N: 5000, window: 3.2, ref: { mod: 15, P: 150, T: 40 },
+    column: "2-Ethylpyridine column · visible, 450 nm", flow: 3.0, nm: 450, t0: 0.4, N: 5000, window: 3.2, ref: { mod: 15, P: 150, T: 40 },
     comps: [
       { name: "Yellow", k: 0.8, S: 1.0, h: 0.8, color: "#f2c230" }, { name: "Orange", k: 1.9, S: 1.2, h: 0.65, color: "#f08a24" },
       { name: "Red", k: 3.2, S: 1.4, h: 0.55, color: "#e0413a" }, { name: "Violet", k: 5.0, S: 1.6, h: 0.45, color: "#7d4cd6" },
@@ -162,12 +163,12 @@ function sfcAppHTML() {
     <section class="sfcw-panel sfcw-chrom" aria-labelledby="sfcChromH"><h3 id="sfcChromH">Chromatogram</h3><canvas class="sfc-chart" id="sfcChart" role="img" aria-label="Live chromatogram"></canvas></section>
     <section class="sfcw-panel sfcw-res" aria-labelledby="sfcResH"><h3 id="sfcResH">Results</h3><div class="sfc-res" id="sfcRes" aria-live="polite"><p class="sfc-note">Inject a sample to see its peaks here.</p></div></section>
     <section class="sfcw-panel sfcw-phase" aria-labelledby="sfcPhaseH"><h3 id="sfcPhaseH">CO₂ phase</h3><div class="sfc-phase"><canvas id="sfcPhase" role="img" aria-label="CO₂ phase diagram with the current pressure and temperature"></canvas><div class="sfc-state" id="sfcState"></div></div>
-      <p class="sfc-note">A teaching model, not instrument software. The app note's EPSA method runs a methanol gradient; here the run is isocratic, tuned so the method settings reproduce its retention times.</p></section>`;
+      <p class="sfc-note">A teaching model, not instrument software. The app note's EPSA method runs a methanol gradient; here the run is isocratic, tuned so that at the method settings each standard lands on the note's calibration line.</p></section>`;
 }
 const $s = id => document.getElementById(id);
 function sfcMounted() { return sfcAppOpen; }
 function sfcStatus() {
-  const f = 3.0, m = sfc.mod / 100, run = sfc.run;
+  const f = SAMPLES[sfc.sample].flow, m = sfc.mod / 100, run = sfc.run;   // total flow, split into CO₂ and modifier
   const st = sfc.inject ? "Injecting" : run && !run.done ? `Run ${fmt2(run.t)} min` : sfc.last ? "Run complete" : "Idle";
   $s("sfcStat").innerHTML = [`CO₂ ${(f * (1 - m)).toFixed(2)} mL/min`, `MeOH ${(f * m).toFixed(2)} mL/min`, `BPR ${sfc.P} bar`, `Oven ${sfc.T.toFixed(1)} °C`, st].map(x => `<span>${x}</span>`).join("");
 }
@@ -211,7 +212,7 @@ function sfcResults() {
     extra = `<div class="sfc-callout"><b>Ritonavir EPSA</b>
       <div class="sfc-kv"><span>App note's calibration line</span><b>${eNote == null ? "—" : Math.round(eNote) + " Å²"}</b></div>
       <div class="sfc-kv"><span>Line from this run's standards</span><b>${eRun == null ? "—" : Math.round(eRun) + " Å²"}</b></div>
-      <div class="sfc-kv"><span>Published value</span><b>75 Å²</b></div>
+      <div class="sfc-kv"><span>Published value (Application News 01-01161-EN)</span><b>75 Å²</b></div>
       <p>${off == null ? "Ritonavir hasn't come off the column yet." : Math.abs(off) < 2.5 ? "At the method settings the retention time lands right on the calibration line." : `The settings moved retention, so the fixed calibration line is off by ${Math.round(Math.abs(off))} Å². Calibrating against standards run under the same conditions pulls the answer back, which is why the method checks the system every day.`}</p>
       <a href="https://kogason2010.github.io/nexera-uc-epsa/" target="_blank" rel="noopener" data-launch="nexera-uc-epsa">Open the EPSA project</a></div>`;
   } else if (run.s === SAMPLES.chiral) {
@@ -244,13 +245,13 @@ function mountSfc() {
 window.addEventListener("resize", () => { if (sfcMounted()) sfcSync(); });
 // the SFC's own displays (SFC_PARTS.lcd in instruments/basement-sfc/model.js): flows, pressure, valve, oven, detector
 function sfcLcds() {
-  const L = SFC_PARTS.lcd, f = 3.0, m = sfc.mod / 100, live = sfc.run && !sfc.run.done;
+  const L = SFC_PARTS.lcd, s = SAMPLES[sfc.sample], f = s.flow, m = sfc.mod / 100, live = sfc.run && !sfc.run.done;
   const st = (sfc.inject ? "INJECT" : live ? "RUN" : "READY").padEnd(10) + "REMOTE";
   L.co2.draw(["CO2   " + (f * (1 - m)).toFixed(2) + " mL/min", "BPR   " + (sfc.P / 10).toFixed(1) + " MPa", st]);
   L.mod.draw(["MeOH  " + (f * m).toFixed(2) + " mL/min", "MOD   " + sfc.mod.toFixed(1) + " %", st]);
   L.inj.draw(["VALVE  " + (sfc.inject ? (sfc.inject.phase === "inject" ? "INJECT" : "LOAD") : live ? "INJECT" : "LOAD"), "SAMPLE  " + SAMPLES[sfc.sample].short.toUpperCase(), "LOOP  10 uL"]);
   L.oven.draw(["OVEN  " + sfc.T.toFixed(1) + " C", "COLUMN  1", st]);
-  if (!live) L.det.draw(["PDA   254 nm", "0.000 AU", st]);
+  if (!live) L.det.draw(["PDA   " + s.nm + " nm", "0.000 AU", st]);
 }
 function sfcInject() {
   if (sfc.inject || (sfc.run && !sfc.run.done)) return;
@@ -447,7 +448,7 @@ function updateSfc(dt, time) {
   screenClock -= dt;
   if (live && screenClock <= 0) {
     screenClock = 0.08; paintSfcScreen();
-    SFC_PARTS.lcd.det.draw(["PDA   254 nm", (signal(run.peaks, run.t) * 0.08).toFixed(3) + " AU", "RUN".padEnd(10) + "REMOTE"]);
+    SFC_PARTS.lcd.det.draw(["PDA   " + run.s.nm + " nm", (signal(run.peaks, run.t) * 0.08).toFixed(3) + " AU", "RUN".padEnd(10) + "REMOTE"]);
     if (sfcAppOpen) sfcDrawChart();
   }
   if (sfcAppOpen) updateLiveCaption();

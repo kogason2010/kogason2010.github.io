@@ -21,7 +21,7 @@ function buildSamplePrep() {
   const bx = IXc - 1.0;
   box(0.36, 0.1, 0.42, 0xeef0f0, bx, IT + 0.05, IZc, gSp); box(0.3, 0.26, 0.3, glass, bx, IT + 0.23, IZc - 0.03, gSp).castShadow = false;
   cyl(0.06, 0.06, 0.01, C.steel, bx, IT + 0.105, IZc - 0.03, gSp, 20, steelM);
-  const balLcd = screenTex(120, 40, lcdLines); balLcd.draw(["  10.002 mg", "STABLE"]); plane(0.13, 0.04, new THREE.MeshBasicMaterial({ map: balLcd.t }), bx, IT + 0.075, IZc + 0.212, 0, gSp);
+  const balLcd = screenTex(120, 40, lcdLines); balLcd.draw(["  10.02 mg", "STABLE"]);   /* a 0.01 mg balance (js/chemistry/content.js) */ plane(0.13, 0.04, new THREE.MeshBasicMaterial({ map: balLcd.t }), bx, IT + 0.075, IZc + 0.212, 0, gSp);
   // ultrasonic bath with a beaker and a shimmer on the water
   const sx = IXc - 0.4;
   box(0.44, 0.22, 0.32, 0xd9dee0, sx, IT + 0.11, IZc, gSp, steelM);
