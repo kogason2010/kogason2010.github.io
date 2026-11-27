@@ -90,10 +90,17 @@ function openSection(key) {
   document.getElementById("sheetKicker").textContent = s.kicker;
   document.getElementById("sheetTitle").textContent = s.title;
   sheetBody.innerHTML = s.html;
+  if (sheet.classList.contains("closed")) sheetOpener = document.activeElement;
   sheet.classList.remove("closed"); sheet.setAttribute("aria-hidden", "false"); document.body.classList.add("sheet-open");
   hint.hidden = true;
   focusOn(hotspots.find(x => x.key === key));
   document.getElementById("closeBtn").focus({ preventScroll: true });
+}
+// closing a panel yourself (its × or Escape) puts the keyboard focus back on whatever opened it, usually its tag
+let sheetOpener = null;
+function returnFocus() {
+  const el = sheetOpener; sheetOpener = null;
+  if (el && el !== document.body && el.isConnected && el.getClientRects().length) el.focus({ preventScroll: true });
 }
 function closeSheet(keepHint) {
   sheet.classList.add("closed"); sheet.setAttribute("aria-hidden", "true"); document.body.classList.remove("sheet-open");
@@ -101,11 +108,11 @@ function closeSheet(keepHint) {
   unfocus();
 }
 sheetBody.addEventListener("click", e => { if (e.target.closest("[data-particles]")) setParticleMode(true); if (e.target.closest("[data-sfcapp]")) openSfcApp(); if (e.target.closest("[data-lcapp]")) openLcApp(); });
-document.getElementById("closeBtn").addEventListener("click", () => closeSheet());
+document.getElementById("closeBtn").addEventListener("click", () => { closeSheet(); returnFocus(); });
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
   if (!document.getElementById("placesMenu").hidden) return;   // the Places menu closes itself (js/ui/places-menu.js); nothing else should go with it
-  if (worldOn) exitWorld(); else if (readerOpen) closeReader(); else if (lcAppOpen) closeLcApp(); else if (sfcAppOpen) closeSfcApp(); else if (wsOpen) closeWorkstation(); else if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else closeSheet();
+  if (worldOn) exitWorld(); else if (readerOpen) closeReader(); else if (lcAppOpen) closeLcApp(); else if (sfcAppOpen) closeSfcApp(); else if (wsOpen) closeWorkstation(); else if (deskOpen) closeDesktop(); else if (pMode) setParticleMode(false); else if (!sheet.classList.contains("closed")) { closeSheet(); returnFocus(); } else closeSheet();
 });
 
 // toolbar buttons that show only an icon on narrower screens (css/style.css) name themselves in a tooltip; the name is read

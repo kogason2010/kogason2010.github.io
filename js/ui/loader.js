@@ -45,11 +45,12 @@ async function runWithLoader(title, eyebrow, steps) {
   setLoaderProgress(1); document.getElementById("loaderStep").textContent = "Ready";
   await nextFrame();
 }
-// compile every shader the new view needs now, behind the card, instead of stuttering through its first frames
-// (anything carrying something other than a real material is set aside for the moment, so it can't stop the rest)
+// compile every shader the new view needs now, behind the card, instead of stuttering through its first frames.
+// three's compile goes through every object, shown or hidden, and stops at the first whose material isn't a real one
+// (the campus jet carries a stand-in that sets its parts' opacity, js/campus/gameplay.js): those stand aside for the
+// moment, so everything after them still compiles
 function warmUp() {
   const odd = [];
-  scene.traverseVisible(o => { const m = o.material; if (m && ![].concat(m).every(x => x && x.isMaterial)) odd.push(o); });
-  odd.forEach(o => { o.visible = false; });
-  try { renderer.compile(scene, camera); } catch (err) { console.warn(err); } finally { odd.forEach(o => { o.visible = true; }); }
+  scene.traverse(o => { const m = o.material; if (m && ![].concat(m).every(x => x && x.isMaterial)) { odd.push([o, m]); o.material = null; } });
+  try { renderer.compile(scene, camera); } catch (err) { console.warn(err); } finally { odd.forEach(([o, m]) => { o.material = m; }); }
 }
