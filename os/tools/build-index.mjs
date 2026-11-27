@@ -64,7 +64,9 @@ const html = `<!doctype html>
 <meta property="og:image" content="${SITE}og-lab.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root { --bg: #e9eef2; --bg-2: #d2dce3; --ink: #18232b; --ink-soft: #51616c; --card: #f8fafb; --line: #c4d0d8; --accent: #0a5fb4; --accent-ink: #fff;
@@ -110,6 +112,7 @@ const html = `<!doctype html>
     <p>${esc(CFG.owner.tagline)} Every project is listed here as a plain page, so nothing has to load before you can read it.</p>
     <div class="start"><a class="primary" href="${SITE}">Enter the 3D lab</a><a href="${SITE}#tour">Take the tour</a><a href="${SITE}os/">Open KogasonOS</a><a href="${esc(CFG.owner.github)}">GitHub</a></div>
   </header>
+  <main>
 ${groups.filter((g) => g.items.length).map((g) => `  <section aria-labelledby="g-${esc(g.id)}">
     <h2 id="g-${esc(g.id)}">${esc(g.title)}</h2>
     ${g.description ? `<p>${esc(g.description)}</p>` : ''}
@@ -117,6 +120,7 @@ ${groups.filter((g) => g.items.length).map((g) => `  <section aria-labelledby="g
     <ul class="grid">${g.items.map(card).join('')}
     </ul>
   </section>`).join('\n')}
+  </main>
   <!-- Built from os/js/config.js by os/tools/build-index.mjs -->
   <footer>Made for fun by kogason2010 · <a href="${SITE}">Back to the lab</a></footer>
 </div>

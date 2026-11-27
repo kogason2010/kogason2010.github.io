@@ -360,7 +360,7 @@ body.world-mode .hint { bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
 .ws-win { width: min(1080px, 100%); height: min(720px, 100%); display: flex; flex-direction: column; overflow: hidden;
   background: var(--sheet); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,.35); }
 .ws-bar { display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 16px; background: var(--bg-2); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-.ws-title { font: 800 15px/1 var(--display); letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 8px; }
+.ws-title { margin: 0; font: 800 15px/1 var(--display); letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 8px; }   /* (an h2: the windows' section headings are h3) */
 .ws-title::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--glow); }
 .ws-tabs { display: flex; gap: 4px; flex: 1; min-width: 0; overflow-x: auto; }
 .ws-tabs button { font: 500 12px/1 var(--mono); padding: 8px 12px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--ink-soft); cursor: pointer; white-space: nowrap; }
@@ -587,7 +587,7 @@ kbd { display: inline-block; min-width: 1.4em; padding: 1px 6px; border-radius: 
 .places-menu .pm-quality { display: flex; align-items: center; gap: 6px; margin-top: 4px; padding: 10px 12px 4px; border-top: 1px solid var(--line); }
 .places-menu .pm-quality span { flex: 1; font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
 .places-menu .pm-quality button { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; font: 500 12px/1 var(--mono); color: var(--ink); }
-.places-menu .pm-quality button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.places-menu .pm-quality button[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
 /* the 3D view was taken away by the device (js/core/scene.js) */
 .gl-lost { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 40; width: min(360px, calc(100% - 32px)); box-sizing: border-box;
@@ -636,5 +636,14 @@ body.touring .joy, body.touring .boost, body.touring .toast, body.touring .bot-t
   .tour-title { font-size: 19px; }
   .tour-text { font-size: 13.5px; }
   .tour-ctl { flex-wrap: wrap; }
+  /* the end card: the two ways back side by side, and the way on beneath them at full width (in reading order) */
+  .tour-done { display: grid; grid-template-columns: 1fr 1fr; }
+  .tour-done .btn.primary { grid-column: 1 / -1; margin-left: 0; padding: 11px 13px; }
 }
 @media (prefers-reduced-motion: reduce) { .letterbox::before, .letterbox::after, .tour, .tour-seg i, .tour-seg i::after { transition: none; } }
+/* No 3D (index.html): the graphics library didn't load or WebGL is off, so the plain pages are offered instead */
+.no-3d body > :not(.no-3d-card) { display: none !important; }   /* (the half-built lab under it is hidden from screen readers too) */
+.no-3d-card { position: fixed; inset: 0; z-index: 30; overflow: auto; padding: 48px 16px; background: #0f181e; color: #e3ecf1; font: 16px/1.6 var(--body); }
+.no-3d-card > div { max-width: 640px; margin: 0 auto; }
+.no-3d-card h1 { margin: 0 0 12px; font: 800 36px/1 var(--display); letter-spacing: -.02em; }
+.no-3d-card a { color: #6aa6f0; }

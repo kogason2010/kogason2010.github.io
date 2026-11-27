@@ -39,7 +39,7 @@ function updateLevel(dt) {
   levelBtn.disabled = false; particleBtn.disabled = level === "down";
   levelBtn.querySelector(".lbl").textContent = level === "up" ? "Go downstairs" : "Go upstairs"; levelBtn.classList.toggle("going-up", level === "down");
   document.getElementById("eyebrow").textContent = level === "up" ? "Portfolio · lab 01" : "Portfolio · basement · SFC suite";
-  levelBtn.setAttribute("aria-label", level === "up" ? "Go downstairs to the SFC suite" : "Go back upstairs to the lab");
+  levelBtn.setAttribute("aria-label", level === "up" ? "Go downstairs to the SFC suite" : "Go upstairs to the lab");   // (keeps the visible words in the name)
   if (osFrame && level === "up") { osFrame.style.visibility = ""; placeOsFrame(); }
 }
 levelBtn.addEventListener("click", () => goLevel(level === "up" ? "down" : "up"));

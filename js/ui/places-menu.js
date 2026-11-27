@@ -21,7 +21,7 @@ function renderPlaces() {
   placesMenu.innerHTML = `<button type="button" role="menuitem" class="pm-tour" data-tour><b>Take the tour</b><span>The highlights of every room, a few minutes</span></button>` + PLACE_LIST.filter(p => !p.secret || spaceUnlocked).map(p =>
     `<button type="button" role="menuitem" data-place="${p.id}"${p.id === here ? ' aria-current="true"' : ""}><b>${p.name}</b><span>${p.id === here ? "You're here" : p.note}</span></button>`).join("") +
     // graphics: switching reloads the page so the campus is rebuilt at the new level of detail
-    `<div class="pm-quality" role="group" aria-label="Graphics"><span>Graphics</span>${["full", "light"].map(q => `<button type="button" data-quality="${q}" aria-pressed="${QUALITY === q}">${q === "full" ? "Full" : "Light"}</button>`).join("")}</div>`;
+    `<div class="pm-quality" role="group" aria-label="Graphics"><span aria-hidden="true">Graphics</span>${["full", "light"].map(q => `<button type="button" role="menuitemradio" data-quality="${q}" aria-checked="${QUALITY === q}">${q === "full" ? "Full" : "Light"}</button>`).join("")}</div>`;
 }
 function setPlacesOpen(open) {
   if (open) renderPlaces();
@@ -31,6 +31,14 @@ function setPlacesOpen(open) {
 placesBtn.addEventListener("click", e => { e.stopPropagation(); setPlacesOpen(placesMenu.hidden); });
 document.addEventListener("click", e => { if (!placesMenu.hidden && !placesMenu.contains(e.target)) setPlacesOpen(false); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !placesMenu.hidden) { setPlacesOpen(false); placesBtn.focus(); } });
+// the arrow keys move through the menu, as in any menu (Home and End jump to the ends); Tab leaves it and closes it
+placesMenu.addEventListener("keydown", e => {
+  if (e.key === "Tab") { setPlacesOpen(false); return; }
+  const items = [...placesMenu.querySelectorAll('[role^="menuitem"]')], i = items.indexOf(document.activeElement);
+  const n = e.key === "ArrowDown" ? (i + 1) % items.length : e.key === "ArrowUp" ? (i - 1 + items.length) % items.length : e.key === "Home" ? 0 : e.key === "End" ? items.length - 1 : -1;
+  if (n < 0) return;
+  e.preventDefault(); items[n].focus();
+});
 placesMenu.addEventListener("click", e => { const qb = e.target.closest("[data-quality]"); if (qb) { if (qb.dataset.quality !== QUALITY) setQuality(qb.dataset.quality); return; } const b = e.target.closest("[data-place]"); if (!b) return; setPlacesOpen(false); travelTo(b.dataset.place); });
 
 // one step toward the destination each time nothing else is moving, until we arrive (or give up if 20 s pass and no step gets going)

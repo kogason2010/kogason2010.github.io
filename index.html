@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Portfolio of kogason2010: a 3D analytical chemistry lab and its campus, with a guided tour, KogasonOS running on the lab's monitor and every project in the library.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="canonical" href="https://kogason2010.github.io/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="kogason2010 · 3D lab">
@@ -26,14 +27,15 @@
 <script>if (performance.setResourceTimingBufferSize) performance.setResourceTimingBufferSize(2000);</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <noscript><div style="position:fixed;inset:0;overflow:auto;background:#0f181e;color:#e3ecf1;font:16px/1.6 system-ui,sans-serif;padding:48px 16px;z-index:10"><div style="max-width:640px;margin:0 auto"><h1>kogason2010</h1><p>The 3D lab needs JavaScript. You can still browse <a style="color:#6aa6f0" href="https://kogason2010.github.io/projects/">every project</a> or open <a style="color:#6aa6f0" href="https://kogason2010.github.io/os/">KogasonOS</a>.</p></div></div></noscript>
-<div id="stage"></div>
-<div id="labels"></div>
-
+<header class="lab-top">
 <div class="tag" id="tag">
   <div class="tag-head">
     <span class="eyebrow" id="eyebrow">Portfolio · lab 01</span>
@@ -63,9 +65,15 @@
 </div>
 
 <div class="places-menu" id="placesMenu" role="menu" aria-label="Places" hidden></div>
+</header>
 
+<main class="lab-main" aria-label="The 3D lab">
+<div id="stage"></div>
+<div id="labels"></div>
 <div class="hint" id="hint">Drag to look around · scroll or pinch to zoom · tap a glowing tag · tap the floor to make a mess</div>
 <div class="caption" id="caption" hidden><b>Caffeine · C₈H₁₀N₄O₂</b><span id="capCount"></span> points · <span id="capHow">move your cursor through it to push them aside</span></div>
+</main>
+
 
 <aside class="sheet closed" id="sheet" aria-hidden="true" aria-labelledby="sheetTitle">
   <header>
@@ -78,7 +86,7 @@
 <div class="ws" id="ws" hidden role="dialog" aria-modal="true" aria-labelledby="wsTitle">
   <div class="ws-win">
     <div class="ws-bar">
-      <span class="ws-title" id="wsTitle">IC Workstation</span>
+      <h2 class="ws-title" id="wsTitle">IC Workstation</h2>
       <nav class="ws-tabs" role="tablist" aria-label="Workstation tools">
         <button type="button" role="tab" id="wsTab-columns" data-tab="columns" aria-selected="true">Columns</button>
         <button type="button" role="tab" id="wsTab-scale" data-tab="scale" aria-selected="false">Scale a method</button>
@@ -127,7 +135,7 @@
   </div>
 </div>
 
-<div class="hud" id="hud" hidden>
+<aside class="hud" id="hud" hidden aria-label="Drive mode">
   <span class="eyebrow" id="hudEyebrow">Campus · drive mode</span>
   <b class="hud-title" id="hudTitle">Out for a spin</b>
   <div class="hud-row hud-campus"><span>Messes cleaned</span><b id="hudMess">0 / 0</b></div>
@@ -145,12 +153,14 @@
     <button class="btn go-space locked" type="button" id="goSpace"><svg class="lock" viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5" fill="currentColor"/><path d="M5.5 7V5.2a2.5 2.5 0 015 0V7" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Space</button>
     <button class="btn" type="button" id="goCampus" hidden>Campus</button>
   </div>
-</div>
+</aside>
+<section class="drive-ctl" aria-label="Drive controls">
 <canvas class="minimap" id="minimap" hidden role="img" aria-label="Campus map"></canvas>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <div class="joy" id="joy" hidden aria-hidden="true"><div class="joy-knob"></div></div>
 <button class="boost" id="boostBtn" type="button" hidden>Boost</button>
 <button class="boost fly" id="flyBtn" type="button" hidden>Fly</button>
+</section>
 <div class="fade" id="fade">
   <div class="loader" id="loader" role="status" aria-live="polite" hidden>
     <span class="loader-eyebrow" id="loaderEyebrow">Loading</span>
@@ -169,7 +179,7 @@
 <div class="sfcw" id="sfcApp" hidden role="dialog" aria-modal="true" aria-labelledby="sfcAppTitle">
   <div class="sfcw-win">
     <div class="sfcw-bar">
-      <span class="ws-title" id="sfcAppTitle">SFC Workstation</span>
+      <h2 class="ws-title" id="sfcAppTitle">SFC Workstation</h2>
       <div class="sfcw-stat" id="sfcStat" aria-label="Instrument status"></div>
       <button type="button" class="ws-close" id="sfcClose">← Back to basement</button>
     </div>
@@ -181,7 +191,7 @@
 <div class="sfcw" id="lcApp" hidden role="dialog" aria-modal="true" aria-labelledby="lcAppTitle">
   <div class="sfcw-win">
     <div class="sfcw-bar">
-      <span class="ws-title" id="lcAppTitle">LC Workstation</span>
+      <h2 class="ws-title" id="lcAppTitle">LC Workstation</h2>
       <div class="sfcw-stat" id="lcStat" aria-label="Instrument status"></div>
       <button type="button" class="ws-close" id="lcClose">← Back to the LC lab</button>
     </div>
@@ -193,7 +203,7 @@
 <div class="sfcw lib-reader" id="libReader" hidden role="dialog" aria-modal="true" aria-labelledby="libReaderTitle">
   <div class="sfcw-win">
     <div class="sfcw-bar">
-      <span class="ws-title" id="libReaderTitle">App note</span>
+      <h2 class="ws-title" id="libReaderTitle">App note</h2>
       <div class="sfcw-stat" id="libReaderMeta"></div>
       <a class="btn" id="libReaderOpen" href="#" target="_blank" rel="noopener">Open in new tab</a>
       <button type="button" class="ws-close" id="libReaderClose">← Back to the library</button>
@@ -202,7 +212,7 @@
   </div>
 </div>
 
-<div class="desk" id="desk" hidden aria-label="Desktop portfolio">
+<div class="desk" id="desk" hidden role="region" aria-label="Desktop portfolio">
   <div class="dicons" id="dicons" hidden></div>
   <div class="launch" id="launch">
     <span class="k">Desktop portfolio</span>
@@ -224,6 +234,20 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/renderers/CSS3DRenderer.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Sky.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Water.js"></script>
+<script>
+  // if the 3D library didn't arrive (a blocked or unreachable CDN), or this browser can't draw WebGL, say so and point to
+  // the plain pages, rather than leave a half-built lab behind the intro card (the lab's own scripts can only fail now)
+  (function () {
+    var ok = !!window.THREE;
+    if (ok) try { var c = document.createElement("canvas"), g = c.getContext("webgl2") || c.getContext("webgl"); ok = !!g; var x = g && g.getExtension("WEBGL_lose_context"); if (x) x.loseContext(); } catch (e) { ok = false; }
+    if (ok) return;
+    document.documentElement.classList.add("no-3d");
+    var d = document.createElement("div"); d.className = "no-3d-card"; d.setAttribute("role", "alert");
+    d.innerHTML = '<div><h1>kogason2010</h1><p>' + (window.THREE ? "The 3D lab needs WebGL, which is turned off or unavailable in this browser." : "The 3D lab couldn\u2019t load its graphics library. Check your connection, then reload the page.") +
+      '</p><p>You can still <a href="https://kogason2010.github.io/projects/">browse every project</a> or open <a href="https://kogason2010.github.io/os/">KogasonOS</a>.</p></div>';
+    document.body.appendChild(d);
+  })();
+</script>
 <script src="js/content.js"></script>
 <script src="js/core/scene.js"></script>
 <script src="js/core/helpers.js"></script>
